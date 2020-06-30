@@ -46,7 +46,7 @@ class EloquentWebAuthnProviderTest extends TestCase
         $user->save();
 
         DB::table('web_authn_credentials')->insert([
-            'credential_id'         => 'test_credential_id',
+            'id'         => 'test_credential_id',
             'user_id'               => 1,
             'is_enabled'            => true,
             'type'                  => 'public_key',
@@ -54,7 +54,7 @@ class EloquentWebAuthnProviderTest extends TestCase
             'attestation_type'      => 'none',
             'trust_path'            => json_encode(['type' => EmptyTrustPath::class]),
             'aaguid'                => Str::uuid()->toString(),
-            'credential_public_key' => 'public_key',
+            'public_key' => 'public_key',
             'counter'               => 0,
             'user_handle'           => 'test_user_handle',
             'created_at'            => now()->toDateTimeString(),

@@ -150,7 +150,7 @@ This package simplifies operating with the WebAuthn _ceremonies_ (attestation an
 
 ### Attestation (Register)
 
-Use the `createAssert` and `verifyAssert` for your user. The latter returns the credentials validated, so you can save them manually.
+Use the `generateAttestation` and `validateAttestation` for your user. The latter returns the credentials validated, so you can save them manually.
 
 ```php
 <?php
@@ -191,7 +191,7 @@ if ($credential) {
 
 ### Assertion (Login)
 
-For assertion, simply create a request using `createAssertion` and validate it with `validateAssertion`.
+For assertion, simply create a request using `generateAssertion` and validate it with `validateAssertion`.
 
 ```php
 <?php
@@ -244,7 +244,7 @@ You can manage the user credentials thanks to the [`WebAuthnAuthenticatable`](sr
 * `disableCredential()`: Excludes an existing Credential ID from authentication.
 * `getFromCredentialId()`: Returns the user using the given Credential ID, if any.
 
-You can use these methods to, for example, blacklist a stolen device/credential and register a new one.
+You can use these methods to, for example, blacklist a stolen device/credential and register a new one, or disable WebAuthn completely by flushing all registered devices.
 
 ## Advanced Configuration
 
@@ -361,9 +361,11 @@ return [
 ];
 ```
 
-By default, the user will log in by confirming with biometrics, PIN or patterns in his device. You can disable the verification to only check for user presence (like a "Continue" button), which may make the login faster. Obviously this tones down the security a bit.
+By default, the application will require the user to log in by confirming with biometrics, PIN or patterns in his device.
 
-> When using userless `preferred` or `required`, this will be overriden to `true`.
+You can disable this verification to only check for user presence (like a "Continue" button), which may make the login faster but making it slightly less secure.
+
+> When setting [userless](#userless-login-one-touch-typeless) as `preferred` or `required`, this will be overridden to `true`.
 
 ### Userless login (One touch, Typeless)
 
@@ -375,6 +377,8 @@ return [
 
 You can activate _userless_ login, also known as one-touch login or typless login. You should change this to `preferred` in that case, since not all devices support the feature.
 
+If this is activated (not `null` or `discouraged`), login verification will be mandatory.
+
 ### Password Fallback
 
 ```php
@@ -383,7 +387,7 @@ return [
 ];
 ```
 
-By default, this package allows to re-use the same `eloquent-webauthn` driver to log in users with passwords when the credentials are not a WebAuthn. 
+By default, this package allows to re-use the same `eloquent-webauthn` driver to log in users with passwords when the credentials are not a WebAuthn.
 
 Disabling the fallback will only check for WebAuthn credentials. To handle classic user/password scenarios, you should create a separate guard.
 

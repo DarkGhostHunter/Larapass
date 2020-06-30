@@ -58,7 +58,7 @@ class WebAuthnAttestationTest extends TestCase
             ]);
 
             DB::table('web_authn_credentials')->insert([
-                'credential_id'         => 'test_credential_foo',
+                'id'         => 'test_credential_foo',
                 'user_id'               => 1,
                 'is_enabled'            => true,
                 'type'                  => 'public_key',
@@ -66,7 +66,7 @@ class WebAuthnAttestationTest extends TestCase
                 'attestation_type'      => 'none',
                 'trust_path'            => json_encode(['type' => EmptyTrustPath::class]),
                 'aaguid'                => Str::uuid(),
-                'credential_public_key' => 'public_key_foo',
+                'public_key' => 'public_key_foo',
                 'counter'               => 0,
                 'user_handle'           => Str::uuid()->toString(),
                 'created_at'            => now()->toDateTimeString(),

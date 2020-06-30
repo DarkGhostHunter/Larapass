@@ -6,10 +6,9 @@ use Illuminate\Support\Str;
 use Webauthn\PublicKeyCredentialUserEntity as UserEntity;
 use Webauthn\PublicKeyCredentialSource as CredentialSource;
 use DarkGhostHunter\Larapass\Eloquent\WebAuthnCredential;
+use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
 
 /**
- * @mixin \Illuminate\Database\Eloquent\Model
- *
  * @property-read \Illuminate\Database\Eloquent\Collection|\DarkGhostHunter\Larapass\Eloquent\WebAuthnCredential[] $webAuthnCredentials
  */
 trait WebAuthnAuthentication
@@ -62,7 +61,7 @@ trait WebAuthnAuthentication
     public function attestationExcludedCredentials() : array
     {
         return $this->webAuthnCredentials()
-            ->where('is_enabled', true)
+            ->enabled()
             ->get()
             ->map->toCredentialDescriptor()
             ->values()
@@ -149,7 +148,7 @@ trait WebAuthnAuthentication
     public function allCredentialDescriptors() : array
     {
         return $this->webAuthnCredentials()
-            ->where('is_enabled', true)
+            ->enabled()
             ->get()
             ->map->toCredentialDescriptor()
             ->values()
@@ -162,10 +161,10 @@ trait WebAuthnAuthentication
      * @param  string  $id
      * @return \DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable|null
      */
-    public static function getFromCredentialId(string $id)
+    public static function getFromCredentialId(string $id) : ?WebAuthnAuthenticatable
     {
         return static::whereHas('webAuthnCredentials', static function ($query) use ($id) {
-            return $query->whereKey($id)->where('is_enabled', true);
+            return $query->whereKey($id)->enabled();
         })->first();
     }
 
@@ -173,12 +172,12 @@ trait WebAuthnAuthentication
      * Returns a WebAuthAuthenticatable user from a given User Handle.
      *
      * @param  string  $handle
-     * @return mixed
+     * @return \DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable|null
      */
-    public static function getFromUserHandle(string $handle)
+    public static function getFromCredentialUserHandle(string $handle) : ?WebAuthnAuthenticatable
     {
         return static::whereHas('webAuthnCredentials', static function ($query) use ($handle) {
-            return $query->where('user_handle', $handle)->where('is_enabled', true);
+            return $query->where('user_handle', $handle)->enabled();
         })->first();
     }
 }

@@ -14,7 +14,7 @@ class CreateWebAuthnCredentialsTable extends Migration
     public function up()
     {
         Schema::create('web_authn_credentials', function (Blueprint $table) {
-            $table->string('credential_id');
+            $table->string('id');
 
             // Change accordingly for your users table if you need to.
             $table->unsignedBigInteger('user_id');
@@ -22,12 +22,12 @@ class CreateWebAuthnCredentialsTable extends Migration
             $table->boolean('is_enabled')->default(true);
 
             $table->string('name')->nullable();
-            $table->string('type', 8);
+            $table->string('type', 16);
             $table->json('transports');
             $table->json('attestation_type');
             $table->json('trust_path');
             $table->uuid('aaguid');
-            $table->binary('credential_public_key');
+            $table->binary('public_key');
             $table->unsignedInteger('counter')->default(0);
 
             // This saves the external "ID" that identifies the user. We use UUID default
@@ -37,7 +37,7 @@ class CreateWebAuthnCredentialsTable extends Migration
 
             $table->timestamps();
 
-            $table->primary(['credential_id', 'is_enabled']);
+            $table->primary(['id', 'is_enabled']);
         });
     }
 

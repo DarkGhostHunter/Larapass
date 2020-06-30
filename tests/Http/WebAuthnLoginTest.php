@@ -98,7 +98,7 @@ class WebAuthnLoginTest extends TestCase
         ])->save();
 
         DB::table('web_authn_credentials')->insert([
-            'credential_id'         => 'test_credential_id',
+            'id'         => 'test_credential_id',
             'user_id'               => 1,
             'is_enabled'            => true,
             'type'                  => 'public_key',
@@ -106,7 +106,7 @@ class WebAuthnLoginTest extends TestCase
             'attestation_type'      => 'none',
             'trust_path'            => json_encode(['type' => EmptyTrustPath::class]),
             'aaguid'                => $uuid->toString(),
-            'credential_public_key' => 'public_key',
+            'public_key' => 'public_key',
             'counter'               => 0,
             'user_handle'           => 'test_user_handle',
             'created_at'            => now()->toDateTimeString(),
@@ -146,7 +146,7 @@ class WebAuthnLoginTest extends TestCase
         ])->save();
 
         DB::table('web_authn_credentials')->insert([
-            'credential_id'         => 'test_credential_id',
+            'id'         => 'test_credential_id',
             'user_id'               => 1,
             'is_enabled'            => false,
             'type'                  => 'public_key',
@@ -154,7 +154,7 @@ class WebAuthnLoginTest extends TestCase
             'attestation_type'      => 'none',
             'trust_path'            => json_encode(['type' => EmptyTrustPath::class]),
             'aaguid'                => $uuid->toString(),
-            'credential_public_key' => 'public_key',
+            'public_key' => 'public_key',
             'counter'               => 0,
             'user_handle'           => 'test_user_handle',
             'created_at'            => now()->toDateTimeString(),
@@ -203,7 +203,7 @@ class WebAuthnLoginTest extends TestCase
         $user->save();
 
         DB::table('web_authn_credentials')->insert([
-            'credential_id'         => 'test_credential_id',
+            'id'         => 'test_credential_id',
             'user_id'               => 1,
             'is_enabled'            => true,
             'type'                  => 'public_key',
@@ -211,7 +211,7 @@ class WebAuthnLoginTest extends TestCase
             'attestation_type'      => 'none',
             'trust_path'            => json_encode(['type' => EmptyTrustPath::class]),
             'aaguid'                => $uuid->toString(),
-            'credential_public_key' => 'public_key',
+            'public_key' => 'public_key',
             'counter'               => 0,
             'user_handle'           => 'test_user_handle',
             'created_at'            => now()->toDateTimeString(),
@@ -239,7 +239,7 @@ class WebAuthnLoginTest extends TestCase
         $this->assertAuthenticatedAs($user);
 
         $this->assertDatabaseHas('web_authn_credentials', [
-            'credential_id' => 'test_credential_id',
+            'id' => 'test_credential_id',
             'counter'       => 1,
         ]);
     }

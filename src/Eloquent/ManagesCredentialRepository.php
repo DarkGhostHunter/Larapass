@@ -61,7 +61,7 @@ trait ManagesCredentialRepository
             'attestation_type'      => $source->getAttestationType(),
             'trust_path'            => $source->getTrustPath()->jsonSerialize(),
             'aaguid'                => $source->getAaguid()->toString(),
-            'credential_public_key' => $source->getCredentialPublicKey(),
+            'public_key'            => $source->getCredentialPublicKey(),
             'counter'               => $source->getCounter(),
         ]);
     }
@@ -74,13 +74,13 @@ trait ManagesCredentialRepository
     public function toCredentialSource() : CredentialSource
     {
         return new CredentialSource(
-            $this->credential_id,
+            $this->id,
             $this->type,
             $this->transports->all(),
             $this->attestation_type,
             TrustPathLoader::loadTrustPath($this->trust_path->all()),
             Uuid::fromString($this->aaguid),
-            $this->credential_public_key,
+            $this->public_key,
             $this->user_handle,
             $this->counter
         );

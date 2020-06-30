@@ -55,9 +55,9 @@ class WebAuthnAuthenticationTest extends TestCase
 
         $model = WebAuthnCredential::make();
 
-        $model->credential_public_key = $key;
+        $model->public_key = $key;
 
-        $this->assertSame($key, base64_encode($model->getAttributes()['credential_public_key']));
+        $this->assertSame($key, base64_encode($model->getAttributes()['public_key']));
     }
 
     public function test_finds_one_by_credential_id()
@@ -69,7 +69,7 @@ class WebAuthnAuthenticationTest extends TestCase
         );
 
         DB::table('web_authn_credentials')->insert([
-            'credential_id'         => 'test_credential_id',
+            'id'         => 'test_credential_id',
             'user_id'               => 1,
             'is_enabled'            => true,
             'type'                  => 'public_key',
@@ -77,7 +77,7 @@ class WebAuthnAuthenticationTest extends TestCase
             'attestation_type'      => 'none',
             'trust_path'            => json_encode(['type' => EmptyTrustPath::class]),
             'aaguid'                => Str::uuid(),
-            'credential_public_key' => 'public_key_bar',
+            'public_key' => 'public_key_bar',
             'counter'               => 0,
             'user_handle'           => Str::uuid()->toString(),
             'created_at'            => now()->toDateTimeString(),
@@ -104,7 +104,7 @@ class WebAuthnAuthenticationTest extends TestCase
         $this->assertEmpty($model->findAllForUserEntity($entity));
 
         DB::table('web_authn_credentials')->insert([
-            'credential_id'         => 'test_credential_id',
+            'id'         => 'test_credential_id',
             'user_id'               => 1,
             'is_enabled'            => true,
             'type'                  => 'public_key',
@@ -112,7 +112,7 @@ class WebAuthnAuthenticationTest extends TestCase
             'attestation_type'      => 'none',
             'trust_path'            => json_encode(['type' => EmptyTrustPath::class]),
             'aaguid'                => Str::uuid(),
-            'credential_public_key' => 'public_key_bar',
+            'public_key' => 'public_key_bar',
             'counter'               => 0,
             'user_handle'           => 'test_id',
             'created_at'            => now()->toDateTimeString(),

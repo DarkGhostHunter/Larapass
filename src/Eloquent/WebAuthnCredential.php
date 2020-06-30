@@ -5,6 +5,7 @@ namespace DarkGhostHunter\Larapass\Eloquent;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Webauthn\PublicKeyCredentialSourceRepository;
 
 /**
@@ -12,7 +13,7 @@ use Webauthn\PublicKeyCredentialSourceRepository;
  *
  * @property-read \DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable $user
  *
- * @property-read string $credential_id
+ * @property-read string $id
  *
  * @property bool $is_excluded
  * @property bool $is_enabled
@@ -21,20 +22,15 @@ use Webauthn\PublicKeyCredentialSourceRepository;
  * @property string $attestation_type
  * @property \Illuminate\Support\Collection $trust_path
  * @property \Ramsey\Uuid\Uuid $aaguid
- * @property string $credential_public_key
+ * @property string $public_key
  * @property int $counter
  * @property string $user_handle
+ *
+ * @method \Illuminate\Database\Eloquent\Builder|static enabled()
  */
 class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepository
 {
     use ManagesCredentialRepository;
-
-    /**
-     * The primary key for the model.
-     *
-     * @var string
-     */
-    protected $primaryKey = 'credential_id';
 
     /**
      * Indicates if the IDs are auto-incrementing.
@@ -56,7 +52,7 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
      * @var array
      */
     protected $hidden = [
-        'credential_public_key',
+        'public_key',
     ];
 
     /**
@@ -65,7 +61,6 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
      * @var array
      */
     protected $casts = [
-        'is_excluded' => 'boolean',
         'is_enabled'  => 'boolean',
         'transports'  => 'collection',
         'trust_path'  => 'collection',
@@ -87,13 +82,13 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
      * @var array
      */
     protected $fillable = [
-        'credential_id',
+        'id',
         'type',
         'transports',
         'attestation_type',
         'trust_path',
         'aaguid',
-        'credential_public_key',
+        'public_key',
         'user_handle',
         'counter',
     ];
@@ -132,9 +127,9 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
      * @param  string  $value
      * @return void
      */
-    public function setCredentialPublicKeyAttribute($value)
+    public function setPublicKeyAttribute($value)
     {
-        $this->attributes['credential_public_key'] = base64_decode($value);
+        $this->attributes['public_key'] = base64_decode($value);
     }
 
     /**
@@ -143,8 +138,19 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
      * @param  string  $value
      * @return string
      */
-    public function getCredentialPublicKeyAttribute($value)
+    public function getPublicKeyAttribute($value)
     {
         return base64_encode($value);
+    }
+
+    /**
+     * Filter the credentials for those explicitly enabled.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $builder
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeEnabled(Builder $builder)
+    {
+        return $builder->where('is_enabled', true);
     }
 }

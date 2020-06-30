@@ -182,7 +182,7 @@ class WebAuthnRegistrationTest extends TestCase
         $this->postJson('webauthn/register', $data)->assertNoContent();
 
         $this->assertDatabaseHas('web_authn_credentials', [
-            'credential_id'         => 'test_id',
+            'id'         => 'test_id',
             'user_id'               => 1,
             'is_enabled'            => true,
             'type'                  => 'test_type',
@@ -194,7 +194,7 @@ class WebAuthnRegistrationTest extends TestCase
             'user_handle'           => 'test_user_handle',
             'created_at'            => $now->toDateTimeString(),
             'updated_at'            => $now->toDateTimeString(),
-            'credential_public_key' => base64_decode('test_public_key'),
+            'public_key' => base64_decode('test_public_key'),
         ]);
 
         $event->assertDispatched(AttestationSuccessful::class, function ($event) use ($user) {
@@ -275,7 +275,7 @@ class WebAuthnRegistrationTest extends TestCase
         $this->postJson('webauthn/register', $data)->assertNoContent(400);
 
         $this->assertDatabaseMissing('web_authn_credentials', [
-            'credential_id'         => 'test_credential_id',
+            'id'         => 'test_credential_id',
         ]);
 
         $event->assertNotDispatched(AttestationSuccessful::class);

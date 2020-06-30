@@ -90,13 +90,13 @@ interface WebAuthnAuthenticatable
      * @param  string  $id
      * @return \DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable|null
      */
-    public static function getFromCredentialId(string $id);
+    public static function getFromCredentialId(string $id) : ?WebAuthnAuthenticatable;
 
     /**
      * Returns a WebAuthAuthenticatable user from a given User Handle.
      *
      * @param  string  $handle
-     * @return mixed
+     * @return \DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable|null
      */
-    public static function getFromUserHandle(string $handle);
+    public static function getFromCredentialUserHandle(string $handle) : ?WebAuthnAuthenticatable;
 }
