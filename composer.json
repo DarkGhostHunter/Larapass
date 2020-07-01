@@ -19,7 +19,7 @@
     "require": {
         "php": "^7.2.15",
         "ext-json": "*",
-        "illuminate/support": "^7.0",
+        "illuminate/support": "^7.18",
         "web-auth/webauthn-lib" : "^3.2",
         "symfony/psr-http-message-bridge": "^2.0",
         "ramsey/uuid": "^4.0",
