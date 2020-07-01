@@ -184,7 +184,7 @@ class WebAuthnAssertValidator
      */
     public function validate(array $data)
     {
-        try {
+//        try {
             if (! $assertion = $this->retrieveAssertion()) {
                 return false;
             }
@@ -203,12 +203,12 @@ class WebAuthnAssertValidator
                 $this->request,
                 $response->getUserHandle()
             );
-        }
-        catch (InvalidArgumentException $exception) {
-            return false;
-        }
-        finally {
-            $this->cache->forget($this->cacheKey());
-        }
+//        }
+//        catch (InvalidArgumentException $exception) {
+//            return false;
+//        }
+//        finally {
+//            $this->cache->forget($this->cacheKey());
+//        }
     }
 }

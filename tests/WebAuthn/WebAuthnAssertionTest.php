@@ -4,6 +4,7 @@ namespace Tests\WebAuthn;
 
 use Mockery;
 use Exception;
+use Ramsey\Uuid\Uuid;
 use Tests\RegistersPackage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
@@ -14,8 +15,10 @@ use Orchestra\Testbench\TestCase;
 use Tests\Stubs\TestWebAuthnUser;
 use Webauthn\PublicKeyCredential;
 use Illuminate\Support\Facades\DB;
+use Psr\Http\Message\UriInterface;
 use Webauthn\AuthenticatorResponse;
 use Tests\RunsPublishableMigrations;
+use Webauthn\AttestedCredentialData;
 use Illuminate\Support\Facades\Route;
 use Webauthn\TrustPath\EmptyTrustPath;
 use Webauthn\PublicKeyCredentialLoader;
@@ -23,6 +26,7 @@ use Webauthn\PublicKeyCredentialSource;
 use Webauthn\AuthenticatorAssertionResponse;
 use Psr\Http\Message\ServerRequestInterface;
 use Webauthn\PublicKeyCredentialRequestOptions;
+use Webauthn\PublicKeyCredentialSourceRepository;
 use Webauthn\AuthenticatorAssertionResponseValidator;
 use DarkGhostHunter\Larapass\Exceptions\WebAuthnException;
 use Illuminate\Contracts\Cache\Factory as CacheFactoryContract;
@@ -54,19 +58,19 @@ class WebAuthnAssertionTest extends TestCase
             ]);
 
             DB::table('web_authn_credentials')->insert([
-                'id'         => 'test_credential_foo',
-                'user_id'               => 1,
-                'is_enabled'            => true,
-                'type'                  => 'public_key',
-                'transports'            => json_encode([]),
-                'attestation_type'      => 'none',
-                'trust_path'            => json_encode(['type' => EmptyTrustPath::class]),
-                'aaguid'                => Str::uuid(),
-                'public_key' => 'public_key_foo',
-                'counter'               => 0,
-                'user_handle'           => Str::uuid()->toString(),
-                'created_at'            => now()->toDateTimeString(),
-                'updated_at'            => now()->toDateTimeString(),
+                'id'               => 'test_credential_foo',
+                'user_id'          => 1,
+                'is_enabled'       => true,
+                'type'             => 'public_key',
+                'transports'       => json_encode([]),
+                'attestation_type' => 'none',
+                'trust_path'       => json_encode(['type' => EmptyTrustPath::class]),
+                'aaguid'           => Str::uuid(),
+                'public_key'       => 'public_key_foo',
+                'counter'          => 0,
+                'user_handle'      => Str::uuid()->toString(),
+                'created_at'       => now()->toDateTimeString(),
+                'updated_at'       => now()->toDateTimeString(),
             ]);
 
             $this->user->save();
@@ -473,5 +477,74 @@ class WebAuthnAssertionTest extends TestCase
             ->andThrow(new Exception);
 
         $this->app[WebAuthnAssertValidator::class]->validate(['foo' => 'bar']);
+    }
+
+    public function test_attestation_reaches_repository()
+    {
+        Route::get('something', function () {
+            return response()->noContent();
+        });
+
+        $this->get('something')->assertNoContent();
+
+        $cache = $this->mock(Repository::class);
+
+        $cache->shouldReceive('forget');
+        $cache->shouldReceive('get')->andReturn(
+            new PublicKeyCredentialRequestOptions(
+                base64_decode('w+BeaUTZZnYMzvUB5GWUpiT1WYOnr9iCGUt5irUiUko='),
+                60000,
+                'webauthn.spomky-labs.com',
+                []
+            )
+        );
+
+        $this->mock(CacheFactoryContract::class)
+            ->shouldReceive('store')
+            ->with(null)
+            ->andReturn($cache);
+
+        $source = $this->mock(PublicKeyCredentialSource::class);
+
+        $source->shouldReceive('getUserHandle')
+            ->andReturn('ee13d4f1-4863-47dd-a407-097cb49ac822');
+        $source->shouldReceive('getCounter')
+            ->andReturn(0);
+        $source->shouldReceive('setCounter')
+            ->with(4)
+            ->andReturnNull();
+        $source->shouldReceive('getAttestedCredentialData')
+            ->andReturn(
+                new AttestedCredentialData(Uuid::fromBytes(base64_decode('YCiwF7HUTAK0s6/Nr8lrsg==', true)),
+                    base64_decode('6oRgydKXdC3LtZBDoAXxKnWte68elEQejDrYOV9x+18=', true),
+                    base64_decode('pAEDAzkBACBZAQDwn2Ee7V+9GNDn2iCU2plQnIVmZG/vOiXSHb9TQzC5806bGzLV918+1SLFhMhlX5jua2rdXt65nYw9Eln7mbmVxLBDmEm2wod6wP2HinC9HPsYwr75tMRakLMNFfH4Xx4lEsjulRmv68yl/N8XH64X8LKe2GBxjqcuJR+c3LbW4D5dWt/1pGL8fS1UbO3abA/d3IeEsP8RpEz5eVo6qBhb4r0VTo2NMeq75saBHIj4whqo6qsRqRvBmK2d9NAecBFFRIQ31NUtEQZPqXOzkbXGehDi7c3YJPBkTW9kMqcosob9Vlru+vVab+1PnFRdqaklR1UtmhrWte/wB61Hm3xdIUMBAAE=', true)
+                )
+            );
+        $source->shouldReceive('jsonSerialize')
+            ->andReturn(['foo' => 'bar']);
+
+        $repo = $this->mock(PublicKeyCredentialSourceRepository::class);
+
+        $repo->shouldReceive('findOneByCredentialId')
+            ->with('6oRgydKXdC3LtZBDoAXxKnWte68elEQejDrYOV9x-18')
+            ->andReturn($source);
+
+        $repo->shouldReceive('saveCredentialSource')
+            ->with($source)
+            ->andReturnNull();
+
+        $credential = $this->app[WebAuthnAssertValidator::class]->validate([
+            'id'       => '6oRgydKXdC3LtZBDoAXxKnWte68elEQejDrYOV9x-18',
+            'type'     => 'public-key',
+            'rawId'    => '6oRgydKXdC3LtZBDoAXxKnWte68elEQejDrYOV9x+18=',
+            'response' => [
+                'authenticatorData' => 'lgTqgoJOmKStoUtEYtDXOo7EaRMNqRsZMHRZIp90o1kFAAAABA==',
+                'clientDataJSON'    => 'ew0KCSJ0eXBlIiA6ICJ3ZWJhdXRobi5nZXQiLA0KCSJjaGFsbGVuZ2UiIDogInctQmVhVVRaWm5ZTXp2VUI1R1dVcGlUMVdZT25yOWlDR1V0NWlyVWlVa28iLA0KCSJvcmlnaW4iIDogImh0dHBzOi8vd2ViYXV0aG4uc3BvbWt5LWxhYnMuY29tIiwNCgkidG9rZW5CaW5kaW5nIiA6IA0KCXsNCgkJInN0YXR1cyIgOiAic3VwcG9ydGVkIg0KCX0NCn0=',
+                'signature'         => 'lV7pKH+0rVaaWC5ZoQIMSW1EjeIELfUTKcplaSW65I8rH7U38qVoTYyvxQiZwtQsqKgXOMQYJ6n1JV+is3yi8wOjxkkmR/bLPPssLz7Za1ooSAJ+R1JKTYsmsozpTmouCVtBN4Il92Zrhy9sOD3pVUjHUJaXaEsV2dReqEamwt9+VLQiD0fJwYrqiyWETEybGqJSj7p2Zb0BVOcevlPCj3tX84DreZMW7lkYE6PyuJCmi7eR/kKq2N+ohvH6H3aHloQ+kgSb2L2gJn1hjs5Z3JxMvrwmnj0Vx1J2AMWrQyuBeBblJN3UP3Wbk16e+8Bq8HC9W6JG9qgqTyR1wJx0Yw==',
+                'userHandle'        => 'ZWUxM2Q0ZjEtNDg2My00N2RkLWE0MDctMDk3Y2I0OWFjODIy',
+            ],
+        ]);
+
+        $this->assertInstanceOf(PublicKeyCredentialSource::class, $credential);
     }
 }

@@ -36,27 +36,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Algorithms
-    |--------------------------------------------------------------------------
-    |
-    | Here are default algorithms to use when asking to create sign and encrypt
-    | binary objects like a public key and a challenge. These works almost in
-    | any device, but you can add or change these depending on your devices.
-    |
-    | @see https://www.iana.org/assignments/cose/cose.xhtml#algorithms
-    |
-    */
-
-    'algorithms' => [
-        -7,    // ECDSA with SHA-256
-        -8,    // EdDSA
-        -35,   // ECDSA with SHA-384
-        -36,   // ECDSA with SHA-512
-        -257,  // RSASSA-PKCS1-v1_5 with SHA-256
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
     | Credentials Attachment.
     |--------------------------------------------------------------------------
     |

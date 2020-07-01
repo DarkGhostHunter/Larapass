@@ -2,6 +2,7 @@
 
 namespace Tests\Eloquent;
 
+use Ramsey\Uuid\Uuid;
 use Tests\RegistersPackage;
 use Illuminate\Support\Str;
 use Orchestra\Testbench\TestCase;
@@ -32,7 +33,6 @@ class WebAuthnAuthenticationTest extends TestCase
 
         parent::setUp();
     }
-
 
     public function test_sets_aaguid_as_uuid()
     {
@@ -69,19 +69,19 @@ class WebAuthnAuthenticationTest extends TestCase
         );
 
         DB::table('web_authn_credentials')->insert([
-            'id'         => 'test_credential_id',
-            'user_id'               => 1,
-            'is_enabled'            => true,
-            'type'                  => 'public_key',
-            'transports'            => json_encode([]),
-            'attestation_type'      => 'none',
-            'trust_path'            => json_encode(['type' => EmptyTrustPath::class]),
-            'aaguid'                => Str::uuid(),
-            'public_key' => 'public_key_bar',
-            'counter'               => 0,
-            'user_handle'           => Str::uuid()->toString(),
-            'created_at'            => now()->toDateTimeString(),
-            'updated_at'            => now()->toDateTimeString(),
+            'id'               => 'test_credential_id',
+            'user_id'          => 1,
+            'is_enabled'       => true,
+            'type'             => 'public_key',
+            'transports'       => json_encode([]),
+            'attestation_type' => 'none',
+            'trust_path'       => json_encode(['type' => EmptyTrustPath::class]),
+            'aaguid'           => Str::uuid(),
+            'public_key'       => 'public_key_bar',
+            'counter'          => 0,
+            'user_handle'      => Str::uuid()->toString(),
+            'created_at'       => now()->toDateTimeString(),
+            'updated_at'       => now()->toDateTimeString(),
         ]);
 
         $this->assertInstanceOf(PublicKeyCredentialSource::class,
@@ -104,24 +104,74 @@ class WebAuthnAuthenticationTest extends TestCase
         $this->assertEmpty($model->findAllForUserEntity($entity));
 
         DB::table('web_authn_credentials')->insert([
-            'id'         => 'test_credential_id',
-            'user_id'               => 1,
-            'is_enabled'            => true,
-            'type'                  => 'public_key',
-            'transports'            => json_encode([]),
-            'attestation_type'      => 'none',
-            'trust_path'            => json_encode(['type' => EmptyTrustPath::class]),
-            'aaguid'                => Str::uuid(),
-            'public_key' => 'public_key_bar',
-            'counter'               => 0,
-            'user_handle'           => 'test_id',
-            'created_at'            => now()->toDateTimeString(),
-            'updated_at'            => now()->toDateTimeString(),
+            'id'               => 'test_credential_id',
+            'user_id'          => 1,
+            'is_enabled'       => true,
+            'type'             => 'public_key',
+            'transports'       => json_encode([]),
+            'attestation_type' => 'none',
+            'trust_path'       => json_encode(['type' => EmptyTrustPath::class]),
+            'aaguid'           => Str::uuid(),
+            'public_key'       => 'public_key_bar',
+            'counter'          => 0,
+            'user_handle'      => 'test_id',
+            'created_at'       => now()->toDateTimeString(),
+            'updated_at'       => now()->toDateTimeString(),
         ]);
 
         $this->assertCount(1, $model->findAllForUserEntity($entity));
         $this->assertSame(
             'test_credential_id', $model->findAllForUserEntity($entity)[0]->getPublicKeyCredentialId()
         );
+    }
+
+    public function test_only_updates_counter_from_credential_source()
+    {
+        DB::table('web_authn_credentials')->insert([
+            'id'               => 'test_credential_id',
+            'user_id'          => 1,
+            'is_enabled'       => true,
+            'type'             => 'public_key',
+            'transports'       => json_encode([]),
+            'attestation_type' => 'none',
+            'trust_path'       => json_encode(['type' => EmptyTrustPath::class]),
+            'aaguid'           => Str::uuid(),
+            'public_key'       => 'public_key_bar',
+            'counter'          => 0,
+            'user_handle'      => Str::uuid()->toString(),
+            'created_at'       => now()->toDateTimeString(),
+            'updated_at'       => now()->toDateTimeString(),
+        ]);
+
+        $model = WebAuthnCredential::make();
+
+        $model->saveCredentialSource(new PublicKeyCredentialSource(
+            'test_credential_id',
+            'anything',
+            ['foo', 'bar'],
+            'any',
+            new EmptyTrustPath(),
+            Uuid::uuid4(),
+            'rofl',
+            'any_handle',
+            10
+        ));
+
+        $model->saveCredentialSource(new PublicKeyCredentialSource(
+            'invalid_id',
+            'anything',
+            ['foo', 'bar'],
+            'any',
+            new EmptyTrustPath(),
+            Uuid::uuid4(),
+            'rofl',
+            'any_handle',
+            14
+        ));
+
+        $this->assertDatabaseHas('web_authn_credentials', [
+            'id' => 'test_credential_id',
+            'counter' => 10
+        ]);
     }
 }
