@@ -12,13 +12,11 @@ jobs:
       fail-fast: true
       matrix:
         php: [7.4, 7.3, 7.2.15]
-        laravel: [7.*, 6.*]
+        laravel: [7.*]
         dependency-version: [prefer-lowest, prefer-stable]
         include:
           - laravel: 7.*
             testbench: 5.*
-          - laravel: 6.*
-            testbench: ^4.1
 
     name: PHP ${{ matrix.php }} - Laravel ${{ matrix.laravel }} - ${{ matrix.dependency-version }}
 

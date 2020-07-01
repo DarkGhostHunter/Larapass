@@ -12,8 +12,8 @@ This enables WebAuthn authentication using Laravel authentication driver.
 
 ## Requisites
 
-* PHP 7.2.15
-* Laravel 6 or 7.
+* PHP 7.2.15+
+* Laravel 7
 
 ## What is WebAuthn? How it uses fingerprints or else?
 
