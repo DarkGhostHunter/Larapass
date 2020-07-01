@@ -31,7 +31,7 @@ trait AssertsWebAuthn
     protected function optionRules()
     {
         return [
-            $this->username() => 'sometimes|string',
+            $this->username() => 'sometimes|email',
         ];
     }
 
