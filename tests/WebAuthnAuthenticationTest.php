@@ -12,6 +12,7 @@ use Webauthn\TrustPath\EmptyTrustPath;
 use Webauthn\PublicKeyCredentialSource;
 use Webauthn\PublicKeyCredentialUserEntity;
 use Webauthn\PublicKeyCredentialDescriptor;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class WebAuthnAuthenticationTest extends TestCase
 {
@@ -76,6 +77,11 @@ class WebAuthnAuthenticationTest extends TestCase
         });
 
         parent::setUp();
+    }
+
+    public function test_returns_relation_instance_on_method_call()
+    {
+        $this->assertInstanceOf(HasMany::class, TestWebAuthnUser::make()->webAuthnCredentials());
     }
 
     public function test_cycles_entity_when_no_credential_exists()
