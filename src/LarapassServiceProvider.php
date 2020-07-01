@@ -57,7 +57,6 @@ class LarapassServiceProvider extends ServiceProvider
      */
     protected function bindWebAuthnBasePackage()
     {
-
         // And from here the shit hits the fan. But it's needed to make the package modular,
         // testable and catchable by the developer when he needs to override anything.
         $this->app->singleton(AttestationStatementSupportManager::class, static function () {
@@ -86,7 +85,6 @@ class LarapassServiceProvider extends ServiceProvider
         $this->app->bind(PublicKeyCredentialSourceRepository::class, static function () {
             return new WebAuthnAuthenticationModel;
         });
-        $this->app->alias(PublicKeyCredentialSourceRepository::class, 'webauthn.repository');
 
         $this->app->bind(TokenBindingHandler::class, static function () {
             return new IgnoreTokenBindingHandler;
@@ -123,17 +121,23 @@ class LarapassServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(PublicKeyCredentialRpEntity::class, static function ($app) {
+            $config = $app['config'];
+
             return new PublicKeyCredentialRpEntity(
-                ...array_values($app['config']->get('larapass.relaying_party'))
+                $config->get('larapass.relaying_party.name'),
+                $config->get('larapass.relaying_party.id'),
+                $config->get('larapass.relaying_party.icon')
             );
         });
 
         $this->app->bind(AuthenticatorSelectionCriteria::class, static function ($app) {
+            $config = $app['config'];
+
             $selection = new WebAuthn\AuthenticatorSelectionCriteria(
-                $app['config']->get('larapass.cross-plataform')
+                $config->get('larapass.cross-plataform')
             );
 
-            if ($userless = $app['config']->get('larapass.userless')) {
+            if ($userless = $config->get('larapass.userless')) {
                 $selection->setResidentKey($userless);
             }
 
