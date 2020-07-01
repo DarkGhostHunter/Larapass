@@ -32,8 +32,8 @@ class ServiceProviderTest extends TestCase
             '--tag'      => 'controllers',
         ])->run();
 
-        $this->assertFileExists(app_path('Http\Controllers\Auth\WebAuthnRegisterController.php'));
-        $this->assertFileExists(app_path('Http\Controllers\Auth\WebAuthnLoginController.php'));
+        $this->assertFileExists(app_path('Http/Controllers/Auth/WebAuthnRegisterController.php'));
+        $this->assertFileExists(app_path('Http/Controllers/Auth/WebAuthnLoginController.php'));
     }
 
     public function test_publishes_config()
