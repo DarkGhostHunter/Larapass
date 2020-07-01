@@ -2,7 +2,7 @@
 
 [![Latest Stable Version](https://poser.pugx.org/darkghosthunter/larapass/v/stable)](https://packagist.org/packages/darkghosthunter/larapass) [![License](https://poser.pugx.org/darkghosthunter/larapass/license)](https://packagist.org/packages/darkghosthunter/larapass)
 ![](https://img.shields.io/packagist/php-v/darkghosthunter/larapass.svg)
- ![](https://github.com/DarkGhostHunter/Larapass/workflows/PHP%20Composer/badge.svg) [![Coverage Status](https://coveralls.io/repos/github/DarkGhostHunter/Larapass/badge.svg?branch=master)](https://coveralls.io/github/DarkGhostHunter/Larapass?branch=master) [![Maintainability](https://api.codeclimate.com/v1/badges/eba13abff3c823c00f5b/maintainability)](https://codeclimate.com/github/DarkGhostHunter/Larapass/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/eba13abff3c823c00f5b/test_coverage)](https://codeclimate.com/github/DarkGhostHunter/Larapass/test_coverage)
+ ![](https://github.com/DarkGhostHunter/Larapass/workflows/PHP%20Composer/badge.svg) [![Coverage Status](https://coveralls.io/repos/github/DarkGhostHunter/Larapass/badge.svg?branch=master)](https://coveralls.io/github/DarkGhostHunter/Larapass?branch=master)
 
 ## Larapass
 
