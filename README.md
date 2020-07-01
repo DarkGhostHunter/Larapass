@@ -266,6 +266,13 @@ return [
     'bytes' => 16,
     'timeout' => 60,
     'cache' => env('WEBAUTHN_CACHE'),
+    'algorithms' => [
+        \Cose\Algorithm\Signature\ECDSA\ES256::class,
+        \Cose\Algorithm\Signature\EdDSA\Ed25519::class,
+        \Cose\Algorithm\Signature\ECDSA\ES384::class,
+        \Cose\Algorithm\Signature\ECDSA\ES512::class,
+        \Cose\Algorithm\Signature\RSA\RS256::class,
+    ],
     'attachment' => null,
     'conveyance' => 'none',
     'login_verify' => true,
