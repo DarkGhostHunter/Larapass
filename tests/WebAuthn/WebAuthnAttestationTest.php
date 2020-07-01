@@ -491,4 +491,53 @@ class WebAuthnAttestationTest extends TestCase
 
         $this->assertFalse($credential);
     }
+
+    public function test_reaches_attestation_validator()
+    {
+        Route::get('something', function () {
+            return response()->noContent();
+        });
+
+        $this->get('something')->assertNoContent();
+
+        $cache = $this->mock(Repository::class);
+
+        $cache->shouldReceive('forget');
+
+        $cache->shouldReceive('get')->andReturn(
+            $creation = new PublicKeyCredentialCreationOptions(
+                new PublicKeyCredentialRpEntity(
+                    'Laravel',
+                    'webauthn.spomky-labs.com'
+                ),
+                $this->user->userEntity(),
+                base64_decode('XKADkZSW9B4h0Fek8KbhQun3m4dfJYN3ci9wdXDNJvU='),
+                [],
+                60000,
+                [],
+                $this->app[AuthenticatorSelectionCriteria::class],
+                'none',
+                $this->app[AuthenticationExtensionsClientInputs::class]
+            )
+        );
+
+        $this->mock(CacheFactoryContract::class)
+            ->shouldReceive('store')
+            ->with(null)
+            ->andReturn($cache);
+
+        $credential = [
+            'id' => 'WsVEgVplFhLkRd68yW3KAIyVJ90ZsQOHFjnL71YirSY',
+            'type' => 'public-key',
+            'rawId' => 'WsVEgVplFhLkRd68yW3KAIyVJ90ZsQOHFjnL71YirSY=',
+            'response' => [
+                'clientDataJSON' => 'ew0KCSJ0eXBlIiA6ICJ3ZWJhdXRobi5jcmVhdGUiLA0KCSJjaGFsbGVuZ2UiIDogIlhLQURrWlNXOUI0aDBGZWs4S2JoUXVuM200ZGZKWU4zY2k5d2RYRE5KdlUiLA0KCSJvcmlnaW4iIDogImh0dHBzOi8vd2ViYXV0aG4uc3BvbWt5LWxhYnMuY29tIiwNCgkidG9rZW5CaW5kaW5nIiA6IA0KCXsNCgkJInN0YXR1cyIgOiAic3VwcG9ydGVkIg0KCX0NCn0=',
+                'attestationObject' => 'o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YVkBZ5YE6oKCTpikraFLRGLQ1zqOxGkTDakbGTB0WSKfdKNZRQAAAABgKLAXsdRMArSzr82vyWuyACBaxUSBWmUWEuRF3rzJbcoAjJUn3RmxA4cWOcvvViKtJqQBAwM5AQAgWQEAv5VUWjpRGBvp2zawiX2JKC9WSDvVxlLfqNqU1EYsdN6iNg16FFF/0EHkt7tJz9wkwC3Cx5vYFyblUw7UF5m8qS579OcGRjvb6MHj+MQFuOKCoowBMY/VjuF+TT14deKMuWtShT2MCab1gtfnkuGAlEcu2CASvAwtbEPKZ2JkaouWWaJ3hDOYTXWYgCgtM5DqqnN9JUZjXrgmAfQC82SYh6ZAV+MQ2s4RG2jP/dvEt235oFSIkr3JEqhStQvJ+CFmjVk67oFtofcISax44CynCd2Lr89inWU1B0JwSB1oyuLPq5HCQuSmFed/piGjVfFgCbN0tCXJkAGufkDXE3J4xSFDAQAB',
+            ],
+        ];
+
+        $result = $this->app[WebAuthnAttestValidator::class]->validate($credential, $this->user);
+
+        $this->assertInstanceOf(PublicKeyCredentialSource::class, $result);
+    }
 }

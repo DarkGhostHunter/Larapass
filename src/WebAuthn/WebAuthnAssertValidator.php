@@ -184,11 +184,11 @@ class WebAuthnAssertValidator
      */
     public function validate(array $data)
     {
-//        try {
-            if (! $assertion = $this->retrieveAssertion()) {
-                return false;
-            }
+        if (! $assertion = $this->retrieveAssertion()) {
+            return false;
+        }
 
+        try {
             $credentials = $this->loader->loadArray($data);
             $response = $credentials->getResponse();
 
@@ -203,12 +203,12 @@ class WebAuthnAssertValidator
                 $this->request,
                 $response->getUserHandle()
             );
-//        }
-//        catch (InvalidArgumentException $exception) {
-//            return false;
-//        }
-//        finally {
-//            $this->cache->forget($this->cacheKey());
-//        }
+        }
+        catch (InvalidArgumentException $exception) {
+            return false;
+        }
+        finally {
+            $this->cache->forget($this->cacheKey());
+        }
     }
 }

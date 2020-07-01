@@ -81,11 +81,11 @@ class WebAuthnAttestValidator extends WebAuthnAttestCreator
      */
     public function validate(array $data, WebAuthnAuthenticatable $user)
     {
-        try {
-            if (! $request = $this->retrieveAttestation($user)) {
-                return false;
-            }
+        if (! $request = $this->retrieveAttestation($user)) {
+            return false;
+        }
 
+        try {
             $credentials = $this->loader->loadArray($data)->getResponse();
 
             if (! $credentials instanceof AuthenticatorAttestationResponse) {
