@@ -31,6 +31,7 @@ use Illuminate\Contracts\Cache\Factory as CacheFactoryContract;
 use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAttestValidator;
 use DarkGhostHunter\Larapass\WebAuthn\AuthenticatorSelectionCriteria;
 use Webauthn\AuthenticationExtensions\AuthenticationExtensionsClientInputs;
+use DarkGhostHunter\Larapass\WebAuthn\PublicKeyCredentialParametersCollection;
 
 class WebAuthnAttestationTest extends TestCase
 {
@@ -116,7 +117,8 @@ class WebAuthnAttestationTest extends TestCase
         foreach ($attestation->getPubKeyCredParams() as $param) {
             $this->assertSame('public-key', $param->getType());
             $this->assertContains(
-                $param->getAlg(), $this->app['config']->get('larapass.algorithms')
+                $param->getAlg(),
+                $this->app[PublicKeyCredentialParametersCollection::class]->map->getAlg()->all()
             );
         }
 

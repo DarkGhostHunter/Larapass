@@ -266,13 +266,6 @@ return [
     'bytes' => 16,
     'timeout' => 60,
     'cache' => env('WEBAUTHN_CACHE'),
-    'algorithms' => [
-        -7,
-        -8,
-        -35,
-        -36,
-        -257,
-    ],
     'attachment' => null,
     'conveyance' => 'none',
     'login_verify' => true,
@@ -318,18 +311,18 @@ The outgoing challenge to be signed is a random string of bytes. This controls h
 ```php
 return [
     'algorithms' => [
-        -7,    // ECDSA with SHA-256
-        -8,    // EdDSA
-        -35,   // ECDSA with SHA-384
-        -36,   // ECDSA with SHA-512
-        -257,  // RSASSA-PKCS1-v1_5 with SHA-256
+        \Cose\Algorithm\Signature\ECDSA\ES256::class,   // ECDSA with SHA-256
+        \Cose\Algorithm\Signature\EdDSA\Ed25519::class, // EdDSA
+        \Cose\Algorithm\Signature\ECDSA\ES384::class,   // ECDSA with SHA-384
+        \Cose\Algorithm\Signature\ECDSA\ES512::class,   // ECDSA with SHA-512
+        \Cose\Algorithm\Signature\RSA\RS256::class,     // RSASSA-PKCS1-v1_5 with SHA-256
     ],
 ];
 ```
 
 This controls how the authenticator (device) will operate to create the public-private keys. These [COSE Algorithms](https://w3c.github.io/webauthn/#typedefdef-cosealgorithmidentifier) are the most compatible ones for in-device and roaming keys, since some must be transmitted on low bandwidth protocols.
 
-> Leave as it is, unless you know what you're doing.
+> Add or remove the classes unless you don't know what you're doing. Really. Just leave them as they are.
 
 ### Key Attachment
 

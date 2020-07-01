@@ -94,18 +94,10 @@ class LarapassServiceProvider extends ServiceProvider
             return new ExtensionOutputCheckerHandler;
         });
 
-        $this->app->bind(CoseAlgorithmManager::class, static function () {
-            $algorithms = [
-                \Cose\Algorithm\Signature\ECDSA\ES256::class,
-                \Cose\Algorithm\Signature\EdDSA\Ed25519::class,
-                \Cose\Algorithm\Signature\ECDSA\ES384::class,
-                \Cose\Algorithm\Signature\ECDSA\ES512::class,
-                \Cose\Algorithm\Signature\RSA\RS256::class,
-            ];
-
+        $this->app->bind(CoseAlgorithmManager::class, static function ($app) {
             $manager = new CoseAlgorithmManager;
 
-            foreach ($algorithms as $algorithm) {
+            foreach ($app['config']->get('larapass.algorithms') as $algorithm) {
                 $manager->add(new $algorithm);
             }
 
@@ -159,7 +151,7 @@ class LarapassServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(PublicKeyCredentialParametersCollection::class, static function ($app) {
-            return PublicKeyCredentialParametersCollection::make($app['config']['larapass.algorithms'])
+            return PublicKeyCredentialParametersCollection::make($app[CoseAlgorithmManager::class]->list())
                 ->map(static function ($algorithm) {
                     return new PublicKeyCredentialParameters('public-key', $algorithm);
                 });
