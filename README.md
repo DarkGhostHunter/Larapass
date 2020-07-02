@@ -15,6 +15,12 @@ This enables WebAuthn authentication using Laravel authentication driver.
 * PHP 7.2.15+
 * Laravel 7
 
+## Installation 
+
+Just hit the console and require it with Composer.
+
+    composer require darkghosthunter/larapass
+
 ## What is WebAuthn? How it uses fingerprints or else?
 
 In a nutshell, [mayor browsers are compatible with Web Authentication API](https://caniuse.com/#feat=webauthn), pushing authentication to the device (fingerprints, Face ID, patterns, codes, etc) instead of plain-text passwords.
@@ -23,11 +29,12 @@ This package validates authentication responses from the devices using a custom 
 
 If you have any doubts about WebAuthn, [check this small FAQ](#faq).
 
-## Installation
+## Set up
 
 1. Add the `eloquent-webauthn` driver to your authentication configuration in `config/auth.php`.
 2. Migrate the `webauthn_credentials` table.
 3. Implement the `WebAuthnAuthenticatable` contract and `WebAuthnAuthentication` trait to your User(s) classes.
+4. Register WebAuthn routes.
 
 ### 1. Add the `eloquent-webauthn` driver.
 
@@ -216,19 +223,16 @@ use App\User;
 use Illuminate\Support\Facades\Auth;
 use DarkGhostHunter\Larapass\Facades\WebAuthn;
 
-$credentialId = request()->json('id');
-
-// Get the user using the credential ID.
-$user = User::getFromCredentialId($credentialId);
-
 // Verify it
-$isValid = WebAuthn::validateAssertion(
-    request()->json()->all(), $user
+$credentials = WebAuthn::validateAssertion(
+    request()->json()->all()
 );
 
-// If is valid, login the user
-if ($isValid) {
-    Auth::login($user);
+// If is valid, login the user of the credentials.
+if ($credentials) {
+    Auth::login(
+        User::getFromCredentialId($credentials->getPublicKeyCredentialId())
+    );
 }
 ```
 

@@ -174,4 +174,38 @@ class WebAuthnAuthenticationTest extends TestCase
             'counter' => 10
         ]);
     }
+
+    public function test_checks_if_credential_is_enabled_or_disabled()
+    {
+        DB::table('web_authn_credentials')->insert([
+            'id'               => 'test_credential_id',
+            'user_id'          => 1,
+            'type'             => 'public_key',
+            'transports'       => json_encode([]),
+            'attestation_type' => 'none',
+            'trust_path'       => json_encode(['type' => EmptyTrustPath::class]),
+            'aaguid'           => Str::uuid(),
+            'public_key'       => 'public_key_bar',
+            'counter'          => 0,
+            'user_handle'      => Str::uuid()->toString(),
+            'created_at'       => now()->toDateTimeString(),
+            'updated_at'       => now()->toDateTimeString(),
+            'disabled_at'      => now()->toDateTimeString(),
+        ]);
+
+        $credential = WebAuthnCredential::find('test_credential_id');
+
+        $this->assertNull($credential);
+
+        $credential = WebAuthnCredential::withTrashed()->find('test_credential_id');
+
+        $this->assertTrue($credential->isDisabled());
+        $this->assertFalse($credential->isEnabled());
+
+        $credential->restore();
+
+        $this->assertTrue($credential->isEnabled());
+        $this->assertFalse($credential->isDisabled());
+
+    }
 }

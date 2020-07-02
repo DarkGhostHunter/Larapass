@@ -90,7 +90,7 @@ class WebAuthnAssertionTest extends TestCase
         $this->assertSame('test_credential_foo', $firstCredential->getId());
         $this->assertCount(0, $result->getExtensions());
         $this->assertSame(60000, $result->getTimeout());
-        $this->assertNull($result->getUserVerification());
+        $this->assertSame('preferred', $result->getUserVerification());
         $this->assertNull($result->getRpId());
     }
 

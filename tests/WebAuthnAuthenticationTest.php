@@ -241,6 +241,17 @@ class WebAuthnAuthenticationTest extends TestCase
         ]);
     }
 
+    public function test_checks_if_credential_is_enabled()
+    {
+        $this->assertTrue($this->user->hasCredentialEnabled('test_credential_foo'));
+
+        DB::table('web_authn_credentials')->where('id', 'test_credential_foo')
+            ->update(['disabled_at' => now()]);
+
+        $this->assertFalse($this->user->hasCredentialEnabled('test_credential_foo'));
+        $this->assertFalse($this->user->hasCredentialEnabled('doesnt_exists'));
+    }
+
     public function test_retrieves_all_credentials_as_descriptors_except_disabled()
     {
         $descriptors = $this->user->allCredentialDescriptors();

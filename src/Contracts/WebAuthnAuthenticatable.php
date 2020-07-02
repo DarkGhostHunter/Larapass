@@ -63,7 +63,7 @@ interface WebAuthnAuthenticatable
     /**
      * Checks if a given credential exists and is enabled.
      *
-     * @param  string|array  $id
+     * @param  string  $id
      * @return mixed
      */
     public function hasCredentialEnabled(string $id) : bool;

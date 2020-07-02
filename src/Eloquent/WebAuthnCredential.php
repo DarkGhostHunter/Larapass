@@ -107,7 +107,7 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
      */
     public function isEnabled()
     {
-        return (bool)$this->disabled_at;
+        return ! $this->disabled_at;
     }
 
     /**
