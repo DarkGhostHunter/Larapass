@@ -3,12 +3,14 @@
 namespace DarkGhostHunter\Larapass;
 
 use Psr\Log\LoggerInterface;
+use Webauthn\Counter\CounterChecker;
 use Illuminate\Support\ServiceProvider;
 use Webauthn\PublicKeyCredentialLoader;
 use Illuminate\Contracts\Hashing\Hasher;
 use Webauthn\PublicKeyCredentialRpEntity;
 use Webauthn\PublicKeyCredentialParameters;
 use Webauthn\AuthenticatorSelectionCriteria;
+use Webauthn\Counter\ThrowExceptionIfInvalid;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Webauthn\TokenBinding\TokenBindingHandler;
 use Webauthn\PublicKeyCredentialSourceRepository;
@@ -110,9 +112,13 @@ class LarapassServiceProvider extends ServiceProvider
                 $app[PublicKeyCredentialSourceRepository::class],
                 $app[TokenBindingHandler::class],
                 $app[ExtensionOutputCheckerHandler::class],
-                null,
+                $app[MetadataStatementRepository::class],
                 $app['log']
             );
+        });
+
+        $this->app->bind(CounterChecker::class, static function ($app) {
+            return new ThrowExceptionIfInvalid($app['log']);
         });
 
         $this->app->bind(AuthenticatorAssertionResponseValidator::class, static function ($app) {
@@ -121,7 +127,7 @@ class LarapassServiceProvider extends ServiceProvider
                 $app[TokenBindingHandler::class],
                 $app[ExtensionOutputCheckerHandler::class],
                 $app[CoseAlgorithmManager::class],
-                null,
+                $app[CounterChecker::class],
                 $app['log']
             );
         });

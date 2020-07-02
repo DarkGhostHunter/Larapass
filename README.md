@@ -279,7 +279,7 @@ return [
     ],
     'attachment' => null,
     'conveyance' => 'none',
-    'login_verify' => true,
+    'login_verify' => 'preferred',
     'userless' => null,
     'fallback' => true,
 ];
@@ -361,7 +361,7 @@ Attestation Conveyance represents if the device key should be verified by you or
 
 ```php
 return [
-    'login_verify' => null,
+    'login_verify' => 'preferred',
 ];
 ```
 
@@ -369,7 +369,7 @@ By default, most authenticators will require the user verification when login in
 
 You can also use `discouraged` to only check for user presence (like a "Continue" button), which may make the login faster but making it slightly less secure.
 
-> When setting [userless](#userless-login-one-touch-typeless) as `preferred` or `required`, this will be overridden to `true`.
+> When setting [userless](#userless-login-one-touch-typeless) as `preferred` or `required`, this will be overridden to `required` automatically.
 
 ### Userless login (One touch, Typeless)
 
@@ -391,7 +391,7 @@ return [
 ];
 ```
 
-By default, this package allows to re-use the same `eloquent-webauthn` driver to log in users with passwords when the credentials are not a WebAuthn.
+By default, this package allows to re-use the same `eloquent-webauthn` driver to log in users with passwords when the credentials are not a WebAuthn JSON payload.
 
 Disabling the fallback will only check for WebAuthn credentials. To handle classic user/password scenarios, you should create a separate guard.
 
@@ -481,28 +481,32 @@ Yes, but you need to manually attest (register) these.
 
 * **What happens if a credential is cloned?**
 
-The user won't be authenticated since the server counter will be greater than the reported by the credential. To detect it, modify the Assertion Validator in the Service Container and add your own `CounterChecker`:
+The user won't be authenticated since the server counter will be greater than the reported by the credential. To intercede in the procedure, modify the Assertion Validator in the Service Container and add your own `CounterChecker`:
+
+```php
+$this->app->bind(CounterChecker::class, function () {
+    return new \App\WebAuthn\MyCountChecker;
+});
+```
+
+Then, you can add your logic to .
 
 ```php
 <?php
 
 namespace App\WebAuthn;
 
-use App\User;
 use Webauthn\Counter\CounterChecker;
-use App\Notifications\CredentialCloned;
-use Webauthn\PublicKeyCredentialSource;
+use App\Exceptions\WebAuthn\CredentialCloned;
+use Webauthn\PublicKeyCredentialSource as Credentials;
 
 class MyCountChecker implements CounterChecker
 {
-    public function check(PublicKeyCredentialSource $credentials, 
-                          int $currentCounter) : void
+    public function check(Credentials $credentials, int $currentCounter) : void
     {
         if ($credentials->getCounter() <= $currentCounter) {
-            $credentialId = $credentials->getPublicKeyCredentialId();
-
-            User::getFromCredentialId($credentialId)->notify(new CredentialCloned($credentialId));
-        }
+            throw new CredentialCloned($credentials);
+        } 
     }
 }
 ```
