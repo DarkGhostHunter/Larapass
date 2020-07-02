@@ -44,35 +44,35 @@ class WebAuthnAuthenticationTest extends TestCase
             $this->user->save();
 
             DB::table('web_authn_credentials')->insert([
-                'id'         => 'test_credential_foo',
-                'user_id'               => 1,
-                'is_enabled'            => true,
-                'type'                  => 'public_key',
-                'transports'            => json_encode([]),
-                'attestation_type'      => 'none',
-                'trust_path'            => json_encode(['type' => EmptyTrustPath::class]),
-                'aaguid'                => Str::uuid(),
-                'public_key' => 'public_key_foo',
-                'counter'               => 0,
-                'user_handle'           => $uuid->toString(),
-                'created_at'            => now()->toDateTimeString(),
-                'updated_at'            => now()->toDateTimeString(),
+                'id'               => 'test_credential_foo',
+                'user_id'          => 1,
+                'is_enabled'       => true,
+                'type'             => 'public_key',
+                'transports'       => json_encode([]),
+                'attestation_type' => 'none',
+                'trust_path'       => json_encode(['type' => EmptyTrustPath::class]),
+                'aaguid'           => Str::uuid(),
+                'public_key'       => 'public_key_foo',
+                'counter'          => 0,
+                'user_handle'      => $uuid->toString(),
+                'created_at'       => now()->toDateTimeString(),
+                'updated_at'       => now()->toDateTimeString(),
             ]);
 
             DB::table('web_authn_credentials')->insert([
-                'id'         => 'test_credential_bar',
-                'user_id'               => 1,
-                'is_enabled'            => true,
-                'type'                  => 'public_key',
-                'transports'            => json_encode([]),
-                'attestation_type'      => 'none',
-                'trust_path'            => json_encode(['type' => EmptyTrustPath::class]),
-                'aaguid'                => Str::uuid(),
-                'public_key' => 'public_key_bar',
-                'counter'               => 0,
-                'user_handle'           => $uuid->toString(),
-                'created_at'            => now()->toDateTimeString(),
-                'updated_at'            => now()->toDateTimeString(),
+                'id'               => 'test_credential_bar',
+                'user_id'          => 1,
+                'type'             => 'public_key',
+                'transports'       => json_encode([]),
+                'attestation_type' => 'none',
+                'trust_path'       => json_encode(['type' => EmptyTrustPath::class]),
+                'aaguid'           => Str::uuid(),
+                'public_key'       => 'public_key_bar',
+                'counter'          => 0,
+                'user_handle'      => $uuid->toString(),
+                'created_at'       => now()->toDateTimeString(),
+                'updated_at'       => now()->toDateTimeString(),
+                'disabled_at'      => null,
             ]);
         });
 
@@ -111,22 +111,22 @@ class WebAuthnAuthenticationTest extends TestCase
         $this->assertCount(2, $this->user->attestationExcludedCredentials());
 
         DB::table('web_authn_credentials')->insert([
-            'id'         => 'test_credential_baz',
-            'user_id'               => 1,
-            'is_enabled'            => false,
-            'type'                  => 'public_key',
-            'transports'            => json_encode([]),
-            'attestation_type'      => 'none',
-            'trust_path'            => json_encode(['type' => EmptyTrustPath::class]),
-            'aaguid'                => Str::uuid(),
-            'public_key' => 'public_key_bar',
-            'counter'               => 0,
-            'user_handle'           => $this->user->userEntity()->getId(),
-            'created_at'            => now()->toDateTimeString(),
-            'updated_at'            => now()->toDateTimeString(),
+            'id'               => 'test_credential_baz',
+            'user_id'          => 1,
+            'type'             => 'public_key',
+            'transports'       => json_encode([]),
+            'attestation_type' => 'none',
+            'trust_path'       => json_encode(['type' => EmptyTrustPath::class]),
+            'aaguid'           => Str::uuid(),
+            'public_key'       => 'public_key_bar',
+            'counter'          => 0,
+            'user_handle'      => $this->user->userEntity()->getId(),
+            'created_at'       => now()->toDateTimeString(),
+            'updated_at'       => now()->toDateTimeString(),
+            'disabled_at'      => now()->toDateTimeString(),
         ]);
 
-        $this->assertCount(3, $this->user->webAuthnCredentials()->get());
+        $this->assertCount(3, $this->user->webAuthnCredentials()->withTrashed()->get());
         $this->assertCount(2, $this->user->attestationExcludedCredentials());
     }
 
@@ -153,72 +153,74 @@ class WebAuthnAuthenticationTest extends TestCase
         ));
 
         $this->assertDatabaseHas('web_authn_credentials', [
-            'id'         => 'test_credential_id',
-            'user_id'               => 1,
-            'is_enabled'            => true,
-            'type'                  => 'public_key',
-            'transports'            => json_encode([]),
-            'attestation_type'      => 'none',
-            'trust_path'            => json_encode(['type' => EmptyTrustPath::class]),
-            'aaguid'                => $uuid,
-            'counter'               => 0,
-            'user_handle'           => $handle,
-            'created_at'            => $now->toDateTimeString(),
-            'updated_at'            => $now->toDateTimeString(),
-            'public_key' => base64_decode('testKey'),
+            'id'               => 'test_credential_id',
+            'user_id'          => 1,
+            'type'             => 'public_key',
+            'transports'       => json_encode([]),
+            'attestation_type' => 'none',
+            'trust_path'       => json_encode(['type' => EmptyTrustPath::class]),
+            'aaguid'           => $uuid,
+            'counter'          => 0,
+            'user_handle'      => $handle,
+            'created_at'       => $now->toDateTimeString(),
+            'updated_at'       => $now->toDateTimeString(),
+            'disabled_at'      => null,
+            'public_key'       => base64_decode('testKey'),
         ]);
     }
 
     public function test_enables_and_disables_credentials()
     {
+        Date::setTestNow($now = Date::create(2020, 04, 01, 16, 30));
+
         $this->user->disableCredential('test_credential_foo');
         $this->assertDatabaseHas('web_authn_credentials', [
-            'id' => 'test_credential_foo',
-            'is_enabled' => false
+            'id'          => 'test_credential_foo',
+            'disabled_at' => $now->toDateTimeString(),
         ]);
 
         $this->user->disableCredential(['test_credential_foo', 'test_credential_bar']);
-        $this->assertCount(2, DB::table('web_authn_credentials')->where('is_enabled', false)->get());
+        $this->assertCount(2, DB::table('web_authn_credentials')->whereNotNull('disabled_at')->get());
 
         $this->user->enableCredential('test_credential_foo');
         $this->assertDatabaseHas('web_authn_credentials', [
-            'id' => 'test_credential_foo',
-            'is_enabled' => true
+            'id'          => 'test_credential_foo',
+            'disabled_at' => null,
         ]);
 
         $this->user->enableCredential(['test_credential_foo', 'test_credential_bar']);
-        $this->assertCount(2, DB::table('web_authn_credentials')->where('is_enabled', true)->get());
+        $this->assertCount(2, DB::table('web_authn_credentials')->whereNull('disabled_at')->get());
     }
 
     public function test_deletes_credentials()
     {
         $this->user->removeCredential('test_credential_foo');
         $this->assertDatabaseMissing('web_authn_credentials', [
-            'id' => 'test_credential_foo'
+            'id' => 'test_credential_foo',
         ]);
 
         DB::table('web_authn_credentials')->insert([
-            'id'         => 'test_credential_baz',
-            'user_id'               => 1,
-            'is_enabled'            => false,
-            'type'                  => 'public_key',
-            'transports'            => json_encode([]),
-            'attestation_type'      => 'none',
-            'trust_path'            => json_encode(['type' => EmptyTrustPath::class]),
-            'aaguid'                => Str::uuid(),
-            'public_key' => 'public_key_bar',
-            'counter'               => 0,
-            'user_handle'           => $this->user->userEntity()->getId(),
-            'created_at'            => now()->toDateTimeString(),
-            'updated_at'            => now()->toDateTimeString(),
+            'id'               => 'test_credential_baz',
+            'user_id'          => 1,
+            'type'             => 'public_key',
+            'transports'       => json_encode([]),
+            'attestation_type' => 'none',
+            'trust_path'       => json_encode(['type' => EmptyTrustPath::class]),
+            'aaguid'           => Str::uuid(),
+            'public_key'       => 'public_key_bar',
+            'counter'          => 0,
+            'user_handle'      => $this->user->userEntity()->getId(),
+            'created_at'       => now()->toDateTimeString(),
+            'updated_at'       => now()->toDateTimeString(),
+            'disabled_at'      => now()->toDateTimeString(),
         ]);
 
         $this->user->removeCredential(['test_credential_bar', 'test_credential_baz']);
         $this->assertDatabaseMissing('web_authn_credentials', [
-            'id' => 'test_credential_bar'
+            'id' => 'test_credential_bar',
         ]);
         $this->assertDatabaseMissing('web_authn_credentials', [
-            'id' => 'test_credential_baz'
+            'id' => 'test_credential_baz',
         ]);
     }
 
@@ -234,8 +236,8 @@ class WebAuthnAuthenticationTest extends TestCase
         $this->user->flushCredentials('test_credential_foo');
 
         $this->assertDatabaseCount('web_authn_credentials', 1);
-        $this->assertDatabaseHas('web_authn_credentials',[
-            'id' => 'test_credential_foo'
+        $this->assertDatabaseHas('web_authn_credentials', [
+            'id' => 'test_credential_foo',
         ]);
     }
 

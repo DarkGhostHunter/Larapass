@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use DarkGhostHunter\Larapass\Eloquent\WebAuthnCredential;
 
 class CreateWebAuthnCredentialsTable extends Migration
 {
@@ -36,6 +37,7 @@ class CreateWebAuthnCredentialsTable extends Migration
             $table->uuid('user_handle')->nullable();
 
             $table->timestamps();
+            $table->softDeletes(WebAuthnCredential::DELETED_AT);
 
             $table->primary(['id', 'is_enabled']);
         });

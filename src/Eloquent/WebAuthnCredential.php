@@ -6,6 +6,7 @@ use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Webauthn\PublicKeyCredentialSourceRepository;
 
 /**
@@ -16,7 +17,6 @@ use Webauthn\PublicKeyCredentialSourceRepository;
  * @property-read string $id
  *
  * @property bool $is_excluded
- * @property bool $is_enabled
  * @property string $type
  * @property \Illuminate\Support\Collection $transports
  * @property string $attestation_type
@@ -25,12 +25,20 @@ use Webauthn\PublicKeyCredentialSourceRepository;
  * @property string $public_key
  * @property int $counter
  * @property string $user_handle
- *
+ * @property-read null|\Illuminate\Support\Carbon $disabled_at
  * @method \Illuminate\Database\Eloquent\Builder|static enabled()
  */
 class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepository
 {
+    use SoftDeletes;
     use ManagesCredentialRepository;
+
+    /**
+     * The column name for soft-deletes.
+     *
+     * @var string
+     */
+    public const DELETED_AT = 'disabled_at';
 
     /**
      * Indicates if the IDs are auto-incrementing.
@@ -61,7 +69,6 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
      * @var array
      */
     protected $casts = [
-        'is_enabled'  => 'boolean',
         'transports'  => 'collection',
         'trust_path'  => 'collection',
         'counter'     => 'integer',
@@ -92,6 +99,26 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
         'user_handle',
         'counter',
     ];
+
+    /**
+     * Returns if the Credential is enabled.
+     *
+     * @return bool
+     */
+    public function isEnabled()
+    {
+        return (bool)$this->disabled_at;
+    }
+
+    /**
+     * Returns if the Credential is disabled.
+     *
+     * @return bool
+     */
+    public function isDisabled()
+    {
+        return ! $this->isEnabled();
+    }
 
     /**
      * The AAGUID is basically an UUID, so we will make it depending on how is encoded.
@@ -151,6 +178,6 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
      */
     public function scopeEnabled(Builder $builder)
     {
-        return $builder->where('is_enabled', true);
+        return $builder->withoutTrashed();
     }
 }

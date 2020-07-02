@@ -93,6 +93,28 @@ trait WebAuthnAuthentication
     }
 
     /**
+     * Removes a credential previously registered.
+     *
+     * @param  string|array  $id
+     * @return void
+     */
+    public function removeCredential($id) : void
+    {
+        $this->webAuthnCredentials()->whereKey($id)->forceDelete();
+    }
+
+    /**
+     * Checks if a given credential exists and is enabled.
+     *
+     * @param  string|array  $id
+     * @return mixed
+     */
+    public function hasCredentialEnabled($id) : bool
+    {
+        return $this->webAuthnCredentials()->whereKey($id)->enabled()->exists();
+    }
+
+    /**
      * Enable the credential for authentication.
      *
      * @param  string|array  $id
@@ -100,9 +122,7 @@ trait WebAuthnAuthentication
      */
     public function enableCredential($id) : void
     {
-        $this->webAuthnCredentials()->whereKey($id)->update([
-            'is_enabled' => true,
-        ]);
+        $this->webAuthnCredentials()->whereKey($id)->restore();
     }
 
     /**
@@ -112,19 +132,6 @@ trait WebAuthnAuthentication
      * @return void
      */
     public function disableCredential($id) : void
-    {
-        $this->webAuthnCredentials()->whereKey($id)->update([
-            'is_enabled' => false,
-        ]);
-    }
-
-    /**
-     * Removes a credential previously registered.
-     *
-     * @param  string|array  $id
-     * @return void
-     */
-    public function removeCredential($id) : void
     {
         $this->webAuthnCredentials()->whereKey($id)->delete();
     }
@@ -137,7 +144,7 @@ trait WebAuthnAuthentication
      */
     public function flushCredentials($except = null) : void
     {
-        $this->webAuthnCredentials()->whereKeyNot($except)->delete();
+        $this->webAuthnCredentials()->whereKeyNot($except)->forceDelete();
     }
 
     /**

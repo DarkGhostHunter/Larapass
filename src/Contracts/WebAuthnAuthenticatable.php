@@ -60,6 +60,13 @@ interface WebAuthnAuthenticatable
      */
     public function flushCredentials($except = null) : void;
 
+    /**
+     * Checks if a given credential exists and is enabled.
+     *
+     * @param  string|array  $id
+     * @return mixed
+     */
+    public function hasCredentialEnabled(string $id) : bool;
 
     /**
      * Enable the credential for authentication.

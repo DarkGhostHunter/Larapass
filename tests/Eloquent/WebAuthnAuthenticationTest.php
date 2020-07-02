@@ -71,7 +71,6 @@ class WebAuthnAuthenticationTest extends TestCase
         DB::table('web_authn_credentials')->insert([
             'id'               => 'test_credential_id',
             'user_id'          => 1,
-            'is_enabled'       => true,
             'type'             => 'public_key',
             'transports'       => json_encode([]),
             'attestation_type' => 'none',
@@ -82,6 +81,7 @@ class WebAuthnAuthenticationTest extends TestCase
             'user_handle'      => Str::uuid()->toString(),
             'created_at'       => now()->toDateTimeString(),
             'updated_at'       => now()->toDateTimeString(),
+            'disabled_at'      => null
         ]);
 
         $this->assertInstanceOf(PublicKeyCredentialSource::class,
@@ -106,7 +106,6 @@ class WebAuthnAuthenticationTest extends TestCase
         DB::table('web_authn_credentials')->insert([
             'id'               => 'test_credential_id',
             'user_id'          => 1,
-            'is_enabled'       => true,
             'type'             => 'public_key',
             'transports'       => json_encode([]),
             'attestation_type' => 'none',
@@ -117,6 +116,7 @@ class WebAuthnAuthenticationTest extends TestCase
             'user_handle'      => 'test_id',
             'created_at'       => now()->toDateTimeString(),
             'updated_at'       => now()->toDateTimeString(),
+            'disabled_at'      => null
         ]);
 
         $this->assertCount(1, $model->findAllForUserEntity($entity));
@@ -130,7 +130,6 @@ class WebAuthnAuthenticationTest extends TestCase
         DB::table('web_authn_credentials')->insert([
             'id'               => 'test_credential_id',
             'user_id'          => 1,
-            'is_enabled'       => true,
             'type'             => 'public_key',
             'transports'       => json_encode([]),
             'attestation_type' => 'none',
@@ -141,6 +140,7 @@ class WebAuthnAuthenticationTest extends TestCase
             'user_handle'      => Str::uuid()->toString(),
             'created_at'       => now()->toDateTimeString(),
             'updated_at'       => now()->toDateTimeString(),
+            'disabled_at'      => null
         ]);
 
         $model = WebAuthnCredential::make();
