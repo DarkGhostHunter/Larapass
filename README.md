@@ -92,14 +92,14 @@ You can copy-paste these route definitions in your `routes/web.php` file.
 
 ```php
 Route::post('webauthn/register/options', 'Auth\WebAuthnRegisterController@options')
-    ->name('webauthn.register.options');
+     ->name('webauthn.register.options');
 Route::post('webauthn/register', 'Auth\WebAuthnRegisterController@register')
-    ->name('webauthn.register');
+     ->name('webauthn.register');
 
 Route::post('webauthn/login/options', 'Auth\WebAuthnLoginController@options')
-    ->name('webauthn.login.options');
+     ->name('webauthn.login.options');
 Route::post('webauthn/login', 'Auth\WebAuthnLoginController@login')
-    ->name('webauthn.login');
+     ->name('webauthn.login');
 ```
 
 In your frontend scripts, point the requests to these routes.
