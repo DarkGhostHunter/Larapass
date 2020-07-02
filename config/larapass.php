@@ -79,11 +79,11 @@ return [
     | sign. Using "none" means the data is meaningless, "indirect" allows to
     | receive anonymized data, and "direct" means to receive the real data.
     |
-    | Supported: "null", "none", "indirect", "direct".
+    | Supported: "none", "indirect", "direct".
     |
     */
 
-    'conveyance' => null,
+    'conveyance' => 'none',
 
     /*
     |--------------------------------------------------------------------------
@@ -93,11 +93,12 @@ return [
     | Most authenticators and smartphones will ask the user to actively verify
     | themselves for log in. Use "required" to always ask verify, "preferred"
     | to ask when possible, and "discouraged" to just ask for user presence.
-    | Supported: "null", "required", "preferred", "discouraged".
+    |
+    | Supported: "required", "preferred", "discouraged".
     |
     */
 
-    'login_verify' => null,
+    'login_verify' => 'preferred',
 
     /*
     |--------------------------------------------------------------------------

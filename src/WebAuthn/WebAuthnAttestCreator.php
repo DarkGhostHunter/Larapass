@@ -112,7 +112,7 @@ class WebAuthnAttestCreator
 
         $this->timeout = $config->get('larapass.timeout') * 1000;
         $this->bytes = $config->get('larapass.bytes');
-        $this->conveyance = $config->get('larapass.conveyance') ?? 'none';
+        $this->conveyance = $config->get('larapass.conveyance');
         $this->unique = $config->get('larapass.unique');
     }
 
