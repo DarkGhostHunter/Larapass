@@ -118,8 +118,22 @@ class WebAuthnAssertValidator
         $this->timeout = $config->get('larapass.timeout') * 1000;
         $this->bytes = $config->get('larapass.bytes');
 
-        $this->verifyLogin = $config->get('larapass.login_verify')
-            || in_array($config->get('larapass.userless'), ['required', 'preferred']);
+        $this->verifyLogin = $this->shouldVerifyLogin($config);
+    }
+
+    /**
+     * Check if the login verification should be mandatory.
+     *
+     * @param  \Illuminate\Contracts\Config\Repository  $config
+     * @return string
+     */
+    protected function shouldVerifyLogin(ConfigContract $config)
+    {
+        if (in_array($config->get('larapass.userless'), ['required', 'preferred'])) {
+            return 'required';
+        }
+
+        return $config->get('larapass.login_verify');
     }
 
     /**

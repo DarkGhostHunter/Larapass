@@ -90,7 +90,7 @@ class WebAuthnAssertionTest extends TestCase
         $this->assertSame('test_credential_foo', $firstCredential->getId());
         $this->assertCount(0, $result->getExtensions());
         $this->assertSame(60000, $result->getTimeout());
-        $this->assertSame('1', $result->getUserVerification());
+        $this->assertNull($result->getUserVerification());
         $this->assertNull($result->getRpId());
     }
 
@@ -126,13 +126,13 @@ class WebAuthnAssertionTest extends TestCase
 
         $request = $this->app[WebAuthnAssertValidator::class]->generateAssertion();
 
-        $this->assertSame('1', $request->getUserVerification());
+        $this->assertSame('required', $request->getUserVerification());
 
         $this->app['config']->set('larapass.userless', 'preferred');
 
         $request = $this->app[WebAuthnAssertValidator::class]->generateAssertion();
 
-        $this->assertSame('1', $request->getUserVerification());
+        $this->assertSame('required', $request->getUserVerification());
     }
 
     public function test_assert_validates_and_returns_credentials()

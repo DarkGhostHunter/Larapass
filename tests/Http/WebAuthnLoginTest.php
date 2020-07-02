@@ -118,14 +118,12 @@ class WebAuthnLoginTest extends TestCase
         ])
             ->assertJsonStructure([
                 'challenge',
-                'userVerification',
                 'allowCredentials' => [
                     0 => ['type', 'id'],
                 ],
                 'timeout',
             ])
             ->assertJson([
-                'userVerification' => 1,
                 'allowCredentials' => [
                     [
                         'type' => 'public_key',
@@ -166,11 +164,7 @@ class WebAuthnLoginTest extends TestCase
         ])
             ->assertJsonStructure([
                 'challenge',
-                'userVerification',
                 'timeout',
-            ])
-            ->assertJson([
-                'userVerification' => 1,
             ]);
     }
 

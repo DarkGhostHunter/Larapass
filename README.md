@@ -357,13 +357,13 @@ Attestation Conveyance represents if the device key should be verified by you or
 
 ```php
 return [
-    'login_verify' => true,
+    'login_verify' => null,
 ];
 ```
 
-By default, the application will require the user to log in by confirming with biometrics, PIN or patterns in his device.
+By default, most authenticators will require the user verification when login in. You can override this and set it as `required` if you want no exceptions.
 
-You can disable this verification to only check for user presence (like a "Continue" button), which may make the login faster but making it slightly less secure.
+You can also use `discouraged` to only check for user presence (like a "Continue" button), which may make the login faster but making it slightly less secure.
 
 > When setting [userless](#userless-login-one-touch-typeless) as `preferred` or `required`, this will be overridden to `true`.
 

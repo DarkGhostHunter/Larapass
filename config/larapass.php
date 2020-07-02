@@ -90,13 +90,14 @@ return [
     | User presence and verification
     |--------------------------------------------------------------------------
     |
-    | The user is verified by the device when registering it into your app, and
-    | also when the user logs in. You can tone down a bit the security of the
-    | login by just asking for the user presence, which may make it faster.
+    | Most authenticators and smartphones will ask the user to actively verify
+    | themselves for log in. Use "required" to always ask verify, "preferred"
+    | to ask when possible, and "discouraged" to just ask for user presence.
+    | Supported: "null", "required", "preferred", "discouraged".
     |
     */
 
-    'login_verify' => true,
+    'login_verify' => null,
 
     /*
     |--------------------------------------------------------------------------
