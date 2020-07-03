@@ -7,12 +7,11 @@ use InvalidArgumentException;
 use Webauthn\PublicKeyCredentialLoader;
 use Psr\Http\Message\ServerRequestInterface;
 use Webauthn\AuthenticatorAssertionResponse;
-use Webauthn\PublicKeyCredentialRequestOptions as RequestOptions;
 use Webauthn\AuthenticatorAssertionResponseValidator;
 use Webauthn\PublicKeyCredentialRpEntity as RelyingParty;
 use Illuminate\Contracts\Config\Repository as ConfigContract;
 use Illuminate\Contracts\Cache\Factory as CacheFactoryContract;
-use Webauthn\PublicKeyCredentialCreationOptions as CreationOptions;
+use Webauthn\PublicKeyCredentialRequestOptions as RequestOptions;
 use Webauthn\AuthenticationExtensions\AuthenticationExtensionsClientInputs;
 
 class WebAuthnAssertValidator
