@@ -2,18 +2,17 @@
 
 namespace DarkGhostHunter\Larapass\WebAuthn;
 
-use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use InvalidArgumentException;
 use Webauthn\PublicKeyCredentialLoader;
 use Webauthn\AuthenticatorSelectionCriteria;
 use Psr\Http\Message\ServerRequestInterface;
 use Webauthn\AuthenticatorAttestationResponse;
-use Webauthn\PublicKeyCredentialCreationOptions as CreationOptions;
 use Webauthn\PublicKeyCredentialRpEntity as RelyingParty;
 use Illuminate\Contracts\Config\Repository as ConfigContract;
 use Illuminate\Contracts\Cache\Factory as CacheFactoryContract;
 use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
+use Webauthn\PublicKeyCredentialCreationOptions as CreationOptions;
 use Webauthn\AuthenticationExtensions\AuthenticationExtensionsClientInputs;
 use Webauthn\AuthenticatorAttestationResponseValidator as AttestationValidator;
 
