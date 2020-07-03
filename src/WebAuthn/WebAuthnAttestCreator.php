@@ -120,7 +120,7 @@ class WebAuthnAttestCreator
      * Retrieves an Attestation if it exists.
      *
      * @param  \Illuminate\Contracts\Auth\Authenticatable|\DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable  $user
-     * @return \Webauthn\PublicKeyCredentialRequestOptions|null
+     * @return \Webauthn\PublicKeyCredentialCreationOptions|null
      */
     public function retrieveAttestation(WebAuthnAuthenticatable $user)
     {

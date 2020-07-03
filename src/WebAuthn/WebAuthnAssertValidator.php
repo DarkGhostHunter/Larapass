@@ -7,11 +7,12 @@ use InvalidArgumentException;
 use Webauthn\PublicKeyCredentialLoader;
 use Psr\Http\Message\ServerRequestInterface;
 use Webauthn\AuthenticatorAssertionResponse;
-use Webauthn\PublicKeyCredentialRequestOptions;
+use Webauthn\PublicKeyCredentialRequestOptions as RequestOptions;
 use Webauthn\AuthenticatorAssertionResponseValidator;
 use Webauthn\PublicKeyCredentialRpEntity as RelyingParty;
 use Illuminate\Contracts\Config\Repository as ConfigContract;
 use Illuminate\Contracts\Cache\Factory as CacheFactoryContract;
+use Webauthn\PublicKeyCredentialCreationOptions as CreationOptions;
 use Webauthn\AuthenticationExtensions\AuthenticationExtensionsClientInputs;
 
 class WebAuthnAssertValidator
@@ -169,7 +170,7 @@ class WebAuthnAssertValidator
      */
     protected function makeAssertionRequest($user = null)
     {
-        return new PublicKeyCredentialRequestOptions(
+        return new RequestOptions(
             random_bytes($this->bytes),
             $this->timeout,
             $this->relyingParty->getId(),
@@ -215,7 +216,8 @@ class WebAuthnAssertValidator
                 $response,
                 $this->retrieveAssertion(),
                 $this->request,
-                $response->getUserHandle()
+                $response->getUserHandle(),
+                [$this->getCurrentRpId($assertion)]
             );
         }
         catch (InvalidArgumentException $exception) {
@@ -224,5 +226,16 @@ class WebAuthnAssertValidator
         finally {
             $this->cache->forget($this->cacheKey());
         }
+    }
+
+    /**
+     * Returns the current Relaying Party ID to validate the response.
+     *
+     * @param  \Webauthn\PublicKeyCredentialRequestOptions  $assertion
+     * @return string
+     */
+    protected function getCurrentRpId(RequestOptions $assertion)
+    {
+        return $assertion->getRpId() ?? $this->laravelRequest->getHost();
     }
 }

@@ -263,7 +263,7 @@ After that, you will receive the `config/larapass.php` config file with an array
 
 return [
     'relaying_party' => [
-        'name' => env('WEBAUTHN_NAME', env('APP_NAME', 'Laravel')),
+        'name' => env('WEBAUTHN_NAME', env('APP_NAME')),
         'id'   => env('WEBAUTHN_ID'),
         'icon' => env('WEBAUTHN_ICON'),
     ],

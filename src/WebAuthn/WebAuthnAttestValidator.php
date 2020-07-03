@@ -2,12 +2,14 @@
 
 namespace DarkGhostHunter\Larapass\WebAuthn;
 
+use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use InvalidArgumentException;
 use Webauthn\PublicKeyCredentialLoader;
 use Webauthn\AuthenticatorSelectionCriteria;
 use Psr\Http\Message\ServerRequestInterface;
 use Webauthn\AuthenticatorAttestationResponse;
+use Webauthn\PublicKeyCredentialCreationOptions as CreationOptions;
 use Webauthn\PublicKeyCredentialRpEntity as RelyingParty;
 use Illuminate\Contracts\Config\Repository as ConfigContract;
 use Illuminate\Contracts\Cache\Factory as CacheFactoryContract;
@@ -81,7 +83,7 @@ class WebAuthnAttestValidator extends WebAuthnAttestCreator
      */
     public function validate(array $data, WebAuthnAuthenticatable $user)
     {
-        if (! $request = $this->retrieveAttestation($user)) {
+        if (! $attestation = $this->retrieveAttestation($user)) {
             return false;
         }
 
@@ -92,7 +94,12 @@ class WebAuthnAttestValidator extends WebAuthnAttestCreator
                 return false;
             }
 
-            return $this->validator->check($credentials, $request, $this->request);
+            return $this->validator->check(
+                $credentials,
+                $attestation,
+                $this->request,
+                [$this->getCurrentRpId($attestation)]
+            );
         }
         catch (InvalidArgumentException $exception) {
             return false;
@@ -100,5 +107,16 @@ class WebAuthnAttestValidator extends WebAuthnAttestCreator
         finally {
             $this->cache->forget($this->cacheKey($user));
         }
+    }
+
+    /**
+     * Returns the current Relaying Party ID to validate the response.
+     *
+     * @param  \Webauthn\PublicKeyCredentialCreationOptions  $attestation
+     * @return string
+     */
+    protected function getCurrentRpId(CreationOptions $attestation)
+    {
+        return $attestation->getRp()->getId() ?? $this->laravelRequest->getHost();
     }
 }

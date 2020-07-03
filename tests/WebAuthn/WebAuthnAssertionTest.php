@@ -188,7 +188,8 @@ class WebAuthnAssertionTest extends TestCase
                 $response,
                 $options,
                 Mockery::type(ServerRequestInterface::class),
-                $handle
+                $handle,
+                [0 => 'test_id']
             )
             ->once()
             ->andReturn($this->user->webAuthnCredentials()->first()->toCredentialSource());
@@ -253,7 +254,8 @@ class WebAuthnAssertionTest extends TestCase
                 $response,
                 $options,
                 Mockery::type(ServerRequestInterface::class),
-                $handle
+                $handle,
+                [0 => 'test_id']
             )
             ->once()
             ->andThrow(new InvalidArgumentException);
@@ -402,7 +404,8 @@ class WebAuthnAssertionTest extends TestCase
                 $response,
                 $options,
                 Mockery::type(ServerRequestInterface::class),
-                $handle
+                $handle,
+                [0 => 'test_id']
             )
             ->once()
             ->andThrow(new InvalidArgumentException);
@@ -469,7 +472,8 @@ class WebAuthnAssertionTest extends TestCase
                 $response,
                 $options,
                 Mockery::type(ServerRequestInterface::class),
-                $handle
+                $handle,
+                [0 => 'test_id']
             )
             ->once()
             ->andThrow(new Exception);
