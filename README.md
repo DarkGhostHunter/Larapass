@@ -533,6 +533,10 @@ No, mainly because each application frontend is different. A given script may no
 
 No, you must ensure to encode/decode to binary forms some strings in your frontend because the nature of WebAuthn. This [WebAuthn Javascript Helpers](https://github.com/web-auth/webauthn-helper) package does it automatically for you.
 
+* **Why this doesn't work on non-HTTPS sites like my dev machine?**
+
+It's a limit imposed by the WebAuthn libraries.
+
 ## License
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.

@@ -61,7 +61,6 @@ class WebAuthnAttestationTest extends TestCase
             DB::table('web_authn_credentials')->insert([
                 'id'         => 'test_credential_foo',
                 'user_id'               => 1,
-                'is_enabled'            => true,
                 'type'                  => 'public_key',
                 'transports'            => json_encode([]),
                 'attestation_type'      => 'none',
