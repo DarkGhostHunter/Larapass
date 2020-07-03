@@ -171,7 +171,7 @@ trait WebAuthnAuthentication
     public static function getFromCredentialId(string $id) : ?WebAuthnAuthenticatable
     {
         return static::whereHas('webAuthnCredentials', static function ($query) use ($id) {
-            return $query->whereKey($id)->enabled();
+            return $query->whereKey($id);
         })->first();
     }
 
@@ -184,7 +184,7 @@ trait WebAuthnAuthentication
     public static function getFromCredentialUserHandle(string $handle) : ?WebAuthnAuthenticatable
     {
         return static::whereHas('webAuthnCredentials', static function ($query) use ($handle) {
-            return $query->where('user_handle', $handle)->enabled();
+            return $query->where('user_handle', $handle);
         })->first();
     }
 }

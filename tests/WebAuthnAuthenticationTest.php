@@ -276,6 +276,11 @@ class WebAuthnAuthenticationTest extends TestCase
         $this->assertTrue($this->user->is($user));
 
         $this->assertNull(call_user_func([$this->user, 'getFromCredentialId'], 'test_credential_baz'));
+
+        DB::table('web_authn_credentials')->where('id', 'test_credential_foo')
+            ->update(['disabled_at' => now()]);
+
+        $this->assertNull(call_user_func([$this->user, 'getFromCredentialId'], 'test_credential_foo'));
     }
 
     public function test_returns_user_from_given_user_handle()
@@ -285,5 +290,11 @@ class WebAuthnAuthenticationTest extends TestCase
         $this->assertTrue($this->user->is($user));
 
         $this->assertNull(call_user_func([$this->user, 'getFromCredentialUserHandle'], 'nope'));
+
+        DB::table('web_authn_credentials')->update(['disabled_at' => now()]);
+
+        $this->assertNull(
+            call_user_func([$this->user, 'getFromCredentialUserHandle'], $this->user->userHandle())
+        );
     }
 }
