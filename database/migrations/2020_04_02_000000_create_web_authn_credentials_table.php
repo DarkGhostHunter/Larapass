@@ -20,8 +20,6 @@ class CreateWebAuthnCredentialsTable extends Migration
             // Change accordingly for your users table if you need to.
             $table->unsignedBigInteger('user_id');
 
-            $table->boolean('is_enabled')->default(true);
-
             $table->string('name')->nullable();
             $table->string('type', 16);
             $table->json('transports');
@@ -39,7 +37,7 @@ class CreateWebAuthnCredentialsTable extends Migration
             $table->timestamps();
             $table->softDeletes(WebAuthnCredential::DELETED_AT);
 
-            $table->primary(['id', 'is_enabled']);
+            $table->primary(['id', 'user_id']);
         });
     }
 
