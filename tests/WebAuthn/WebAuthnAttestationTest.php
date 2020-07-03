@@ -282,7 +282,8 @@ class WebAuthnAttestationTest extends TestCase
             ->with(
                 $response,
                 Mockery::type(PublicKeyCredentialCreationOptions::class),
-                Mockery::type(ServerRequestInterface::class)
+                Mockery::type(ServerRequestInterface::class),
+                [0 => 'localhost']
             )->andReturn(
                 $source = new PublicKeyCredentialSource(
                     'test_id',
@@ -348,7 +349,8 @@ class WebAuthnAttestationTest extends TestCase
             ->with(
                 $response,
                 Mockery::type(PublicKeyCredentialCreationOptions::class),
-                Mockery::type(ServerRequestInterface::class)
+                Mockery::type(ServerRequestInterface::class),
+                [0 => 'localhost']
             )->andThrow(new InvalidArgumentException);
 
         $result = $this->app[WebAuthnAttestValidator::class]->validate(['foo' => 'bar'], $this->user);
