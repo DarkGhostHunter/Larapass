@@ -51,14 +51,24 @@ class EloquentWebAuthnProvider extends EloquentUserProvider
      */
     public function retrieveByCredentials(array $credentials)
     {
-        if ($this->isSignedChallenge($credentials)) {
-            // We will try to get the user for the given credential ID.
-            return call_user_func([$this->model, 'getFromCredentialId'], $credentials['id']);
+        if ($this->isSignedChallenge($credentials) && $id = $this->binaryID($credentials['rawId'])) {
+            return $this->model::getFromCredentialId($id);
         }
 
         if ($this->fallback) {
             return parent::retrieveByCredentials($credentials);
         }
+    }
+
+    /**
+     * Transforms the raw ID string into a binary string.
+     *
+     * @param  string  $rawId
+     * @return null|string
+     */
+    protected function binaryID(string $rawId)
+    {
+        return base64_decode(strtr($rawId, '-_', '+/'), true);
     }
 
     /**
@@ -82,7 +92,7 @@ class EloquentWebAuthnProvider extends EloquentUserProvider
     public function validateCredentials(UserContract $user, array $credentials)
     {
         if ($this->isSignedChallenge($credentials)) {
-            return (bool) $this->validator->validate($credentials);
+            return (bool)$this->validator->validate($credentials);
         }
 
         if ($this->fallback) {

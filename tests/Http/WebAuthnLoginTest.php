@@ -98,19 +98,19 @@ class WebAuthnLoginTest extends TestCase
         ])->save();
 
         DB::table('web_authn_credentials')->insert([
-            'id'         => 'test_credential_id',
-            'user_id'               => 1,
-            'is_enabled'            => true,
-            'type'                  => 'public_key',
-            'transports'            => json_encode([]),
-            'attestation_type'      => 'none',
-            'trust_path'            => json_encode(['type' => EmptyTrustPath::class]),
-            'aaguid'                => $uuid->toString(),
-            'public_key' => 'public_key',
-            'counter'               => 0,
-            'user_handle'           => 'test_user_handle',
-            'created_at'            => now()->toDateTimeString(),
-            'updated_at'            => now()->toDateTimeString(),
+            'id'               => 'test_credential_id',
+            'user_id'          => 1,
+            'is_enabled'       => true,
+            'type'             => 'public_key',
+            'transports'       => json_encode([]),
+            'attestation_type' => 'none',
+            'trust_path'       => json_encode(['type' => EmptyTrustPath::class]),
+            'aaguid'           => $uuid->toString(),
+            'public_key'       => 'public_key',
+            'counter'          => 0,
+            'user_handle'      => 'test_user_handle',
+            'created_at'       => now()->toDateTimeString(),
+            'updated_at'       => now()->toDateTimeString(),
         ]);
 
         $this->post('webauthn/login/options', [
@@ -144,19 +144,19 @@ class WebAuthnLoginTest extends TestCase
         ])->save();
 
         DB::table('web_authn_credentials')->insert([
-            'id'         => 'test_credential_id',
-            'user_id'               => 1,
-            'is_enabled'            => false,
-            'type'                  => 'public_key',
-            'transports'            => json_encode([]),
-            'attestation_type'      => 'none',
-            'trust_path'            => json_encode(['type' => EmptyTrustPath::class]),
-            'aaguid'                => $uuid->toString(),
-            'public_key' => 'public_key',
-            'counter'               => 0,
-            'user_handle'           => 'test_user_handle',
-            'created_at'            => now()->toDateTimeString(),
-            'updated_at'            => now()->toDateTimeString(),
+            'id'               => 'test_credential_id',
+            'user_id'          => 1,
+            'is_enabled'       => false,
+            'type'             => 'public_key',
+            'transports'       => json_encode([]),
+            'attestation_type' => 'none',
+            'trust_path'       => json_encode(['type' => EmptyTrustPath::class]),
+            'aaguid'           => $uuid->toString(),
+            'public_key'       => 'public_key',
+            'counter'          => 0,
+            'user_handle'      => 'test_user_handle',
+            'created_at'       => now()->toDateTimeString(),
+            'updated_at'       => now()->toDateTimeString(),
         ]);
 
         $this->post('webauthn/login/options', [
@@ -181,7 +181,7 @@ class WebAuthnLoginTest extends TestCase
             ],
             'type'     => 'public-key',
         ])
-            ->assertStatus(401);
+            ->assertStatus(422);
     }
 
     public function test_user_authenticates_with_webauthn()
@@ -197,28 +197,33 @@ class WebAuthnLoginTest extends TestCase
         $user->save();
 
         DB::table('web_authn_credentials')->insert([
-            'id'         => 'test_credential_id',
-            'user_id'               => 1,
-            'is_enabled'            => true,
-            'type'                  => 'public_key',
-            'transports'            => json_encode([]),
-            'attestation_type'      => 'none',
-            'trust_path'            => json_encode(['type' => EmptyTrustPath::class]),
-            'aaguid'                => $uuid->toString(),
-            'public_key' => 'public_key',
-            'counter'               => 0,
-            'user_handle'           => 'test_user_handle',
-            'created_at'            => now()->toDateTimeString(),
-            'updated_at'            => now()->toDateTimeString(),
+            'id'               => 'test_credential_id',
+            'user_id'          => 1,
+            'is_enabled'       => true,
+            'type'             => 'public_key',
+            'transports'       => json_encode([]),
+            'attestation_type' => 'none',
+            'trust_path'       => json_encode(['type' => EmptyTrustPath::class]),
+            'aaguid'           => $uuid->toString(),
+            'public_key'       => 'public_key',
+            'counter'          => 0,
+            'user_handle'      => 'test_user_handle',
+            'created_at'       => now()->toDateTimeString(),
+            'updated_at'       => now()->toDateTimeString(),
         ]);
 
         $this->mock(WebAuthnAssertValidator::class)
             ->shouldReceive('validate')
             ->with($data = [
-                'id' => 'test_credential_id',
-                'rawId' => 'test_raw_id',
-                'type' => 'test_type',
-                'response' => 'test_response',
+                'id'       => 'test_credential_id',
+                'type'     => 'test_type',
+                'response' => [
+                    'authenticatorData' => 'test',
+                    'clientDataJSON' => 'test',
+                    'signature' => 'test',
+                    'userHandle' => 'test',
+                ],
+                'rawId'    => Base64Url::encode('test_credential_id'),
             ])
             ->andReturnUsing(function ($data) {
                 $credentials = WebAuthnCredential::whereKey($data['id'])->first();
@@ -233,8 +238,8 @@ class WebAuthnLoginTest extends TestCase
         $this->assertAuthenticatedAs($user);
 
         $this->assertDatabaseHas('web_authn_credentials', [
-            'id' => 'test_credential_id',
-            'counter'       => 1,
+            'id'      => 'test_credential_id',
+            'counter' => 1,
         ]);
     }
 

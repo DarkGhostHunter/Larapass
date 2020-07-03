@@ -2,6 +2,7 @@
 
 namespace Tests\Auth;
 
+use Base64Url\Base64Url;
 use Tests\RegistersPackage;
 use Illuminate\Support\Str;
 use Tests\Stubs\TestWebAuthnUser;
@@ -46,27 +47,27 @@ class EloquentWebAuthnProviderTest extends TestCase
         $user->save();
 
         DB::table('web_authn_credentials')->insert([
-            'id'         => 'test_credential_id',
-            'user_id'               => 1,
-            'is_enabled'            => true,
-            'type'                  => 'public_key',
-            'transports'            => json_encode([]),
-            'attestation_type'      => 'none',
-            'trust_path'            => json_encode(['type' => EmptyTrustPath::class]),
-            'aaguid'                => Str::uuid()->toString(),
-            'public_key' => 'public_key',
-            'counter'               => 0,
-            'user_handle'           => 'test_user_handle',
-            'created_at'            => now()->toDateTimeString(),
-            'updated_at'            => now()->toDateTimeString(),
+            'id'               => 'test_credential_id',
+            'user_id'          => 1,
+            'is_enabled'       => true,
+            'type'             => 'public_key',
+            'transports'       => json_encode([]),
+            'attestation_type' => 'none',
+            'trust_path'       => json_encode(['type' => EmptyTrustPath::class]),
+            'aaguid'           => Str::uuid()->toString(),
+            'public_key'       => 'public_key',
+            'counter'          => 0,
+            'user_handle'      => 'test_user_handle',
+            'created_at'       => now()->toDateTimeString(),
+            'updated_at'       => now()->toDateTimeString(),
         ]);
 
         $retrieved = Auth::createUserProvider('users')
             ->retrieveByCredentials([
-                'id' => 'test_credential_id',
-                'rawId' => 'something',
+                'id'       => 'test_credential_id',
+                'rawId'    => Base64Url::encode('test_credential_id'),
                 'response' => ['something'],
-                'type' => 'public-key'
+                'type'     => 'public-key',
             ]);
 
         $this->assertTrue($user->is($retrieved));
@@ -84,7 +85,7 @@ class EloquentWebAuthnProviderTest extends TestCase
 
         $retrieved = Auth::createUserProvider('users')
             ->retrieveByCredentials([
-                'email' => 'john.doe@mail.com'
+                'email' => 'john.doe@mail.com',
             ]);
 
         $this->assertTrue($user->is($retrieved));
@@ -104,7 +105,7 @@ class EloquentWebAuthnProviderTest extends TestCase
 
         $retrieved = Auth::createUserProvider('users')
             ->retrieveByCredentials([
-                'email' => 'john.doe@mail.com'
+                'email' => 'john.doe@mail.com',
             ]);
 
         $this->assertNull($retrieved);
@@ -122,8 +123,8 @@ class EloquentWebAuthnProviderTest extends TestCase
 
         $result = Auth::createUserProvider('users')
             ->validateCredentials($user, [
-                'name' => 'john',
-                'password' => 'secret'
+                'name'     => 'john',
+                'password' => 'secret',
             ]);
 
         $this->assertTrue($result);
@@ -143,8 +144,8 @@ class EloquentWebAuthnProviderTest extends TestCase
 
         $result = Auth::createUserProvider('users')
             ->validateCredentials($user, [
-                'name' => 'john',
-                'password' => 'secret'
+                'name'     => 'john',
+                'password' => 'secret',
             ]);
 
         $this->assertFalse($result);

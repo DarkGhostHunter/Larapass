@@ -77,13 +77,31 @@ trait AssertsWebAuthn
      */
     public function login(Request $request)
     {
-        $credential = $request->only('rawId', 'id', 'response', 'type');
+        $credential = $request->validate($this->assertionRules());
 
         if ($authenticated = $this->attemptLogin($credential, $this->hasRemember($request))) {
             return $this->authenticated($request, $this->guard()->user()) ?? response()->noContent();
         }
 
-        return response()->noContent(401);
+        return response()->noContent(422);
+    }
+
+    /**
+     * The assertion rules to validate the incoming JSON payload.
+     *
+     * @return array|string[]
+     */
+    protected function assertionRules()
+    {
+        return [
+            'id'                         => 'required|string',
+            'rawId'                      => 'required|string',
+            'response.authenticatorData' => 'required|string',
+            'response.clientDataJSON'    => 'required|string',
+            'response.signature'         => 'required|string',
+            'response.userHandle'        => 'required|string',
+            'type'                       => 'required|string',
+        ];
     }
 
     /**

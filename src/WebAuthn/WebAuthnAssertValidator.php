@@ -211,7 +211,7 @@ class WebAuthnAssertValidator
             }
 
             return $this->validator->check(
-                $credentials->getId(),
+                $credentials->getRawId(),
                 $response,
                 $this->retrieveAssertion(),
                 $this->request,

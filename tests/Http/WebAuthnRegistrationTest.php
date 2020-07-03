@@ -105,7 +105,7 @@ class WebAuthnRegistrationTest extends TestCase
 
         $this->post('webauthn/register/options')->assertExactJson([
             'rp'                     => [
-                'id' => 'app.com',
+                'id'   => 'app.com',
                 'name' => 'test',
             ],
             'pubKeyCredParams'       => [
@@ -159,13 +159,16 @@ class WebAuthnRegistrationTest extends TestCase
             ->shouldReceive('validate')
             ->with($data = [
                 'id'       => 'test_id',
-                'rawId'    => 'test_raw_id',
-                'response' => 'test_response',
+                'rawId'    => Base64Url::encode('test_id'),
+                'response' => [
+                    'attestationObject' => 'test',
+                    'clientDataJSON'    => 'test',
+                ],
                 'type'     => 'test_public_key',
             ], $user)
             ->andReturnUsing(function (array $data) {
                 return new PublicKeyCredentialSource(
-                    $data['id'],
+                    $data['rawId'],
                     'test_type',
                     [],
                     'test_attestation',
@@ -182,24 +185,24 @@ class WebAuthnRegistrationTest extends TestCase
         $this->postJson('webauthn/register', $data)->assertNoContent();
 
         $this->assertDatabaseHas('web_authn_credentials', [
-            'id'         => 'test_id',
-            'user_id'               => 1,
-            'is_enabled'            => true,
-            'type'                  => 'test_type',
-            'transports'            => json_encode([]),
-            'attestation_type'      => 'test_attestation',
-            'trust_path'            => json_encode(['type' => EmptyTrustPath::class]),
-            'aaguid'                => '1c3c674c-2f09-4079-8e57-ddc5fe5e66eb',
-            'counter'               => 0,
-            'user_handle'           => 'test_user_handle',
-            'created_at'            => $now->toDateTimeString(),
-            'updated_at'            => $now->toDateTimeString(),
-            'public_key' => base64_decode('test_public_key'),
+            'id'               => $data['rawId'],
+            'user_id'          => 1,
+            'type'             => 'test_type',
+            'transports'       => json_encode([]),
+            'attestation_type' => 'test_attestation',
+            'trust_path'       => json_encode(['type' => EmptyTrustPath::class]),
+            'aaguid'           => '1c3c674c-2f09-4079-8e57-ddc5fe5e66eb',
+            'counter'          => 0,
+            'user_handle'      => 'test_user_handle',
+            'created_at'       => $now->toDateTimeString(),
+            'updated_at'       => $now->toDateTimeString(),
+            'disabled_at'      => null,
+            'public_key'       => 'test_public_key',
         ]);
 
-        $event->assertDispatched(AttestationSuccessful::class, function ($event) use ($user) {
+        $event->assertDispatched(AttestationSuccessful::class, function ($event) use ($user, $data) {
             return $user->is($event->user)
-                && 'test_id' === $event->credential->getPublicKeyCredentialId();
+                && $data['rawId'] === $event->credential->getPublicKeyCredentialId();
         });
     }
 
@@ -221,9 +224,9 @@ class WebAuthnRegistrationTest extends TestCase
             ->assertJsonFragment([
                 'authenticatorSelection' => [
                     'requireResidentKey' => false,
-                    'residentKey' => 'preferred',
-                    'userVerification' => 'preferred'
-                ]
+                    'residentKey'        => 'preferred',
+                    'userVerification'   => 'preferred',
+                ],
             ])->assertStatus(200);
     }
 
@@ -272,10 +275,10 @@ class WebAuthnRegistrationTest extends TestCase
             ], $user)
             ->andReturnFalse();
 
-        $this->postJson('webauthn/register', $data)->assertNoContent(400);
+        $this->postJson('webauthn/register', $data)->assertNoContent(422);
 
         $this->assertDatabaseMissing('web_authn_credentials', [
-            'id'         => 'test_credential_id',
+            'id' => 'test_credential_id',
         ]);
 
         $event->assertNotDispatched(AttestationSuccessful::class);

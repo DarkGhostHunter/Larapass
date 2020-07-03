@@ -15,7 +15,7 @@ class CreateWebAuthnCredentialsTable extends Migration
     public function up()
     {
         Schema::create('web_authn_credentials', function (Blueprint $table) {
-            $table->string('id');
+            $table->binary('id');
 
             // Change accordingly for your users table if you need to.
             $table->unsignedBigInteger('user_id');

@@ -57,7 +57,7 @@ class WebAuthnAuthenticationTest extends TestCase
 
         $model->public_key = $key;
 
-        $this->assertSame($key, base64_encode($model->getAttributes()['public_key']));
+        $this->assertSame($key, $model->getAttributes()['public_key']);
     }
 
     public function test_finds_one_by_credential_id()

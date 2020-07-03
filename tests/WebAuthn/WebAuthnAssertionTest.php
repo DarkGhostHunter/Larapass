@@ -15,7 +15,6 @@ use Orchestra\Testbench\TestCase;
 use Tests\Stubs\TestWebAuthnUser;
 use Webauthn\PublicKeyCredential;
 use Illuminate\Support\Facades\DB;
-use Psr\Http\Message\UriInterface;
 use Webauthn\AuthenticatorResponse;
 use Tests\RunsPublishableMigrations;
 use Webauthn\AttestedCredentialData;
@@ -186,7 +185,7 @@ class WebAuthnAssertionTest extends TestCase
         $this->mock(AuthenticatorAssertionResponseValidator::class)
             ->shouldReceive('check')
             ->with(
-                'test_credential_id',
+                'a04f39f8ba6a4a19b98a0579bf76505ea6d55730745274616166ef827b649506',
                 $response,
                 $options,
                 Mockery::type(ServerRequestInterface::class),
@@ -251,7 +250,7 @@ class WebAuthnAssertionTest extends TestCase
         $this->mock(AuthenticatorAssertionResponseValidator::class)
             ->shouldReceive('check')
             ->with(
-                'test_credential_id',
+                'a04f39f8ba6a4a19b98a0579bf76505ea6d55730745274616166ef827b649506',
                 $response,
                 $options,
                 Mockery::type(ServerRequestInterface::class),
@@ -400,7 +399,7 @@ class WebAuthnAssertionTest extends TestCase
         $this->mock(AuthenticatorAssertionResponseValidator::class)
             ->shouldReceive('check')
             ->with(
-                'test_credential_id',
+                'a04f39f8ba6a4a19b98a0579bf76505ea6d55730745274616166ef827b649506',
                 $response,
                 $options,
                 Mockery::type(ServerRequestInterface::class),
@@ -467,7 +466,7 @@ class WebAuthnAssertionTest extends TestCase
         $this->mock(AuthenticatorAssertionResponseValidator::class)
             ->shouldReceive('check')
             ->with(
-                'test_credential_id',
+                'a04f39f8ba6a4a19b98a0579bf76505ea6d55730745274616166ef827b649506',
                 $response,
                 $options,
                 Mockery::type(ServerRequestInterface::class),
@@ -515,7 +514,8 @@ class WebAuthnAssertionTest extends TestCase
             ->andReturnNull();
         $source->shouldReceive('getAttestedCredentialData')
             ->andReturn(
-                new AttestedCredentialData(Uuid::fromBytes(base64_decode('YCiwF7HUTAK0s6/Nr8lrsg==', true)),
+                new AttestedCredentialData(
+                    Uuid::fromBytes(base64_decode('YCiwF7HUTAK0s6/Nr8lrsg==', true)),
                     base64_decode('6oRgydKXdC3LtZBDoAXxKnWte68elEQejDrYOV9x+18=', true),
                     base64_decode('pAEDAzkBACBZAQDwn2Ee7V+9GNDn2iCU2plQnIVmZG/vOiXSHb9TQzC5806bGzLV918+1SLFhMhlX5jua2rdXt65nYw9Eln7mbmVxLBDmEm2wod6wP2HinC9HPsYwr75tMRakLMNFfH4Xx4lEsjulRmv68yl/N8XH64X8LKe2GBxjqcuJR+c3LbW4D5dWt/1pGL8fS1UbO3abA/d3IeEsP8RpEz5eVo6qBhb4r0VTo2NMeq75saBHIj4whqo6qsRqRvBmK2d9NAecBFFRIQ31NUtEQZPqXOzkbXGehDi7c3YJPBkTW9kMqcosob9Vlru+vVab+1PnFRdqaklR1UtmhrWte/wB61Hm3xdIUMBAAE=', true)
                 )
@@ -526,7 +526,7 @@ class WebAuthnAssertionTest extends TestCase
         $repo = $this->mock(PublicKeyCredentialSourceRepository::class);
 
         $repo->shouldReceive('findOneByCredentialId')
-            ->with('6oRgydKXdC3LtZBDoAXxKnWte68elEQejDrYOV9x-18')
+            ->with(base64_decode('6oRgydKXdC3LtZBDoAXxKnWte68elEQejDrYOV9x+18=', true))
             ->andReturn($source);
 
         $repo->shouldReceive('saveCredentialSource')

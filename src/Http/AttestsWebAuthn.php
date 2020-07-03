@@ -33,7 +33,7 @@ trait AttestsWebAuthn
         // save it into the credentials store. If the data is invalid we will bail
         // out and return a non-authorized response since we can't save the data.
         $validCredential = WebAuthn::validateAttestation(
-            $request->only('id', 'rawId', 'response', 'type'), $user
+            $request->validate($this->attestationRules()), $user
         );
 
         if ($validCredential) {
@@ -44,7 +44,23 @@ trait AttestsWebAuthn
             return $this->credentialRegistered($user, $validCredential) ?? response()->noContent();
         }
 
-        return response()->noContent(400);
+        return response()->noContent(422);
+    }
+
+    /**
+     * The attestation rules to validate the incoming JSON payload.
+     *
+     * @return array|string[]
+     */
+    protected function attestationRules()
+    {
+        return [
+            'id'                         => 'required|string',
+            'rawId'                      => 'required|string',
+            'response.attestationObject' => 'required|string',
+            'response.clientDataJSON'    => 'required|string',
+            'type'                       => 'required|string',
+        ];
     }
 
     /**

@@ -149,28 +149,6 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
     }
 
     /**
-     * Sets the credential public key as binary form.
-     *
-     * @param  string  $value
-     * @return void
-     */
-    public function setPublicKeyAttribute($value)
-    {
-        $this->attributes['public_key'] = base64_decode($value);
-    }
-
-    /**
-     * Return the credential public key as a Base64 string.
-     *
-     * @param  string  $value
-     * @return string
-     */
-    public function getPublicKeyAttribute($value)
-    {
-        return base64_encode($value);
-    }
-
-    /**
      * Filter the credentials for those explicitly enabled.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $builder

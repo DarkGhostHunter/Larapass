@@ -10,9 +10,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Date;
 use Webauthn\TrustPath\EmptyTrustPath;
 use Webauthn\PublicKeyCredentialSource;
+use Illuminate\Database\Eloquent\Model;
 use Webauthn\PublicKeyCredentialUserEntity;
 use Webauthn\PublicKeyCredentialDescriptor;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use DarkGhostHunter\Larapass\WebAuthnAuthentication;
 
 class WebAuthnAuthenticationTest extends TestCase
 {
@@ -81,7 +83,11 @@ class WebAuthnAuthenticationTest extends TestCase
 
     public function test_returns_relation_instance_on_method_call()
     {
-        $this->assertInstanceOf(HasMany::class, TestWebAuthnUser::make()->webAuthnCredentials());
+        $model = new class extends Model {
+            use WebAuthnAuthentication;
+        };
+
+        $this->assertInstanceOf(HasMany::class, $model->webAuthnCredentials());
     }
 
     public function test_cycles_entity_when_no_credential_exists()
@@ -165,7 +171,7 @@ class WebAuthnAuthenticationTest extends TestCase
             'created_at'       => $now->toDateTimeString(),
             'updated_at'       => $now->toDateTimeString(),
             'disabled_at'      => null,
-            'public_key'       => base64_decode('testKey'),
+            'public_key'       => 'testKey',
         ]);
     }
 
