@@ -205,7 +205,7 @@ class LarapassServiceProvider extends ServiceProvider
         ], 'controllers');
 
         $this->publishes([
-            __DIR__.'/../resources/js/larapass.js' => public_path('vendor/larapass'),
+            __DIR__.'/../resources/js' => public_path('vendor/larapass/js'),
         ], 'public');
 
         if (! class_exists('CreateWebAuthnCredentialsTable')) {
