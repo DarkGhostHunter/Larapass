@@ -35,6 +35,7 @@ If you have any doubts about WebAuthn, [check this small FAQ](#faq).
 2. Migrate the `webauthn_credentials` table.
 3. Implement the `WebAuthnAuthenticatable` contract and `WebAuthnAuthentication` trait to your User(s) classes.
 4. Register WebAuthn routes.
+4. Add the Javascript helper.
 
 ### 1. Add the `eloquent-webauthn` driver.
 
@@ -113,28 +114,79 @@ In your frontend scripts, point the requests to these routes.
 
 > If you want full control, you can opt-out of these helper controllers and use your own logic. Use the [`AttestWebAuthn`](src/Http/AttestsWebAuthn.php) and [`AssertsWebAuthn`](src/Http/AssertsWebAuthn.php) traits if you need to start with something.
 
-## Frontend integration
+### 5. Frontend integration
 
-You're in charge of registering and authenticating users as you want using your own scripts in your frontend. **Larapass doesn't include scripts** because there is no best all-around script that cover all use cases (Vue.js, React.js, vanilla Javascript, etc).
+This package includes a convenient script to handle registration and login via WebAuthn. To use it, just publish the `larapass.js` asset into your application public resources.
 
-The important bit is to point the _attest_ (registration) and _assert_ (login) to the routes used for each of them.
+    php artisan vendor:publish --provider="DarkGhostHunter\Larapass\LarapassServiceProvider" --tag="public"
 
-If you want to start with something, I recommend these [WebAuthn Javascript Helpers](https://github.com/web-auth/webauthn-helper) which are simple and straightforward.
+You will receive the `vendor/larapass/js/larapass.js` file which you can include into your authentication views and use it programmatically, anyway you want.
+
+```html
+<script src="{{ asset('vendor/larapass/js/larapass.js') }}"></script>
+
+<!-- Registering users -->
+<script>
+    const register = () => {
+        new Larapass({
+            register: 'webauthn/register',
+            registerOptions: 'webauthn/register/options'
+        }).register()
+          .then(response => window.location.href = 'https://myapp.com/devices')
+          .catch(response => alert('Something went wrong, try again!'))
+    }
+
+    document.getElementById('register-form').addEventListener('submit', register)
+</script>
+
+<!-- Login users -->
+<script>
+    const login = () => {
+        new Larapass({
+            login: 'webauthn/register',
+            loginOptions: 'webauthn/register/options'
+        }).login({
+            email: document.getElementById('email').value,
+        }).then(response => window.location.href = 'https://myapp.com/account')
+          .catch(error => alert('Something went wrong, try again!'))
+    }
+
+    document.getElementById('login-form').addEventListener('submit', login)
+</script>
+```
+
+You can bypass the route list declaration if you're using the defaults. The example above includes them just for show.
+
+Also, the helper allows headers on the action request, on both registration and login.
 
 ```javascript
-import {useLogin} from 'webauthn-helper';
-
-const login = useLogin({
-    loginOptions: '/webauthn/login/options',
-    loginUrl:     '/webauthn/login',
-});
-
-login({
-    username: 'John Doe'
+new Larapass({
+    login: 'webauthn/register',
+    loginOptions: 'webauthn/register/options'
+}).login({
+    email: document.getElementById('email').value,
+}, {
+    myHeader: 'This is sent with the signed challenge',
 })
-    .then(response => window.location.replace = 'https://myapp.com/welcome')
-    .catch(error => console.log(error));
 ```
+
+> If the script doesn't suit your needs, you're free to create your own script to handle WebAuthn, or just copy-paste it and import into a transpiler like [Laravel Mix](https://laravel.com/docs/mix#running-mix), [Babel](https://babeljs.io/) or [Webpack](https://webpack.js.org/).
+
+### Remembering Users
+
+You can enable it by just issuing the `WebAuthn-Remember` header value to `true` when pushing the signed login challenge from your frontend. We can do this easily with the [included Javascript helper](#5-frontend-integration).
+
+```javascript
+new Larapass.login({
+    email: document.getElementById('email').value
+}, {
+    'WebAuthn-Remember': true
+})
+```
+
+Alternatively, you can add the `remember` key to the outgoing JSON Payload if you're using your own scripts. Both ways are accepted.
+
+> You can override this behaviour in the [`AssertsWebAuthn`](src/Http/AssertsWebAuthn.php) trait.
 
 ## Events
 
@@ -395,25 +447,6 @@ By default, this package allows to re-use the same `eloquent-webauthn` driver to
 
 Disabling the fallback will only check for WebAuthn credentials. To handle classic user/password scenarios, you should create a separate guard.
 
-## Remembering Users
-
-You can enable it by just issuing the `WebAuthn-Remember` header value to `true` when pushing the signed login challenge from your frontend, or adding the `remember` key to the JSON Payload if you're able to.
-
-```javascript
-fetch('/webauthn/login', {
-  method: 'POST',
-  credentials: 'same-origin',
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    'WebAuthn-Remember': true,
-  },
-  body: JSON.stringify(publicKeyCredentialsSource),
-})
-```
-
-> You can override this in the [`AssertsWebAuthn`](src/Http/AssertsWebAuthn.php) trait.
-
 ## Attestation and Metadata statements support
 
 If you need very-high-level of security, you should use attestation and metadata statements. You will basically ask the authenticator for its authenticity and check it in a lot of ways.
@@ -451,10 +484,10 @@ If you discover any security related issues, please email darkghosthunter@gmail.
 
 * **Does this work with any browser?**
 
-[Yes](https://caniuse.com/#feat=webauthn). In the case of old browsers, you should have a fallback detection script:
+[Yes](https://caniuse.com/#feat=webauthn). In the case of old browsers, you should have a fallback detection script. This can be asked with [the included Javascript helper](#5-frontend-integration) in a breeze:
 
 ```javascript
-if (typeof(PublicKeyCredential) == "undefined") {
+if (! Larapass.supportsWebAuthn()) {
    alert('Your device is not secure enough to use this site!');
 }
 ```
@@ -527,11 +560,11 @@ Yes. Just be sure to disable the password column in the users table, the Passwor
 
 * **Does this includes Javascript?**
 
-No, mainly because each application frontend is different. A given script may not work for you.
+[Yes.](#5-frontend-integration)
 
 * **Does this encodes/decode the strings automatically in the frontend?**
 
-No, you must ensure to encode/decode to binary forms some strings in your frontend because the nature of WebAuthn. This [WebAuthn Javascript Helpers](https://github.com/web-auth/webauthn-helper) package does it automatically for you.
+No, you must ensure to encode/decode to binary forms some strings in your frontend because the nature of WebAuthn. The included [WebAuthn Helper](#5-frontend-integration) does it automatically for you.
 
 ## License
 
