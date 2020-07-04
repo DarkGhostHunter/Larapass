@@ -522,7 +522,7 @@ $this->app->bind(CounterChecker::class, function () {
 });
 ```
 
-Then, you can add your logic to .
+Inside your counter checker, you may want to throw an exception if the counter is below what is reported.
 
 ```php
 <?php
@@ -548,7 +548,7 @@ class MyCountChecker implements CounterChecker
 
 Yes, just send him a signed email to register a new device with secure attestation and assertion routes. That's up to you.
 
-> To blacklist a device, use `disableDevice()` in the user instance.
+> To blacklist a device, use `disableDevice()` in the user instance. That allows the user to re-enable it when he recovers the device.
 
 * **How secure is this against passwords or 2FA?**
 
@@ -556,9 +556,9 @@ Extremely secure since it works only on HTTPS, and no password or codes are exch
 
 * **Can I deactivate the password fallback? Can I enforce only WebAuthn authentication?**
 
-Yes. Just be sure to disable the password column in the users table, the Password Broker, and have some logic to register new devices and invalidate old ones. The [`WebAuthnAuthentication`](src/WebAuthnAuthentication.php) trait helps with this.
+Yes. Just be sure to disable the password column in the users table, the Password Broker, and have some logic to recover the account with new devices and invalidate old ones. The [`WebAuthnAuthentication`](src/WebAuthnAuthentication.php) trait helps with this.
 
-* **Does this includes Javascript?**
+* **Does this includes a frontend Javascript?**
 
 [Yes.](#5-frontend-integration)
 
