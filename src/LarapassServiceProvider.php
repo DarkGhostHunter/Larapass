@@ -204,6 +204,10 @@ class LarapassServiceProvider extends ServiceProvider
             __DIR__ . '/../stubs' => app_path('Http/Controllers/Auth'),
         ], 'controllers');
 
+        $this->publishes([
+            __DIR__.'/../resources/js' => public_path('vendor/larapass/js'),
+        ], 'public');
+
         if (! class_exists('CreateWebAuthnCredentialsTable')) {
             $this->publishes([
                 __DIR__ .
