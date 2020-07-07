@@ -4,8 +4,8 @@ namespace DarkGhostHunter\Larapass;
 
 use Illuminate\Support\Str;
 use Webauthn\PublicKeyCredentialUserEntity as UserEntity;
-use Webauthn\PublicKeyCredentialSource as CredentialSource;
 use DarkGhostHunter\Larapass\Eloquent\WebAuthnCredential;
+use Webauthn\PublicKeyCredentialSource as CredentialSource;
 use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
 
 /**
@@ -104,6 +104,17 @@ trait WebAuthnAuthentication
     }
 
     /**
+     * Removes all credentials previously registered.
+     *
+     * @param  string|array|null  $except
+     * @return void
+     */
+    public function flushCredentials($except = null) : void
+    {
+        $this->webAuthnCredentials()->whereKeyNot($except)->forceDelete();
+    }
+
+    /**
      * Checks if a given credential exists and is enabled.
      *
      * @param  string  $id
@@ -137,14 +148,14 @@ trait WebAuthnAuthentication
     }
 
     /**
-     * Removes all credentials previously registered.
+     * Disables all credentials for the user.
      *
      * @param  string|array|null  $except
      * @return void
      */
-    public function flushCredentials($except = null) : void
+    public function disableAllCredentials($except = null) : void
     {
-        $this->webAuthnCredentials()->whereKeyNot($except)->forceDelete();
+        $this->webAuthnCredentials()->whereKeyNot($except)->delete();
     }
 
     /**
@@ -160,6 +171,17 @@ trait WebAuthnAuthentication
             ->map->toCredentialDescriptor()
             ->values()
             ->all();
+    }
+
+    /**
+     * Sends a credential recovery email to the user.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendCredentialRecoveryNotification(string $token) : void
+    {
+        $this->notify(new Notifications\AccountRecoveryNotification($token));
     }
 
     /**

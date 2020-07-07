@@ -85,11 +85,27 @@ interface WebAuthnAuthenticatable
     public function disableCredential($id) : void;
 
     /**
+     * Disables all credentials for the user.
+     *
+     * @param  string|array|null  $except
+     * @return void
+     */
+    public function disableAllCredentials($except = null) : void;
+
+    /**
      * Returns all credentials descriptors of the user.
      *
      * @return array|\Webauthn\PublicKeyCredentialDescriptor[]
      */
     public function allCredentialDescriptors() : array;
+
+    /**
+     * Sends a credential recovery email to the user.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendCredentialRecoveryNotification(string $token) : void;
 
     /**
      * Returns an WebAuthnAuthenticatable user from a given Credential ID.

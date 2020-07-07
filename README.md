@@ -35,7 +35,8 @@ If you have any doubts about WebAuthn, [check this small FAQ](#faq).
 2. Migrate the `webauthn_credentials` table.
 3. Implement the `WebAuthnAuthenticatable` contract and `WebAuthnAuthentication` trait to your User(s) classes.
 4. Register WebAuthn routes.
-4. Add the Javascript helper.
+5. Add the Javascript helper.
+6. Set up account recovery (optional)
 
 ### 1. Add the `eloquent-webauthn` driver.
 
@@ -187,6 +188,53 @@ new Larapass.login({
 Alternatively, you can add the `remember` key to the outgoing JSON Payload if you're using your own scripts. Both ways are accepted.
 
 > You can override this behaviour in the [`AssertsWebAuthn`](src/Http/AssertsWebAuthn.php) trait.
+
+### 6. Set up account recovery (optional)
+
+Probably you will want to offer a way to recover an account if the user loses his credentials. You can use the `WebAuthnDeviceLostController` and `WebAuthnRecoveryController` [which are also published](#4-register-the-routes), along with these routes:
+
+```php
+Route::get('webauthn/lost', 'Auth\WebAuthnDeviceLostController@showDeviceLostForm')
+     ->name('webauthn.lost.form');
+Route::post('webauthn/lost', 'Auth\WebAuthnDeviceLostController@sendRecoveryEmail')
+     ->name('webauthn.lost.send');
+
+Route::get('webauthn/recover', 'Auth\WebAuthnRecoveryController@showResetForm')
+     ->name('webauthn.recover.form');
+Route::post('webauthn/recover/options', 'Auth\WebAuthnRecoveryController@options')
+     ->name('webauthn.recover.options');
+Route::post('webauthn/recover/register', 'Auth\WebAuthnRecoveryController@recover')
+     ->name('webauthn.recover');
+```
+
+These comes with new views and translation lines, so you can override them if you're not happy with what is included. 
+
+You can override the views in `resources/vendor/larapass` and the notification being sent using the `sendCredentialRecoveryNotification` method of the user.
+
+After that, don't forget to add a new token broker in your `config/auth.php`:
+
+```php
+return [
+    // ...
+
+    'passwords' => [
+        'users' => [
+            'provider' => 'users',
+            'table' => 'password_resets',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+
+        // New for WebAuthn
+        'webauthn' => [
+            'provider' => 'users', // The user provider using WebAuthn.
+            'table' => 'web_authn_recoveries', // The table to store the recoveries.
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+    ],
+];
+```
 
 ## Events
 
@@ -565,6 +613,10 @@ Yes. Just be sure to disable the password column in the users table, the Passwor
 * **Does this encodes/decode the strings automatically in the frontend?**
 
 Yes, the included [WebAuthn Helper](#5-frontend-integration) does it automatically for you.
+
+* **Does this include a credential recovery routes?**
+
+No, because the Laravel Password Broker is meant to be used with classic passwords. You're better doing one yourself. As a hint, you should use a `TokenRepositoryInterface` to issue and check _recovery_ tokens.
 
 ## License
 

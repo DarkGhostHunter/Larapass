@@ -8,6 +8,8 @@ use DarkGhostHunter\Larapass\Facades\WebAuthn;
 
 trait AssertsWebAuthn
 {
+    use CredentialRules;
+
     /**
      * Returns an WebAuthn Assertion challenge for the user (or userless).
      *
@@ -84,24 +86,6 @@ trait AssertsWebAuthn
         }
 
         return response()->noContent(422);
-    }
-
-    /**
-     * The assertion rules to validate the incoming JSON payload.
-     *
-     * @return array|string[]
-     */
-    protected function assertionRules()
-    {
-        return [
-            'id'                         => 'required|string',
-            'rawId'                      => 'required|string',
-            'response.authenticatorData' => 'required|string',
-            'response.clientDataJSON'    => 'required|string',
-            'response.signature'         => 'required|string',
-            'response.userHandle'        => 'required|string',
-            'type'                       => 'required|string',
-        ];
     }
 
     /**

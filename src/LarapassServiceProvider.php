@@ -2,6 +2,7 @@
 
 namespace DarkGhostHunter\Larapass;
 
+use Illuminate\Support\Str;
 use Psr\Log\LoggerInterface;
 use Webauthn\Counter\CounterChecker;
 use Illuminate\Support\ServiceProvider;
@@ -17,6 +18,7 @@ use Webauthn\PublicKeyCredentialSourceRepository;
 use Cose\Algorithm\Manager as CoseAlgorithmManager;
 use Webauthn\TokenBinding\IgnoreTokenBindingHandler;
 use Webauthn\AuthenticatorAssertionResponseValidator;
+use Illuminate\Auth\Passwords\DatabaseTokenRepository;
 use Webauthn\AuthenticatorAttestationResponseValidator;
 use Webauthn\MetadataService\MetadataStatementRepository;
 use Webauthn\AttestationStatement\AttestationObjectLoader;
@@ -25,6 +27,7 @@ use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAttestCreator;
 use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAssertValidator;
 use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAttestValidator;
 use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
+use DarkGhostHunter\Larapass\Auth\Credentials\CredentialBroker;
 use Webauthn\AttestationStatement\NoneAttestationStatementSupport;
 use Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler;
 use Webauthn\AttestationStatement\AttestationStatementSupportManager;
@@ -166,6 +169,28 @@ class LarapassServiceProvider extends ServiceProvider
         $this->app->bind(AuthenticationExtensionsClientInputs::class, static function () {
             return new AuthenticationExtensionsClientInputs;
         });
+
+        $this->app->bind(CredentialBroker::class, static function ($app) {
+            $config = $app['config']['auth.passwords.webauthn'];
+
+            $key = $app['config']['app.key'];
+
+            if (Str::startsWith($key, 'base64:')) {
+                $key = base64_decode(substr($key, 7));
+            }
+
+            return new CredentialBroker(
+                new DatabaseTokenRepository(
+                    $app['db']->connection($config['connection'] ?? null),
+                    $app['hash'],
+                    $config['table'],
+                    $key,
+                    $config['expire'],
+                    $config['throttle'] ?? 0
+                ),
+                $app['auth']->createUserProvider($config['provider'] ?? null)
+            );
+        });
     }
 
     /**
@@ -175,6 +200,10 @@ class LarapassServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'larapass');
+        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'larapass');
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+
         $this->app['auth']->provider('eloquent-webauthn', static function ($app, $config) {
             return new EloquentWebAuthnProvider(
                 $app['config'],
