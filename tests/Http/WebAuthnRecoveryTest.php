@@ -166,7 +166,7 @@ class WebAuthnRecoveryTest extends TestCase
         $this->post('webauthn/recover/options', [
             'email' => 'john.doe@mail.com',
             'token' => 'test_token',
-        ])->assertNotFound();
+        ])->assertStatus(401);
     }
 
     public function test_fails_when_token_doesnt_exists()
@@ -180,7 +180,7 @@ class WebAuthnRecoveryTest extends TestCase
         $this->postJson('webauthn/recover/options', [
             'email' => 'john.doe@mail.com',
             'token' => 'foo_bar',
-        ])->assertNotFound();
+        ])->assertStatus(401);
     }
 
     public function test_fails_when_token_expired()
@@ -196,7 +196,7 @@ class WebAuthnRecoveryTest extends TestCase
         $this->postJson('webauthn/recover/options', [
             'email' => 'john.doe@mail.com',
             'token' => 'test_token',
-        ])->assertNotFound();
+        ])->assertStatus(401);
     }
 
     public function test_fails_when_no_user_exists()
@@ -210,7 +210,7 @@ class WebAuthnRecoveryTest extends TestCase
         $this->postJson('webauthn/recover/options', [
             'email' => 'mike.doe@mail.com',
             'token' => 'test_token',
-        ])->assertNotFound();
+        ])->assertStatus(401);
     }
 
     public function test_register_new_device()

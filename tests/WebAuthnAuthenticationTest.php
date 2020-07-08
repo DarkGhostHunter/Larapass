@@ -111,6 +111,17 @@ class WebAuthnAuthenticationTest extends TestCase
         $this->assertSame($this->user->userEntity()->getId(), $this->user->userEntity()->getId());
     }
 
+    public function test_returns_user_entity_with_handle_used_in_disabled_credential()
+    {
+        $entity = $this->user->userEntity()->getId();
+
+        DB::table('web_authn_credentials')
+            ->where('test_credential_bar')
+            ->update(['disabled_at' => now()]);
+
+        $this->assertSame($entity, $this->user->userEntity()->getId());
+    }
+
     public function test_returns_all_credentials_as_excluded()
     {
         $this->assertCount(2, $this->user->attestationExcludedCredentials());

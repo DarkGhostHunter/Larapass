@@ -38,9 +38,8 @@ trait WebAuthnAuthentication
      */
     public function userHandle() : string
     {
-        return $this->webAuthnCredentials()->firstOrNew([], [
-            'user_handle' => $this->generateUserHandle()
-        ])->user_handle;
+        return $this->webAuthnCredentials()->withTrashed()->value('user_handle')
+            ?? $this->generateUserHandle();
     }
 
     /**

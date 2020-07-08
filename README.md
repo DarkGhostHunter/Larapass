@@ -381,7 +381,6 @@ return [
     'conveyance' => 'none',
     'login_verify' => 'preferred',
     'userless' => null,
-    'fallback' => true,
 ];
 ```
 
@@ -594,7 +593,7 @@ class MyCountChecker implements CounterChecker
 
 * **If a user loses his device, can he register a new device?**
 
-Yes, just send him a signed email to register a new device with secure attestation and assertion routes. That's up to you.
+Yes, just send him a signed email to register a new device with secure attestation and assertion routes. You can [use these recovery helpers](#6-set-up-account-recovery-optional).
 
 > To blacklist a device, use `disableDevice()` in the user instance. That allows the user to re-enable it when he recovers the device.
 
@@ -604,7 +603,7 @@ Extremely secure since it works only on HTTPS, and no password or codes are exch
 
 * **Can I deactivate the password fallback? Can I enforce only WebAuthn authentication?**
 
-Yes. Just be sure to disable the password column in the users table, the Password Broker, and have some logic to recover the account with new devices and invalidate old ones. The [`WebAuthnAuthentication`](src/WebAuthnAuthentication.php) trait helps with this.
+Yes. Just be sure to [use the recovery helpers](#6-set-up-account-recovery-optional) if you want a quick fix.
 
 * **Does this includes a frontend Javascript?**
 
@@ -616,7 +615,7 @@ Yes, the included [WebAuthn Helper](#5-frontend-integration) does it automatical
 
 * **Does this include a credential recovery routes?**
 
-No, because the Laravel Password Broker is meant to be used with classic passwords. You're better doing one yourself. As a hint, you should use a `TokenRepositoryInterface` to issue and check _recovery_ tokens.
+[Yes.](#6-set-up-account-recovery-optional)
 
 ## License
 

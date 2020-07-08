@@ -5,7 +5,7 @@ namespace DarkGhostHunter\Larapass\Http;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
-use DarkGhostHunter\Larapass\Auth\Credentials\CredentialBroker;
+use DarkGhostHunter\Larapass\Facades\WebAuthn;
 
 trait SendsWebAuthnRecoveryEmail
 {
@@ -30,12 +30,11 @@ trait SendsWebAuthnRecoveryEmail
     {
         $credentials = $request->validate($this->recoveryRules());
 
-        $response = $this->broker()->sendResetLink($credentials);
+        $response = WebAuthn::sendRecoveryLink($credentials);
 
-        return $response === CredentialBroker::RESET_LINK_SENT
+        return $response === WebAuthn::RECOVERY_SENT
             ? $this->sendRecoveryLinkResponse($request, $response)
             : $this->sendRecoveryLinkFailedResponse($request, $response);
-
     }
 
     /**
@@ -83,15 +82,5 @@ trait SendsWebAuthnRecoveryEmail
         return back()
             ->withInput($request->only('email'))
             ->withErrors(['email' => trans($response)]);
-    }
-
-    /**
-     * Returns the WebAuthn Credential Broker.
-     *
-     * @return \DarkGhostHunter\Larapass\Auth\Credentials\CredentialBroker
-     */
-    protected function broker()
-    {
-        return app(CredentialBroker::class);
     }
 }

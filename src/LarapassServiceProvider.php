@@ -16,6 +16,7 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Webauthn\TokenBinding\TokenBindingHandler;
 use Webauthn\PublicKeyCredentialSourceRepository;
 use Cose\Algorithm\Manager as CoseAlgorithmManager;
+use DarkGhostHunter\Larapass\Auth\CredentialBroker;
 use Webauthn\TokenBinding\IgnoreTokenBindingHandler;
 use Webauthn\AuthenticatorAssertionResponseValidator;
 use Illuminate\Auth\Passwords\DatabaseTokenRepository;
@@ -27,7 +28,6 @@ use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAttestCreator;
 use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAssertValidator;
 use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAttestValidator;
 use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
-use DarkGhostHunter\Larapass\Auth\Credentials\CredentialBroker;
 use Webauthn\AttestationStatement\NoneAttestationStatementSupport;
 use Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler;
 use Webauthn\AttestationStatement\AttestationStatementSupportManager;
@@ -170,7 +170,7 @@ class LarapassServiceProvider extends ServiceProvider
             return new AuthenticationExtensionsClientInputs;
         });
 
-        $this->app->bind(CredentialBroker::class, static function ($app) {
+        $this->app->singleton(CredentialBroker::class, static function ($app) {
             $config = $app['config']['auth.passwords.webauthn'];
 
             $key = $app['config']['app.key'];

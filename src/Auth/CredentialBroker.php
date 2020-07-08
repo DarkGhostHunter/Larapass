@@ -1,9 +1,8 @@
 <?php
 
-namespace DarkGhostHunter\Larapass\Auth\Credentials;
+namespace DarkGhostHunter\Larapass\Auth;
 
 use Closure;
-use UnexpectedValueException;
 use Illuminate\Auth\Passwords\PasswordBroker;
 use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
@@ -15,35 +14,35 @@ class CredentialBroker extends PasswordBroker
      *
      * @var string
      */
-    public const RESET_LINK_SENT = 'credentials.sent';
+    public const RESET_LINK_SENT = 'larapass::credentials.sent';
 
     /**
      * Constant representing a successfully reset password.
      *
      * @var string
      */
-    public const PASSWORD_RESET = 'credentials.reset';
+    public const PASSWORD_RESET = 'larapass::credentials.reset';
 
     /**
      * Constant representing the user not found response.
      *
      * @var string
      */
-    public const INVALID_USER = 'credentials.user';
+    public const INVALID_USER = 'larapass::credentials.user';
 
     /**
      * Constant representing an invalid token.
      *
      * @var string
      */
-    public const INVALID_TOKEN = 'credentials.token';
+    public const INVALID_TOKEN = 'larapass::credentials.token';
 
     /**
      * Constant representing a throttled reset attempt.
      *
      * @var string
      */
-    public const RESET_THROTTLED = 'credentials.throttled';
+    public const RESET_THROTTLED = 'larapass::credentials.throttled';
 
     /**
      * Send a password reset link to a user.
@@ -90,24 +89,5 @@ class CredentialBroker extends PasswordBroker
         $this->tokens->delete($user);
 
         return static::PASSWORD_RESET;
-    }
-
-    /**
-     * Get the user for the given credentials.
-     *
-     * @param  array  $credentials
-     * @return \Illuminate\Contracts\Auth\CanResetPassword|null
-     *
-     * @throws \UnexpectedValueException
-     */
-    public function getUser(array $credentials)
-    {
-        $user = parent::getUser($credentials);
-
-        if ($user && ! $user instanceof WebAuthnAuthenticatable) {
-            throw new UnexpectedValueException('User must implement WebAuthnAuthenticatable interface.');
-        }
-
-        return $user;
     }
 }

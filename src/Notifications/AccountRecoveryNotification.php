@@ -48,12 +48,14 @@ class AccountRecoveryNotification extends Notification
     public function via($notifiable)
     {
         return ['mail'];
-    }    /**
- * Build the mail representation of the notification.
- *
- * @param  mixed  $notifiable
- * @return \Illuminate\Notifications\Messages\MailMessage
- */
+    }
+
+    /**
+     * Build the mail representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return \Illuminate\Notifications\Messages\MailMessage
+     */
     public function toMail($notifiable)
     {
         if (static::$toMailCallback) {
@@ -73,7 +75,9 @@ class AccountRecoveryNotification extends Notification
             ->subject(Lang::get('Account Recovery Notification'))
             ->line(Lang::get('You are receiving this email because we received an account recovery  request for your account.'))
             ->action(Lang::get('Recover Account'), $url)
-            ->line(Lang::get('This recovery link will expire in :count minutes.', ['count' => config('auth.passwords.'.config('auth.defaults.passwords').'.expire')]))
+            ->line(Lang::get('This recovery link will expire in :count minutes.', ['count' => config('auth.passwords.' .
+                config('auth.defaults.passwords') .
+                '.expire')]))
             ->line(Lang::get('If you did not request an account recovery, no further action is required.'));
     }
 

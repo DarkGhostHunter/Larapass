@@ -9,7 +9,6 @@ use DarkGhostHunter\Larapass\Facades\WebAuthn;
 use Illuminate\Validation\ValidationException;
 use DarkGhostHunter\Larapass\Events\AttestationSuccessful;
 use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
-use DarkGhostHunter\Larapass\Auth\Credentials\CredentialBroker;
 
 trait RecoversWebAuthn
 {
@@ -40,12 +39,12 @@ trait RecoversWebAuthn
      */
     public function options(Request $request)
     {
-        $user = $this->broker()->getUser($request->validate($this->rules()));
+        $user = WebAuthn::getUser($request->validate($this->rules()));
 
         // We will proceed only if the broker can find the user and the token is valid.
         // If the user doesn't exists or the token is invalid, we will bail out with a
-        // HTTP 404 code because the user doing the request is not authorized for it.
-        abort_unless($user && $this->broker()->tokenExists($user, $request->input('token')), 404);
+        // HTTP 401 code because the user doing the request is not authorized for it.
+        abort_unless(WebAuthn::tokenExists($user, $request->input('token')), 401);
 
         return response()->json(WebAuthn::generateAttestation($user));
     }
@@ -77,11 +76,11 @@ trait RecoversWebAuthn
             'token' => $request->header('token'),
         ], $this->rules())->validate();
 
-        $response = $this->broker()->reset($credentials, function ($user) use ($request) {
+        $response = WebAuthn::recover($credentials, function ($user) use ($request) {
             $this->register($request, $user);
         });
 
-        return $response === CredentialBroker::PASSWORD_RESET
+        return $response === WebAuthn::RECOVERY_ATTACHED
             ? $this->sendRecoveryResponse($request, $response)
             : $this->sendRecoveryFailedResponse($request, $response);
     }
@@ -143,16 +142,6 @@ trait RecoversWebAuthn
     }
 
     /**
-     * Returns the WebAuthn Credential Broker.
-     *
-     * @return \DarkGhostHunter\Larapass\Auth\Credentials\CredentialBroker
-     */
-    protected function broker()
-    {
-        return app(CredentialBroker::class);
-    }
-
-    /**
      * Returns the Authentication guard.
      *
      * @return \Illuminate\Contracts\Auth\StatefulGuard
@@ -163,7 +152,7 @@ trait RecoversWebAuthn
     }
 
     /**
-     * Get the post register / login redirect path.
+     * Get the post recovery redirect path.
      *
      * @return string
      */
