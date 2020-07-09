@@ -547,8 +547,8 @@ $this->app->extend(AttestationStatementSupport::class, function ($manager) {
 
 These are some details about this WebAuthn implementation:
 
-* Registration (attestation) is exclusive to the domain and IP, and the user if specified.
-* Login (assertion) is exclusive to the domain and IP.
+* Registration (attestation) is exclusive to the domain, IP and user.
+* Login (assertion) is exclusive to the domain, IP, and the user if specified
 * Cached challenge is always forgotten after resolution, independently of the result.
 * Cached challenge TTL is the same as the WebAuthn timeout (60 seconds default).
 * Included controllers include throttling for WebAuthn endpoints.

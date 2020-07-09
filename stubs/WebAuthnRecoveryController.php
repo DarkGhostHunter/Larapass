@@ -35,6 +35,7 @@ class WebAuthnRecoveryController extends Controller
      */
     public function __construct()
     {
+        $this->middleware('guest');
         $this->middleware('throttle:10,1')->only('options', 'recover');
     }
 }

@@ -36,5 +36,6 @@ class WebAuthnConfirmController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+        $this->middleware('throttle:10,1')->only('options', 'confirm');
     }
 }
