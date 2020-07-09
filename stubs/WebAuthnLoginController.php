@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use DarkGhostHunter\Larapass\Http\AssertsWebAuthn;
+use DarkGhostHunter\Larapass\Http\AuthenticatesWebAuthn;
 
 class WebAuthnLoginController extends Controller
 {
-    use AssertsWebAuthn;
+    use AuthenticatesWebAuthn;
 
     /*
     |--------------------------------------------------------------------------

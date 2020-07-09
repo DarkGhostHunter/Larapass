@@ -1,5 +1,7 @@
 @extends('larapass::layout')
 
+@section('title', 'larapass::recovery.title')
+
 @section('body')
     <form id="form" action="{{ route('webauthn.lost.send') }}" method="post">
         @csrf

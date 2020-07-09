@@ -4,25 +4,25 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
-use DarkGhostHunter\Larapass\Http\RecoversWebAuthn;
+use DarkGhostHunter\Larapass\Http\ConfirmsWebAuthn;
 
-class WebAuthnRecoveryController extends Controller
+class WebAuthnConfirmController extends Controller
 {
-    use RecoversWebAuthn;
+    use ConfirmsWebAuthn;
 
     /*
     |--------------------------------------------------------------------------
-    | WebAuthn Recovery Controller
+    | Confirm Device Controller
     |--------------------------------------------------------------------------
     |
-    | When an user loses his device he will reach this controller to attach a
-    | new device. The user will attach a new device, and optionally, disable
-    | all others. Then he will be authenticated and redirected to your app.
+    | This controller is responsible for handling WebAuthn confirmations and
+    | uses a simple trait to include the behavior. You're free to explore
+    | this trait and override any functions that require customization.
     |
     */
 
     /**
-     * Where to redirect users after resetting their password.
+     * Where to redirect users when the intended url fails.
      *
      * @var string
      */
@@ -35,6 +35,6 @@ class WebAuthnRecoveryController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('throttle:10,1')->only('options', 'recover');
+        $this->middleware('auth');
     }
 }

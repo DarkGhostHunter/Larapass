@@ -7,7 +7,7 @@ use DarkGhostHunter\Larapass\Facades\WebAuthn;
 use DarkGhostHunter\Larapass\Events\AttestationSuccessful;
 use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
 
-trait AttestsWebAuthn
+trait RegistersWebAuthn
 {
     use CredentialRules;
 

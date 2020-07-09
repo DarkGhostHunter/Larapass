@@ -213,6 +213,8 @@ class LarapassServiceProvider extends ServiceProvider
             );
         });
 
+        $this->app['router']->aliasMiddleware('webauthn.confirm', Http\Middleware\ConfirmWebAuthn::class);
+
         if ($this->app->runningInConsole()) {
             $this->publishFiles();
         }

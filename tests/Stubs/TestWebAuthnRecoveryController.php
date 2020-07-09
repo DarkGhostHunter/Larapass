@@ -26,4 +26,14 @@ class TestWebAuthnRecoveryController extends Controller
      * @var string
      */
     protected $redirectTo = '/home';
+
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('throttle:10,1')->only('options', 'recover');
+    }
 }

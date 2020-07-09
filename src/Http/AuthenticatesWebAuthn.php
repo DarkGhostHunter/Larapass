@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use DarkGhostHunter\Larapass\Facades\WebAuthn;
 
-trait AssertsWebAuthn
+trait AuthenticatesWebAuthn
 {
     use CredentialRules;
 
