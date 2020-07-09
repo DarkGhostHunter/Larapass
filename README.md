@@ -199,7 +199,7 @@ Alternatively, you can add the `remember` key to the outgoing JSON Payload if yo
 
 ### 6. Set up account recovery (optional)
 
-Probably you will want to offer a way to "recover" an account if the user loses his credentials, which is basically a way to attach a new one. You can use the `WebAuthnDeviceLostController` and `WebAuthnRecoveryController` [which are also published](#4-register-the-routes-optional), along with these routes:
+Probably you will want to offer a way to "recover" an account if the user loses his credentials, which is basically a way to attach a new one. You can use controllers [which are also published](#4-register-the-routes-optional), along with these routes:
 
 ```php
 Route::get('webauthn/lost', 'Auth\WebAuthnDeviceLostController@showDeviceLostForm')
@@ -217,7 +217,7 @@ Route::post('webauthn/recover/register', 'Auth\WebAuthnRecoveryController@recove
 
 These come with [new views](resources/views) and [translation lines](resources/lang), so you can override them if you're not happy with what is included. 
 
-You can override the views in `resources/vendor/larapass` and the notification being sent using the `sendCredentialRecoveryNotification` method of the user.
+You can also override the views in `resources/vendor/larapass` and the notification being sent using the `sendCredentialRecoveryNotification` method of the user.
 
 After that, don't forget to add a new token broker in your `config/auth.php`. We will need it to store the tokens from the recovery procedure.
 
@@ -472,7 +472,7 @@ return [
 ];
 ```
 
-By default, the user decides what to use to register. If you wish to exclusively use a cross-platform authentication (like USB Keys, CA Servers or Certificates) set this to `true`, or `false` if you want to enforce device-only authentication. 
+By default, the user decides what to use for registration. If you wish to exclusively use a cross-platform authentication (like USB Keys, CA Servers or Certificates) set this to `true`, or `false` if you want to enforce device-only authentication. 
 
 ### Attestation conveyance
 
@@ -498,7 +498,7 @@ By default, most authenticators will require the user verification when login in
 
 You can also use `discouraged` to only check for user presence (like a "Continue" button), which may make the login faster but making it slightly less secure.
 
-> When setting [userless](#userless-login-one-touch-typeless) as `preferred` or `required`, this will be overridden to `required` automatically.
+> When setting [userless](#userless-login-one-touch-typeless) as `preferred` or `required` will override this to `required` automatically.
 
 ### Userless login (One touch, Typeless)
 
@@ -563,7 +563,7 @@ If you discover any security related issues, please email darkghosthunter@gmail.
 
 * **Does this work with any browser?**
 
-[Yes](https://caniuse.com/#feat=webauthn). In the case of old browsers, you should have a fallback detection script. This can be asked with [the included Javascript helper](#5-frontend-integration) in a breeze:
+[Yes](https://caniuse.com/#feat=webauthn). In the case of old browsers, you should have a fallback detection script. This can be asked with [the included Javascript helper](#5-use-the-javascript-helper-optional) in a breeze:
 
 ```javascript
 if (! Larapass.supportsWebAuthn()) {
@@ -627,7 +627,9 @@ class MyCountChecker implements CounterChecker
 
 Yes, just send him a signed email to register a new device with secure attestation and assertion routes. You can [use these recovery helpers](#6-set-up-account-recovery-optional).
 
-> To blacklist a device, use `disableDevice()` in the user instance. That allows the user to re-enable it when he recovers the device.
+* **What's the difference between disabling and deleting a credential?**
+
+Disabling a credential doesn't delete it, so it can be later enabled manually. When the credential is deleted, it goes away forever.
 
 * **How secure is this against passwords or 2FA?**
 
@@ -639,11 +641,11 @@ Yes. Just be sure to [use the recovery helpers](#6-set-up-account-recovery-optio
 
 * **Does this includes a frontend Javascript?**
 
-[Yes.](#5-frontend-integration)
+[Yes.](#5-use-the-javascript-helper-optional)
 
 * **Does this encodes/decode the strings automatically in the frontend?**
 
-Yes, the included [WebAuthn Helper](#5-frontend-integration) does it automatically for you.
+Yes, the included [WebAuthn Helper](#5-use-the-javascript-helper-optional) does it automatically for you.
 
 * **Does this include a credential recovery routes?**
 

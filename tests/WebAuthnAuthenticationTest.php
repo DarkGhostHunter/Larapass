@@ -195,6 +195,10 @@ class WebAuthnAuthenticationTest extends TestCase
             'disabled_at' => $now->toDateTimeString(),
         ]);
 
+        $this->user->webAuthnCredentials()->update([
+            'disabled_at' => null
+        ]);
+
         $this->user->disableCredential(['test_credential_foo', 'test_credential_bar']);
         $this->assertCount(2, DB::table('web_authn_credentials')->whereNotNull('disabled_at')->get());
 
@@ -203,6 +207,8 @@ class WebAuthnAuthenticationTest extends TestCase
             'id'          => 'test_credential_foo',
             'disabled_at' => null,
         ]);
+
+        $this->user->disableAllCredentials();
 
         $this->user->enableCredential(['test_credential_foo', 'test_credential_bar']);
         $this->assertCount(2, DB::table('web_authn_credentials')->whereNull('disabled_at')->get());
