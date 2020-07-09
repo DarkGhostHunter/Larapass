@@ -8,7 +8,7 @@ use DarkGhostHunter\Larapass\Facades\WebAuthn;
 
 trait AuthenticatesWebAuthn
 {
-    use CredentialRules;
+    use WebAuthnRules;
 
     /**
      * Returns an WebAuthn Assertion challenge for the user (or userless).
@@ -75,7 +75,7 @@ trait AuthenticatesWebAuthn
      * Log the user in.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response|\Illuminate\Http\JsonResponse
      */
     public function login(Request $request)
     {
@@ -96,7 +96,7 @@ trait AuthenticatesWebAuthn
      */
     protected function hasRemember(Request $request)
     {
-        return $request->filled('remember') || $request->header('WebAuthn-Remember', false);
+        return $request->filled('remember') || $request->header('WebAuthn-Remember');
     }
 
     /**
@@ -116,7 +116,7 @@ trait AuthenticatesWebAuthn
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  mixed  $user
-     * @return void|mixed
+     * @return void|\Illuminate\Http\JsonResponse
      */
     protected function authenticated(Request $request, $user)
     {

@@ -12,7 +12,7 @@ use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
 
 trait RecoversWebAuthn
 {
-    use CredentialRules;
+    use WebAuthnRules;
 
     /**
      * Display the password reset view for the given token.

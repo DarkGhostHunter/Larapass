@@ -8,7 +8,7 @@ use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
 
 trait ConfirmsWebAuthn
 {
-    use CredentialRules;
+    use WebAuthnRules;
 
     /**
      * Display the password confirmation view.

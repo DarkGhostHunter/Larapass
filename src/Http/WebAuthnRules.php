@@ -2,7 +2,7 @@
 
 namespace DarkGhostHunter\Larapass\Http;
 
-trait CredentialRules
+trait WebAuthnRules
 {
     /**
      * The attestation rules to validate the incoming JSON payload.

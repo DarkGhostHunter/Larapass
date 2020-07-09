@@ -20,14 +20,14 @@ class AccountRecoveryNotification extends Notification
      *
      * @var \Closure|null
      */
-    public static $createUrlCallback;
+    protected static $createUrlCallback;
 
     /**
      * The callback that should be used to build the mail message.
      *
      * @var \Closure|null
      */
-    public static $toMailCallback;
+    protected static $toMailCallback;
 
     /**
      * AccountRecoveryNotification constructor.
@@ -84,7 +84,7 @@ class AccountRecoveryNotification extends Notification
     /**
      * Set a callback that should be used when creating the reset password button URL.
      *
-     * @param  \Closure  $callback
+     * @param  callable  $callback
      * @return void
      */
     public static function createUrlUsing($callback)
@@ -95,7 +95,7 @@ class AccountRecoveryNotification extends Notification
     /**
      * Set a callback that should be used when building the notification mail message.
      *
-     * @param  \Closure  $callback
+     * @param  callable  $callback
      * @return void
      */
     public static function toMailUsing($callback)

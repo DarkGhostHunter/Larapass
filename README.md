@@ -27,22 +27,22 @@ In a nutshell, [mayor browsers are compatible with Web Authentication API](https
 
 This package validates the WebAuthn payload from the devices using a custom [user provider](https://laravel.com/docs/authentication#adding-custom-user-providers).
 
-If you have any doubts about WebAuthn, [check this small FAQ](#faq). For a more deep dive, check [WebAuthn.io](https://webauthn.io/), [Webauth.me](https://webauthn.me/) and [Google WebAuthn tutorial](https://codelabs.developers.google.com/codelabs/webauthn-reauth/).
+If you have any doubts about WebAuthn, [check this small FAQ](#faq). For a more deep dive, check [WebAuthn.io](https://webauthn.io/), [WebAuthn.me](https://webauthn.me/) and [Google WebAuthn tutorial](https://codelabs.developers.google.com/codelabs/webauthn-reauth/).
 
 ## Set up
 
-We need to make sure that your users can save their credentials and retrieve them for validation:
+We need to make sure your users can register their devices and authenticate with them.
 
 1. [Add the `eloquent-webauthn` driver](#1-add-the-eloquent-webauthn-driver).
 2. [Create the `webauthn_credentials` table.](#2-create-the-webauthn_credentials-table)
 3. [Implement the contract and trait](#3-implement-the-contract-and-trait)
 
-After that, you can quick start WebAuthn with the included controllers and helpers to make your life easier. 
+After that, you can quick start WebAuthn with the included controllers and helpers to make your life easier.
 
 4. [Register the routes](#4-register-the-routes-optional)
 5. [Use the Javascript helper](#5-use-the-javascript-helper-optional)
 6. [Set up account recovery](#6-set-up-account-recovery-optional)
-7 
+7. [Register the Confirmation route](#7-register-the-confirmation-route-optional)
 
 ### 1. Add the `eloquent-webauthn` driver
 
@@ -82,6 +82,8 @@ Add the `WebAuthnAuthenticatable` contract and the `WebAuthnAuthentication` trai
 
 ```php
 <?php
+
+namespace App;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
@@ -177,11 +179,11 @@ new Larapass({
 })
 ```
 
-> If the script doesn't suit your needs, you're free to create your own script to handle WebAuthn, or just copy-paste it and import into a transpiler like [Laravel Mix](https://laravel.com/docs/mix#running-mix), [Babel](https://babeljs.io/) or [Webpack](https://webpack.js.org/).
+> You can copy-paste it and import into a transpiler like [Laravel Mix](https://laravel.com/docs/mix#running-mix), [Babel](https://babeljs.io/) or [Webpack](https://webpack.js.org/). If the script doesn't suit your needs, you're free to create your own.
 
 ### Remembering Users
 
-You can enable it by just issuing the `WebAuthn-Remember` header value to `true` when pushing the signed login challenge from your frontend. We can do this easily with the [included Javascript helper](#5-frontend-integration).
+You can enable it by just issuing the `WebAuthn-Remember` header value to `true` when pushing the signed login challenge from your frontend. We can do this easily with the [included Javascript helper](#5-use-the-javascript-helper-optional).
 
 ```javascript
 new Larapass.login({
@@ -197,7 +199,7 @@ Alternatively, you can add the `remember` key to the outgoing JSON Payload if yo
 
 ### 6. Set up account recovery (optional)
 
-Probably you will want to offer a way to recover an account if the user loses his credentials. You can use the `WebAuthnDeviceLostController` and `WebAuthnRecoveryController` [which are also published](#4-register-the-routes-optional), along with these routes:
+Probably you will want to offer a way to "recover" an account if the user loses his credentials, which is basically a way to attach a new one. You can use the `WebAuthnDeviceLostController` and `WebAuthnRecoveryController` [which are also published](#4-register-the-routes-optional), along with these routes:
 
 ```php
 Route::get('webauthn/lost', 'Auth\WebAuthnDeviceLostController@showDeviceLostForm')

@@ -8,7 +8,7 @@ use Webauthn\PublicKeyCredentialUserEntity;
 interface WebAuthnAuthenticatable
 {
     /**
-     * Creates an user entity information for attestation (register).
+     * Creates an user entity information for attestation (registration).
      *
      * @return \Webauthn\PublicKeyCredentialUserEntity
      */

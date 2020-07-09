@@ -208,6 +208,35 @@ class WebAuthnAuthenticationTest extends TestCase
         $this->assertCount(2, DB::table('web_authn_credentials')->whereNull('disabled_at')->get());
     }
 
+    public function test_disables_all_credentials()
+    {
+        $this->user->disableAllCredentials();
+        $this->assertDatabaseHas('web_authn_credentials', [
+            'id'          => 'test_credential_foo',
+        ]);
+        $this->assertDatabaseHas('web_authn_credentials', [
+            'id'          => 'test_credential_bar',
+        ]);
+        $this->assertDatabaseMissing('web_authn_credentials', [
+            'disabled_at' => null,
+        ]);
+    }
+
+    public function test_disables_all_credentials_except_some()
+    {
+        Date::setTestNow($now = Date::create(2020, 04, 01, 16, 30));
+
+        $this->user->disableAllCredentials('test_credential_bar');
+        $this->assertDatabaseHas('web_authn_credentials', [
+            'id'          => 'test_credential_foo',
+            'disabled_at' => $now->toDateTimeString(),
+        ]);
+        $this->assertDatabaseHas('web_authn_credentials', [
+            'id'          => 'test_credential_bar',
+            'disabled_at' => null,
+        ]);
+    }
+
     public function test_deletes_credentials()
     {
         $this->user->removeCredential('test_credential_foo');

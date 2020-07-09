@@ -9,7 +9,7 @@ use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
 
 trait RegistersWebAuthn
 {
-    use CredentialRules;
+    use WebAuthnRules;
 
     /**
      * Returns a challenge to be verified by the user device.
