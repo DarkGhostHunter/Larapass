@@ -2,8 +2,6 @@
 
 namespace DarkGhostHunter\Larapass\Eloquent;
 
-use Ramsey\Uuid\Uuid;
-use Webauthn\TrustPath\TrustPathLoader;
 use Webauthn\PublicKeyCredentialUserEntity as UserEntity;
 use Webauthn\PublicKeyCredentialSource as CredentialSource;
 use Webauthn\PublicKeyCredentialDescriptor as CredentialDescriptor;
@@ -78,8 +76,8 @@ trait ManagesCredentialRepository
             $this->type,
             $this->transports->all(),
             $this->attestation_type,
-            TrustPathLoader::loadTrustPath($this->trust_path->all()),
-            Uuid::fromString($this->aaguid),
+            $this->trust_path,
+            $this->aaguid,
             $this->public_key,
             $this->user_handle,
             $this->counter

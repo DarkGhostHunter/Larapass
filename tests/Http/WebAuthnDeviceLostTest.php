@@ -99,7 +99,6 @@ class WebAuthnDeviceLostTest extends TestCase
     public function test_shows_recovery_form()
     {
         $this->get('webauthn/lost')
-            ->dump()
             ->assertViewIs('larapass::lost')
             ->assertSee(trans('larapass::recovery.title'))
             ->assertSee(trans('larapass::recovery.description'))

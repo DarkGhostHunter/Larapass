@@ -108,7 +108,6 @@ class WebAuthnConfirmTest extends TestCase
         $this->actingAs($this->user)
             ->followingRedirects()
             ->get('intended')
-            ->dump()
             ->assertViewIs('larapass::confirm')
             ->assertOk();
     }
