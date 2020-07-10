@@ -19,4 +19,6 @@ return [
     'user'      => 'We can\'t find a user with that email address.',
     'token'     => 'The token is invalid or has expired.',
     'throttled' => 'Please wait before retrying.',
+
+    'failed'    => 'The recovery failed. Try again.',
 ];

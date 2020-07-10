@@ -17,16 +17,20 @@
 @push('scripts')
     <script src="{{ asset('vendor/larapass/js/larapass.js') }}"></script>
     <script>
+        const larapass = new Larapass({
+            login: '/webauthn/confirm',
+            loginOptions: '/webauthn/confirm/options'
+        });
+
         document.getElementById('form').addEventListener('submit', function (event) {
             event.preventDefault()
 
-            const larapass = new Larapass({
-                login: '/webauthn/confirm',
-                loginOptions: '/webauthn/confirm/options'
-            })
-
             larapass.login()
-                .then(response => window.location.replace = response.json().redirectTo)
+                .then(response => window.location.replace(response.redirectTo))
+                .catch(response => {
+                    alert('{{ __('Confirmation unsuccessful, try again!') }}')
+                    console.error('Confirmation unsuccessful', response);
+                })
         })
     </script>
 @endpush

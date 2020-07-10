@@ -35,13 +35,13 @@
 @push('scripts')
     <script src="{{ asset('vendor/larapass/js/larapass.js') }}"></script>
     <script>
+        const larapass = new Larapass({
+            register: '/webauthn/recover/register',
+            registerOptions: '/webauthn/recover/options'
+        })
+
         document.getElementById('form').addEventListener('submit', function (event) {
             event.preventDefault()
-
-            const larapass = new Larapass({
-                register: '/webauthn/recover/register',
-                registerOptions: '/webauthn/recover/options'
-            })
 
             let entries = Object.fromEntries(new FormData(this).entries())
 
@@ -49,7 +49,12 @@
                 token: entries.token,
                 email: entries.email,
                 'WebAuthn-Unique': entries.unique ? true : false,
-            }).then(response => window.location.replace = response.json().redirectTo)
+            })
+                .then(response => window.location.replace(response.redirectTo))
+                .catch(response => {
+                    alert('{{ trans('larapass::recovery.failed') }}')
+                    console.error('Recovery failed', response)
+                })
         })
     </script>
 @endpush

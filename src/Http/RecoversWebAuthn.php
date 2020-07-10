@@ -99,7 +99,7 @@ trait RecoversWebAuthn
         );
 
         if ($validCredential) {
-            if ($request->filled('unique') || $request->header('WebAuthn-Unique')) {
+            if ($this->shouldDisableAllCredentials($request)) {
                 $user->disableAllCredentials();
             }
 
@@ -109,6 +109,18 @@ trait RecoversWebAuthn
 
             $this->guard()->login($user);
         }
+    }
+
+    /**
+     * Check if the user has set to disable all others credentials.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return bool|mixed
+     */
+    protected function shouldDisableAllCredentials(Request $request)
+    {
+        return filter_var($request->header('WebAuthn-Unique'), FILTER_VALIDATE_BOOLEAN)
+            ?? $request->filled('unique');
     }
 
     /**
