@@ -203,10 +203,6 @@ class LarapassServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'larapass');
         $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'larapass');
 
-        if (! class_exists('CreateWebAuthnTables')) {
-            $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-        }
-
         $this->app['auth']->provider('eloquent-webauthn', static function ($app, $config) {
             return new EloquentWebAuthnProvider(
                 $app['config'],
