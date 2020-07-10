@@ -14,9 +14,7 @@ use Webauthn\AuthenticatorSelectionCriteria;
 use Webauthn\Counter\ThrowExceptionIfInvalid;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Webauthn\TokenBinding\TokenBindingHandler;
-use Illuminate\Contracts\Routing\UrlGenerator;
 use Webauthn\PublicKeyCredentialSourceRepository;
-use Illuminate\Contracts\Routing\ResponseFactory;
 use Cose\Algorithm\Manager as CoseAlgorithmManager;
 use DarkGhostHunter\Larapass\Auth\CredentialBroker;
 use Webauthn\TokenBinding\IgnoreTokenBindingHandler;
@@ -27,7 +25,6 @@ use Webauthn\MetadataService\MetadataStatementRepository;
 use Webauthn\AttestationStatement\AttestationObjectLoader;
 use DarkGhostHunter\Larapass\Auth\EloquentWebAuthnProvider;
 use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAttestCreator;
-use DarkGhostHunter\Larapass\Http\Middleware\RequireWebAuthn;
 use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAssertValidator;
 use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAttestValidator;
 use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
@@ -192,14 +189,6 @@ class LarapassServiceProvider extends ServiceProvider
                     $config['throttle'] ?? 0
                 ),
                 $app['auth']->createUserProvider($config['provider'] ?? null)
-            );
-        });
-
-        $this->app->bind(RequireWebAuthn::class, static function ($app) {
-            return new RequireWebAuthn(
-                $app[ResponseFactory::class],
-                $app[UrlGenerator::class],
-                $app['config']->get('larapass.confirm_timeout')
             );
         });
     }

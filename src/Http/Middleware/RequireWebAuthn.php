@@ -4,6 +4,7 @@ namespace DarkGhostHunter\Larapass\Http\Middleware;
 
 use Closure;
 use Illuminate\Contracts\Session\Session;
+use Illuminate\Contracts\Config\Repository;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\Routing\ResponseFactory;
 
@@ -41,17 +42,17 @@ class RequireWebAuthn
      * @param  \Illuminate\Contracts\Routing\ResponseFactory  $responseFactory
      * @param  \Illuminate\Contracts\Routing\UrlGenerator  $urlGenerator
      * @param  \Illuminate\Contracts\Session\Session  $session
-     * @param  int|null  $remember
+     * @param  \Illuminate\Contracts\Config\Repository  $config
      */
     public function __construct(ResponseFactory $responseFactory,
                                 UrlGenerator $urlGenerator,
                                 Session $session,
-                                $remember = 10800)
+                                Repository $config)
     {
         $this->responseFactory = $responseFactory;
         $this->urlGenerator = $urlGenerator;
         $this->session = $session;
-        $this->remember = $remember;
+        $this->remember = $config->get('larapass.confirm_timeout', 10800);
     }
 
     /**
