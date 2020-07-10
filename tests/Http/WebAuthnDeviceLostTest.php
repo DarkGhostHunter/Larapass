@@ -191,4 +191,16 @@ class WebAuthnDeviceLostTest extends TestCase
             ->assertRedirect(route('webauthn.lost.form'))
             ->assertSessionHasErrors(['email']);
     }
+
+    public function test_error_if_no_broker_is_set()
+    {
+        $this->app['config']->set('auth.passwords.webauthn', null);
+
+        $this->post('webauthn/lost', [
+            'email' => 'john.doe@mail.com'
+        ], [
+            'HTTP_REFERER' => route('webauthn.lost.form')
+        ])
+            ->assertStatus(500);
+    }
 }

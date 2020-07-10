@@ -173,7 +173,7 @@ class LarapassServiceProvider extends ServiceProvider
 
         $this->app->singleton(CredentialBroker::class, static function ($app) {
             if (! $config = $app['config']['auth.passwords.webauthn']) {
-                throw new RuntimeException('No [webauthn] key broker is configured in [config/auth.php]');
+                throw new RuntimeException('You must set the [webauthn] key broker in [auth] config.');
             }
 
             $key = $app['config']['app.key'];
