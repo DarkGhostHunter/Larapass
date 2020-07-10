@@ -242,6 +242,10 @@ class LarapassServiceProvider extends ServiceProvider
         ], 'public');
 
         $this->publishes([
+            __DIR__ . '/../resources/views' => resource_path('views/vendor/larapass'),
+        ], 'views');
+
+        $this->publishes([
             __DIR__ .
             '/../database/migrations/2020_04_02_000000_create_web_authn_tables.php' => database_path('migrations/' .
                 now()->format('Y_m_d_His') .
