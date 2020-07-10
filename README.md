@@ -21,6 +21,26 @@ Just hit the console and require it with Composer.
 
     composer require darkghosthunter/larapass
 
+# Table of contents
+
+- [What is WebAuthn? How it uses fingerprints or else?](#what-is-webauthn-how-it-uses-fingerprints-or-else)
+- [Set up](#set-up)
+- [Events](#events)
+- [Operations with WebAuthn](#operations-with-webauthn)
+- [Advanced Configuration](#advanced-configuration)
+  - [Relaying Party Information](#relaying-party-information)
+  - [Challenge configuration](#challenge-configuration)
+  - [Algorithms](#algorithms)
+  - [Key Attachment](#key-attachment)
+  - [Attestation conveyance](#attestation-conveyance)
+  - [Login verification](#login-verification)
+  - [Userless login (One touch, Typeless)](#userless-login-one-touch-typeless)
+  - [Password Fallback](#password-fallback)
+- [Attestation and Metadata statements support](#attestation-and-metadata-statements-support)
+- [Security](#security)
+- [FAQ](#faq)
+- [License](#license)
+
 ## What is WebAuthn? How it uses fingerprints or else?
 
 In a nutshell, [mayor browsers are compatible with Web Authentication API](https://caniuse.com/#feat=webauthn), pushing authentication to the device (fingerprints, Face ID, patterns, codes, etc) instead of plain-text passwords.
@@ -181,7 +201,7 @@ new Larapass({
 
 > You can copy-paste it and import into a transpiler like [Laravel Mix](https://laravel.com/docs/mix#running-mix), [Babel](https://babeljs.io/) or [Webpack](https://webpack.js.org/). If the script doesn't suit your needs, you're free to create your own.
 
-### Remembering Users
+#### Remembering Users
 
 You can enable it by just issuing the `WebAuthn-Remember` header value to `true` when pushing the signed login challenge from your frontend. We can do this easily with the [included Javascript helper](#5-use-the-javascript-helper-optional).
 
