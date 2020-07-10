@@ -229,19 +229,26 @@ class Larapass
     /**
      * Handles the response from the Server.
      *
-     * Throws the response if is not OK (HTTP 2XX).
+     * Throws the entire response if is not OK (HTTP 2XX).
      *
      * @param response {Response}
-     * @returns Response
+     * @returns Promise<JSON|ReadableStream>
      * @throws Response
      */
     static #handleResponse(response)
     {
-        if (response.ok) {
-            return response;
+        if (! response.ok) {
+            throw response;
         }
 
-        throw response;
+        // Here we will do a small trick. Since most of the responses from the server
+        // are JSON, we will automatically parse the JSON body from the response. If
+        // it's not JSON, we will push the body verbatim and let the dev handle it.
+        return new Promise(resolve => {
+            response.json()
+                .then(json => resolve(json))
+                .catch(() => resolve(response.body))
+        })
     }
 
     /**
@@ -251,7 +258,7 @@ class Larapass
      *
      * @param data {{string}}
      * @param headers {{string}}
-     * @returns {Promise<Response>}
+     * @returns Promise<any>
      */
     async login(data = {}, headers = {})
     {
@@ -272,7 +279,7 @@ class Larapass
      *
      * @param data {{string}}
      * @param headers {{string}}
-     * @returns {Promise<Response>}
+     * @returns Promise<any>
      */
     async register(data = {}, headers = {})
     {

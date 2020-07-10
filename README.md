@@ -564,7 +564,7 @@ Yes. Just be sure to disable the password column in the users table, the Passwor
 
 * **Does this encodes/decode the strings automatically in the frontend?**
 
-No, you must ensure to encode/decode to binary forms some strings in your frontend because the nature of WebAuthn. The included [WebAuthn Helper](#5-frontend-integration) does it automatically for you.
+Yes, the included [WebAuthn Helper](#5-frontend-integration) does it automatically for you.
 
 ## License
 
