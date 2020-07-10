@@ -1,6 +1,6 @@
 @extends('larapass::layout')
 
-@section('title', 'larapass::recovery.title')
+@section('title', trans('larapass::recovery.title'))
 
 @section('body')
     <form id="form">
