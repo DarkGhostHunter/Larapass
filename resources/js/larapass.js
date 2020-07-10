@@ -232,7 +232,7 @@ class Larapass
      * Throws the entire response if is not OK (HTTP 2XX).
      *
      * @param response {Response}
-     * @returns Promise<JSON|ArrayBuffer|ArrayBufferView|Blob|FormData|string|URLSearchParams>
+     * @returns Promise<JSON|ReadableStream>
      * @throws Response
      */
     static #handleResponse(response)
@@ -245,11 +245,9 @@ class Larapass
         // are JSON, we will automatically parse the JSON body from the response. If
         // it's not JSON, we will push the body verbatim and let the dev handle it.
         return new Promise(resolve => {
-            if (response) {
-                response.json().then(json => resolve(json)).catch(() => resolve(response.body))
-            } else {
-                resolve(response.body)
-            }
+            response.json()
+                .then(json => resolve(json))
+                .catch(() => resolve(response.body))
         })
     }
 
