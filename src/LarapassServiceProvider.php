@@ -2,6 +2,7 @@
 
 namespace DarkGhostHunter\Larapass;
 
+use RuntimeException;
 use Illuminate\Support\Str;
 use Psr\Log\LoggerInterface;
 use Webauthn\Counter\CounterChecker;
@@ -171,7 +172,9 @@ class LarapassServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(CredentialBroker::class, static function ($app) {
-            $config = $app['config']['auth.passwords.webauthn'];
+            if (! $config = $app['config']['auth.passwords.webauthn']) {
+                throw new RuntimeException('No [webauthn] key broker is configured in [config/auth.php]');
+            }
 
             $key = $app['config']['app.key'];
 
