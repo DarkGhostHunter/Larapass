@@ -90,13 +90,10 @@ return [
 
 ### 2. Create the `webauthn_credentials` table
 
-Create the `webauthn_credentials` table by running the migrations:
+Create the `webauthn_credentials` table by publishing the migration files and migrating the table:
 
+    php artisan vendor:publish --provider="DarkGhostHunter\Larapass\LarapassServiceProvider" --tag="migrations"
     php artisan migrate
-
-> If you need to modify the migration from this package, you can publish it to override whatever you need.
->
->     php artisan vendor:publish --provider="DarkGhostHunter\Larapass\LarapassServiceProvider" --tag="migrations"
 
 ### 3. Implement the contract and trait
 
@@ -119,7 +116,7 @@ class User extends Authenticatable implements WebAuthnAuthenticatable
 }
 ```
 
-> The trait is used to basically tie the User model to the WebAuthn data contained in the database.
+> The trait is used to tie the User model to the WebAuthn data contained in the database.
 
 ### 4. Register the routes (optional)
 
