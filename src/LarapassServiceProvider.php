@@ -202,7 +202,11 @@ class LarapassServiceProvider extends ServiceProvider
     {
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'larapass');
         $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'larapass');
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+
+
+        if (! class_exists('CreateWebAuthnTables')) {
+            $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        }
 
         $this->app['auth']->provider('eloquent-webauthn', static function ($app, $config) {
             return new EloquentWebAuthnProvider(
@@ -239,13 +243,11 @@ class LarapassServiceProvider extends ServiceProvider
             __DIR__.'/../resources/js' => public_path('vendor/larapass/js'),
         ], 'public');
 
-        if (! class_exists('CreateWebAuthnCredentialsTable')) {
-            $this->publishes([
-                __DIR__ .
-                '/../database/migrations/2020_04_02_000000_create_web_authn_credentials_table.php' => database_path('migrations/' .
-                    now()->format('Y_m_d_His') .
-                    '_create_web_authn_credentials_table.php'),
-            ], 'migrations');
-        }
+        $this->publishes([
+            __DIR__ .
+            '/../database/migrations/2020_04_02_000000_create_web_authn_tables.php' => database_path('migrations/' .
+                now()->format('Y_m_d_His') .
+                '_create_web_authn_tables.php'),
+        ], 'migrations');
     }
 }
