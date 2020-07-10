@@ -152,5 +152,5 @@ return [
     |
     */
 
-    'confirm' => 10800,
+    'confirm_timeout' => 10800, // 3 hours
 ];

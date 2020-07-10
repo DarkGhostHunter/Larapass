@@ -25,6 +25,7 @@ Just hit the console and require it with Composer.
 
 - [What is WebAuthn? How it uses fingerprints or else?](#what-is-webauthn-how-it-uses-fingerprints-or-else)
 - [Set up](#set-up)
+- [Confirmation Middleware](#confirmation-middleware)
 - [Events](#events)
 - [Operations with WebAuthn](#operations-with-webauthn)
 - [Advanced Configuration](#advanced-configuration)
@@ -62,7 +63,6 @@ After that, you can quick start WebAuthn with the included controllers and helpe
 4. [Register the routes](#4-register-the-routes-optional)
 5. [Use the Javascript helper](#5-use-the-javascript-helper-optional)
 6. [Set up account recovery](#6-set-up-account-recovery-optional)
-7. [Register the Confirmation route](#7-register-the-confirmation-route-optional)
 
 ### 1. Add the `eloquent-webauthn` driver
 
@@ -264,7 +264,7 @@ return [
 ];
 ```
 
-### 7. Register the Confirmation route (optional)
+## Confirmation middleware
 
 Following the same principle of the [`password.confirm` middleware](https://laravel.com/docs/authentication#password-confirmation), Larapass includes a the `webauthn.confirm` middleware that will ask the user to confirm with his device before entering a given route.
 
@@ -286,6 +286,8 @@ Route::post('webauthn/confirm', 'Auth\WebAuthnConfirmController@confirm')
 ```
 
 As always, you can opt-out with your own logic. For these case take a look into the [`ConfirmsWebAuthn`](src/Http/ConfirmsWebAuthn.php) trait to start.
+
+> You can change how much time to remember the confirmation [in the configuration](#confirmation-timeout).
 
 ## Events
 
@@ -431,6 +433,9 @@ return [
     'conveyance' => 'none',
     'login_verify' => 'preferred',
     'userless' => null,
+    'unique' => false,
+    'fallback' => true,
+    'confirm_timeout' => 10800,
 ];
 ```
 
@@ -534,6 +539,16 @@ If this is activated (not `null` or `discouraged`), login verification will be m
 
 > This doesn't affect the login procedure, only the attestation (registration).
 
+### Unique
+
+```php
+return [
+    'unique' => false,
+];
+```
+
+If true, the device will limit the creation of only one credential by device. This is done by telling the device the list of credentials ID the user already has. If at least one if already present in the device, the latter will return an error.
+
 ### Password Fallback
 
 ```php
@@ -545,6 +560,16 @@ return [
 By default, this package allows to re-use the same `eloquent-webauthn` driver to log in users with passwords when the credentials are not a WebAuthn JSON payload.
 
 Disabling the fallback will only validate the WebAuthn credentials. To handle classic user/password scenarios, you may create a separate guard.
+
+### Confirmation timeout
+
+```php
+return [
+    'confirm_timeout' => 10800,
+];
+```
+
+When using the [Confirmation middleware](#confirmation-middleware), the confirmation will be remembered for a set amount of seconds. By default, is 3 hours, which is enough for most scenarios.
 
 ## Attestation and Metadata statements support
 

@@ -7,7 +7,7 @@ use Illuminate\Contracts\Session\Session;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\Routing\ResponseFactory;
 
-class ConfirmWebAuthn
+class RequireWebAuthn
 {
     /**
      * The response factory instance.

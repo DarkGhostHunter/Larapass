@@ -14,7 +14,9 @@ use Webauthn\AuthenticatorSelectionCriteria;
 use Webauthn\Counter\ThrowExceptionIfInvalid;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Webauthn\TokenBinding\TokenBindingHandler;
+use Illuminate\Contracts\Routing\UrlGenerator;
 use Webauthn\PublicKeyCredentialSourceRepository;
+use Illuminate\Contracts\Routing\ResponseFactory;
 use Cose\Algorithm\Manager as CoseAlgorithmManager;
 use DarkGhostHunter\Larapass\Auth\CredentialBroker;
 use Webauthn\TokenBinding\IgnoreTokenBindingHandler;
@@ -25,6 +27,7 @@ use Webauthn\MetadataService\MetadataStatementRepository;
 use Webauthn\AttestationStatement\AttestationObjectLoader;
 use DarkGhostHunter\Larapass\Auth\EloquentWebAuthnProvider;
 use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAttestCreator;
+use DarkGhostHunter\Larapass\Http\Middleware\RequireWebAuthn;
 use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAssertValidator;
 use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAttestValidator;
 use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
@@ -191,6 +194,14 @@ class LarapassServiceProvider extends ServiceProvider
                 $app['auth']->createUserProvider($config['provider'] ?? null)
             );
         });
+
+        $this->app->bind(RequireWebAuthn::class, static function ($app) {
+            return new RequireWebAuthn(
+                $app[ResponseFactory::class],
+                $app[UrlGenerator::class],
+                $app['config']->get('larapass.confirm_timeout')
+            );
+        });
     }
 
     /**
@@ -202,7 +213,6 @@ class LarapassServiceProvider extends ServiceProvider
     {
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'larapass');
         $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'larapass');
-
 
         if (! class_exists('CreateWebAuthnTables')) {
             $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
@@ -217,7 +227,7 @@ class LarapassServiceProvider extends ServiceProvider
             );
         });
 
-        $this->app['router']->aliasMiddleware('webauthn.confirm', Http\Middleware\ConfirmWebAuthn::class);
+        $this->app['router']->aliasMiddleware('webauthn.confirm', Http\Middleware\RequireWebAuthn::class);
 
         if ($this->app->runningInConsole()) {
             $this->publishFiles();
@@ -240,7 +250,7 @@ class LarapassServiceProvider extends ServiceProvider
         ], 'controllers');
 
         $this->publishes([
-            __DIR__.'/../resources/js' => public_path('vendor/larapass/js'),
+            __DIR__ . '/../resources/js' => public_path('vendor/larapass/js'),
         ], 'public');
 
         $this->publishes([
