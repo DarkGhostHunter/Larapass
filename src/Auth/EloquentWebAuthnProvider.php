@@ -55,9 +55,7 @@ class EloquentWebAuthnProvider extends EloquentUserProvider
             return $this->model::getFromCredentialId($id);
         }
 
-        if ($this->fallback) {
-            return parent::retrieveByCredentials($credentials);
-        }
+        return parent::retrieveByCredentials($credentials);
     }
 
     /**
@@ -95,6 +93,7 @@ class EloquentWebAuthnProvider extends EloquentUserProvider
             return (bool)$this->validator->validate($credentials);
         }
 
+        // If the fallback is enabled, we will validate the credential password.
         if ($this->fallback) {
             return parent::validateCredentials($user, $credentials);
         }

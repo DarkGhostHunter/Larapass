@@ -6,8 +6,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use DarkGhostHunter\Larapass\Facades\WebAuthn;
 
-trait AssertsWebAuthn
+trait AuthenticatesWebAuthn
 {
+    use WebAuthnRules;
+
     /**
      * Returns an WebAuthn Assertion challenge for the user (or userless).
      *
@@ -73,7 +75,7 @@ trait AssertsWebAuthn
      * Log the user in.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response|\Illuminate\Http\JsonResponse
      */
     public function login(Request $request)
     {
@@ -87,24 +89,6 @@ trait AssertsWebAuthn
     }
 
     /**
-     * The assertion rules to validate the incoming JSON payload.
-     *
-     * @return array|string[]
-     */
-    protected function assertionRules()
-    {
-        return [
-            'id'                         => 'required|string',
-            'rawId'                      => 'required|string',
-            'response.authenticatorData' => 'required|string',
-            'response.clientDataJSON'    => 'required|string',
-            'response.signature'         => 'required|string',
-            'response.userHandle'        => 'required|string',
-            'type'                       => 'required|string',
-        ];
-    }
-
-    /**
      * Check if the Request has a "Remember" value present.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -112,7 +96,7 @@ trait AssertsWebAuthn
      */
     protected function hasRemember(Request $request)
     {
-        return $request->filled('remember') || $request->header('WebAuthn-Remember', false);
+        return $request->filled('remember') || $request->header('WebAuthn-Remember');
     }
 
     /**
@@ -132,7 +116,7 @@ trait AssertsWebAuthn
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  mixed  $user
-     * @return void|mixed
+     * @return void|\Illuminate\Http\JsonResponse
      */
     protected function authenticated(Request $request, $user)
     {

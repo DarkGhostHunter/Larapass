@@ -1,11 +1,11 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 use DarkGhostHunter\Larapass\Eloquent\WebAuthnCredential;
 
-class CreateWebAuthnCredentialsTable extends Migration
+class CreateWebAuthnTables extends Migration
 {
     /**
      * Run the migrations.
@@ -39,6 +39,12 @@ class CreateWebAuthnCredentialsTable extends Migration
 
             $table->primary(['id', 'user_id']);
         });
+
+        Schema::create('web_authn_recoveries', function (Blueprint $table) {
+            $table->string('email')->index();
+            $table->string('token');
+            $table->timestamp('created_at')->nullable();
+        });
     }
 
     /**
@@ -49,5 +55,6 @@ class CreateWebAuthnCredentialsTable extends Migration
     public function down()
     {
         Schema::dropIfExists('web_authn_authentications');
+        Schema::dropIfExists('web_authn_recoveries');
     }
 }

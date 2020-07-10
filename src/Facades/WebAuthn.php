@@ -2,7 +2,9 @@
 
 namespace DarkGhostHunter\Larapass\Facades;
 
+use Closure;
 use Illuminate\Support\Facades\Facade;
+use DarkGhostHunter\Larapass\Auth\CredentialBroker;
 use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAttestCreator;
 use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAttestValidator;
 use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAssertValidator;
@@ -10,6 +12,41 @@ use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
 
 class WebAuthn extends Facade
 {
+    /**
+     * Constant representing a successfully sent recovery.
+     *
+     * @var string
+     */
+    public const RECOVERY_SENT = CredentialBroker::RESET_LINK_SENT;
+
+    /**
+     * Constant representing a successfully reset recovery.
+     *
+     * @var string
+     */
+    public const RECOVERY_ATTACHED = CredentialBroker::PASSWORD_RESET;
+
+    /**
+     * Constant representing the user not found response.
+     *
+     * @var string
+     */
+    public const INVALID_USER = CredentialBroker::INVALID_USER;
+
+    /**
+     * Constant representing an invalid token.
+     *
+     * @var string
+     */
+    public const INVALID_TOKEN = CredentialBroker::INVALID_TOKEN;
+
+    /**
+     * Constant representing a throttled reset attempt.
+     *
+     * @var string
+     */
+    public const RECOVERY_THROTTLED = CredentialBroker::RESET_THROTTLED;
+
     /**
      * Creates a new attestation (registration) request.
      *
@@ -67,5 +104,51 @@ class WebAuthn extends Facade
     public static function validateAssertion(array $data)
     {
         return (bool) static::$app[WebAuthnAssertValidator::class]->validate($data);
+    }
+
+    /**
+     * Sends an account recovery email to an user by the credentials.
+     *
+     * @param  array  $credentials
+     * @return string
+     */
+    public static function sendRecoveryLink(array $credentials)
+    {
+        return static::$app[CredentialBroker::class]->sendResetLink($credentials);
+    }
+
+    /**
+     * Recover the account for the given token.
+     *
+     * @param  array  $credentials
+     * @param  \Closure  $callback
+     * @return \Illuminate\Contracts\Auth\CanResetPassword|mixed|string
+     */
+    public static function recover(array $credentials, Closure $callback)
+    {
+        return static::$app[CredentialBroker::class]->reset($credentials, $callback);
+    }
+
+    /**
+     * Get the user for the given credentials.
+     *
+     * @param  array  $credentials
+     * @return null|\DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable|\Illuminate\Contracts\Auth\CanResetPassword
+     */
+    public static function getUser(array $credentials)
+    {
+        return static::$app[CredentialBroker::class]->getUser($credentials);
+    }
+
+    /**
+     * Validate the given account recovery token.
+     *
+     * @param  \DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable|\Illuminate\Contracts\Auth\CanResetPassword|null  $user
+     * @param  string  $token
+     * @return bool
+     */
+    public static function tokenExists($user, string $token)
+    {
+        return $user ? static::$app[CredentialBroker::class]->tokenExists($user, $token) : false;
     }
 }

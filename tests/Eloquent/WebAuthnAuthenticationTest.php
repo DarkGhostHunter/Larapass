@@ -34,6 +34,51 @@ class WebAuthnAuthenticationTest extends TestCase
         parent::setUp();
     }
 
+    public function test_hides_from_serialization()
+    {
+        DB::table('web_authn_credentials')->insert([
+            'id'               => 'test_credential_id',
+            'name'             => 'foo',
+            'user_id'          => 1,
+            'type'             => 'public_key',
+            'transports'       => json_encode([]),
+            'attestation_type' => 'none',
+            'trust_path'       => json_encode(['type' => EmptyTrustPath::class]),
+            'aaguid'           => Str::uuid(),
+            'public_key'       => 'public_key_bar',
+            'counter'          => 0,
+            'user_handle'      => Str::uuid()->toString(),
+            'created_at'       => now()->toDateTimeString(),
+            'updated_at'       => now()->toDateTimeString(),
+            'disabled_at'      => null,
+        ]);
+
+        $this->assertSame([
+            'id'         => 'test_credential_id',
+            'name'       => 'foo',
+            'type'       => 'public_key',
+            'transports' => [],
+        ], WebAuthnCredential::first()->toArray());
+    }
+
+    public function test_returns_pretty_id()
+    {
+        $model = WebAuthnCredential::make([
+            'id' => base64_encode('test_credential_id'),
+        ]);
+
+        $this->assertSame('test_credential_id', $model->prettyId);
+    }
+
+    public function test_can_fill_name()
+    {
+        $model = WebAuthnCredential::make([
+            'name' => 'foo',
+        ]);
+
+        $this->assertSame('foo', $model->name);
+    }
+
     public function test_sets_aaguid_as_uuid()
     {
         $uuid = '6028b017-b1d4-4c02-b4b3-afcdafc96bb2';
@@ -81,7 +126,7 @@ class WebAuthnAuthenticationTest extends TestCase
             'user_handle'      => Str::uuid()->toString(),
             'created_at'       => now()->toDateTimeString(),
             'updated_at'       => now()->toDateTimeString(),
-            'disabled_at'      => null
+            'disabled_at'      => null,
         ]);
 
         $this->assertInstanceOf(PublicKeyCredentialSource::class,
@@ -116,7 +161,7 @@ class WebAuthnAuthenticationTest extends TestCase
             'user_handle'      => 'test_id',
             'created_at'       => now()->toDateTimeString(),
             'updated_at'       => now()->toDateTimeString(),
-            'disabled_at'      => null
+            'disabled_at'      => null,
         ]);
 
         $this->assertCount(1, $model->findAllForUserEntity($entity));
@@ -140,7 +185,7 @@ class WebAuthnAuthenticationTest extends TestCase
             'user_handle'      => Str::uuid()->toString(),
             'created_at'       => now()->toDateTimeString(),
             'updated_at'       => now()->toDateTimeString(),
-            'disabled_at'      => null
+            'disabled_at'      => null,
         ]);
 
         $model = WebAuthnCredential::make();
@@ -170,8 +215,8 @@ class WebAuthnAuthenticationTest extends TestCase
         ));
 
         $this->assertDatabaseHas('web_authn_credentials', [
-            'id' => 'test_credential_id',
-            'counter' => 10
+            'id'      => 'test_credential_id',
+            'counter' => 10,
         ]);
     }
 
@@ -206,6 +251,5 @@ class WebAuthnAuthenticationTest extends TestCase
 
         $this->assertTrue($credential->isEnabled());
         $this->assertFalse($credential->isDisabled());
-
     }
 }

@@ -2,6 +2,8 @@
 
 namespace DarkGhostHunter\Larapass;
 
+use RuntimeException;
+use Illuminate\Support\Str;
 use Psr\Log\LoggerInterface;
 use Webauthn\Counter\CounterChecker;
 use Illuminate\Support\ServiceProvider;
@@ -15,8 +17,10 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Webauthn\TokenBinding\TokenBindingHandler;
 use Webauthn\PublicKeyCredentialSourceRepository;
 use Cose\Algorithm\Manager as CoseAlgorithmManager;
+use DarkGhostHunter\Larapass\Auth\CredentialBroker;
 use Webauthn\TokenBinding\IgnoreTokenBindingHandler;
 use Webauthn\AuthenticatorAssertionResponseValidator;
+use Illuminate\Auth\Passwords\DatabaseTokenRepository;
 use Webauthn\AuthenticatorAttestationResponseValidator;
 use Webauthn\MetadataService\MetadataStatementRepository;
 use Webauthn\AttestationStatement\AttestationObjectLoader;
@@ -166,6 +170,30 @@ class LarapassServiceProvider extends ServiceProvider
         $this->app->bind(AuthenticationExtensionsClientInputs::class, static function () {
             return new AuthenticationExtensionsClientInputs;
         });
+
+        $this->app->singleton(CredentialBroker::class, static function ($app) {
+            if (! $config = $app['config']['auth.passwords.webauthn']) {
+                throw new RuntimeException('You must set the [webauthn] key broker in [auth] config.');
+            }
+
+            $key = $app['config']['app.key'];
+
+            if (Str::startsWith($key, 'base64:')) {
+                $key = base64_decode(substr($key, 7));
+            }
+
+            return new CredentialBroker(
+                new DatabaseTokenRepository(
+                    $app['db']->connection($config['connection'] ?? null),
+                    $app['hash'],
+                    $config['table'],
+                    $key,
+                    $config['expire'],
+                    $config['throttle'] ?? 0
+                ),
+                $app['auth']->createUserProvider($config['provider'] ?? null)
+            );
+        });
     }
 
     /**
@@ -175,6 +203,9 @@ class LarapassServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'larapass');
+        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'larapass');
+
         $this->app['auth']->provider('eloquent-webauthn', static function ($app, $config) {
             return new EloquentWebAuthnProvider(
                 $app['config'],
@@ -183,6 +214,8 @@ class LarapassServiceProvider extends ServiceProvider
                 $config['model']
             );
         });
+
+        $this->app['router']->aliasMiddleware('webauthn.confirm', Http\Middleware\RequireWebAuthn::class);
 
         if ($this->app->runningInConsole()) {
             $this->publishFiles();
@@ -205,16 +238,18 @@ class LarapassServiceProvider extends ServiceProvider
         ], 'controllers');
 
         $this->publishes([
-            __DIR__.'/../resources/js' => public_path('vendor/larapass/js'),
+            __DIR__ . '/../resources/js' => public_path('vendor/larapass/js'),
         ], 'public');
 
-        if (! class_exists('CreateWebAuthnCredentialsTable')) {
-            $this->publishes([
-                __DIR__ .
-                '/../database/migrations/2020_04_02_000000_create_web_authn_credentials_table.php' => database_path('migrations/' .
-                    now()->format('Y_m_d_His') .
-                    '_create_web_authn_credentials_table.php'),
-            ], 'migrations');
-        }
+        $this->publishes([
+            __DIR__ . '/../resources/views' => resource_path('views/vendor/larapass'),
+        ], 'views');
+
+        $this->publishes([
+            __DIR__ .
+            '/../database/migrations/2020_04_02_000000_create_web_authn_tables.php' => database_path('migrations/' .
+                now()->format('Y_m_d_His') .
+                '_create_web_authn_tables.php'),
+        ], 'migrations');
     }
 }
