@@ -14,35 +14,35 @@ class CredentialBroker extends PasswordBroker
      *
      * @var string
      */
-    public const RESET_LINK_SENT = 'larapass::credentials.sent';
+    public const RESET_LINK_SENT = 'larapass::recovery.sent';
 
     /**
      * Constant representing a successfully reset password.
      *
      * @var string
      */
-    public const PASSWORD_RESET = 'larapass::credentials.reset';
+    public const PASSWORD_RESET = 'larapass::recovery.reset';
 
     /**
      * Constant representing the user not found response.
      *
      * @var string
      */
-    public const INVALID_USER = 'larapass::credentials.user';
+    public const INVALID_USER = 'larapass::recovery.user';
 
     /**
      * Constant representing an invalid token.
      *
      * @var string
      */
-    public const INVALID_TOKEN = 'larapass::credentials.token';
+    public const INVALID_TOKEN = 'larapass::recovery.token';
 
     /**
      * Constant representing a throttled reset attempt.
      *
      * @var string
      */
-    public const RESET_THROTTLED = 'larapass::credentials.throttled';
+    public const RESET_THROTTLED = 'larapass::recovery.throttled';
 
     /**
      * Send a password reset link to a user.
