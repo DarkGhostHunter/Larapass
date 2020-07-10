@@ -2,8 +2,6 @@
 
 namespace DarkGhostHunter\Larapass\Eloquent;
 
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -16,16 +14,19 @@ use Webauthn\PublicKeyCredentialSourceRepository;
  *
  * @property-read string $id
  *
- * @property bool $is_excluded
- * @property string $type
- * @property \Illuminate\Support\Collection $transports
- * @property string $attestation_type
- * @property \Illuminate\Support\Collection $trust_path
- * @property \Ramsey\Uuid\Uuid $aaguid
- * @property string $public_key
- * @property int $counter
- * @property string $user_handle
+ * @property-read string $type
+ * @property-read null|string $name
+ * @property-read \Illuminate\Support\Collection $transports
+ * @property-read string $attestation_type
+ * @property-read \Webauthn\TrustPath\TrustPath $trust_path
+ * @property-read \Ramsey\Uuid\UuidInterface $aaguid
+ * @property-read string $public_key
+ * @property-read int $counter
+ * @property-read string $user_handle
  * @property-read null|\Illuminate\Support\Carbon $disabled_at
+ *
+ * @property-read string $prettyId
+ *
  * @method \Illuminate\Database\Eloquent\Builder|static enabled()
  */
 class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepository
@@ -55,12 +56,15 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
     protected $keyType = 'string';
 
     /**
-     * The attributes that should be hidden for serialization.
+     * The attributes that should be visible in serialization.
      *
      * @var array
      */
-    protected $hidden = [
-        'public_key',
+    protected $visible = [
+        'id',
+        'name',
+        'type',
+        'transports',
     ];
 
     /**
@@ -70,17 +74,9 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
      */
     protected $casts = [
         'transports'  => 'collection',
-        'trust_path'  => 'collection',
         'counter'     => 'integer',
-    ];
-
-    /**
-     * The attributes that should be mutated to dates.
-     *
-     * @var array
-     */
-    protected $dates = [
-        'last_login_at',
+        'trust_path'  => Casting\TrustPathCast::class,
+        'aaguid'      => Casting\UuidCast::class,
     ];
 
     /**
@@ -90,6 +86,7 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
      */
     protected $fillable = [
         'id',
+        'name',
         'type',
         'transports',
         'attestation_type',
@@ -121,31 +118,13 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
     }
 
     /**
-     * The AAGUID is basically an UUID, so we will make it depending on how is encoded.
+     * Returns the credential ID encoded in BASE64.
      *
-     * @param  string  $value
-     * @return void
+     * @return false
      */
-    public function setAaguidAttribute($value)
+    public function getPrettyIdAttribute()
     {
-        $this->attributes['aaguid'] = mb_strlen($value, '8bit') === 36
-            ? Uuid::fromString($value)
-            : Uuid::fromBytes(base64_decode($value, true));
-    }
-
-    /**
-     * Returns the Aaguid as UUID.
-     *
-     * @param $value
-     * @return \Ramsey\Uuid\UuidInterface
-     */
-    public function getAaguidAttribute($value)
-    {
-        if (! $value instanceof UuidInterface) {
-            Uuid::fromString($value);
-        }
-
-        return $value;
+        return base64_decode($this->attributes['id']);
     }
 
     /**

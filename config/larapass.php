@@ -140,4 +140,17 @@ return [
     */
 
     'fallback' => true,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Device Confirmation
+    |--------------------------------------------------------------------------
+    |
+    | If you're using the "webauthn.confirm" middleware in your routes you may
+    | want to adjust the time the confirmation is remembered in the browser.
+    | This is measured in seconds, but it can be overridden in the route.
+    |
+    */
+
+    'confirm_timeout' => 10800, // 3 hours
 ];

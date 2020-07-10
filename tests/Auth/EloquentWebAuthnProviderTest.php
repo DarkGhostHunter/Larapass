@@ -90,7 +90,7 @@ class EloquentWebAuthnProviderTest extends TestCase
         $this->assertTrue($user->is($retrieved));
     }
 
-    public function test_fails_retrieving_user_using_classic_credentials_without_fallback()
+    public function test_retrieves_user_using_classic_credentials_without_fallback()
     {
         $this->app['config']->set('larapass.fallback', false);
 
@@ -107,7 +107,7 @@ class EloquentWebAuthnProviderTest extends TestCase
                 'email' => 'john.doe@mail.com',
             ]);
 
-        $this->assertNull($retrieved);
+        $this->assertTrue($retrieved->is($user));
     }
 
     public function test_validates_user_using_password_fallback()

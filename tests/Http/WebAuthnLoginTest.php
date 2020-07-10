@@ -223,7 +223,7 @@ class WebAuthnLoginTest extends TestCase
                 'rawId'    => Base64Url::encode('test_credential_id'),
             ])
             ->andReturnUsing(function ($data) {
-                $credentials = WebAuthnCredential::whereKey($data['id'])->first();
+                $credentials = WebAuthnCredential::find($data['id']);
 
                 $credentials->setAttribute('counter', 1)->save();
 

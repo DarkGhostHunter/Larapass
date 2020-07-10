@@ -8,12 +8,12 @@
 
 Authenticate users with just their device, fingerprint or biometric data. Goodbye passwords!
 
-This enables WebAuthn authentication using Laravel authentication driver.
+This enables WebAuthn authentication inside Laravel authentication driver, and comes with everything but the kitchen sink. 
 
 ## Requisites
 
 * PHP 7.2.15+
-* Laravel 7
+* Laravel 7.18 (July 2020)
 
 ## Installation 
 
@@ -21,23 +21,52 @@ Just hit the console and require it with Composer.
 
     composer require darkghosthunter/larapass
 
+# Table of contents
+
+- [What is WebAuthn? How it uses fingerprints or else?](#what-is-webauthn-how-it-uses-fingerprints-or-else)
+- [Set up](#set-up)
+- [Confirmation Middleware](#confirmation-middleware)
+- [Events](#events)
+- [Operations with WebAuthn](#operations-with-webauthn)
+- [Advanced Configuration](#advanced-configuration)
+  - [Relaying Party Information](#relaying-party-information)
+  - [Challenge configuration](#challenge-configuration)
+  - [Algorithms](#algorithms)
+  - [Key Attachment](#key-attachment)
+  - [Attestation conveyance](#attestation-conveyance)
+  - [Login verification](#login-verification)
+  - [Userless login (One touch, Typeless)](#userless-login-one-touch-typeless)
+  - [Unique](#unique)
+  - [Password Fallback](#password-fallback)
+  - [Confirmation timeout](#confirmation-timeout)
+- [Attestation and Metadata statements support](#attestation-and-metadata-statements-support)
+- [Security](#security)
+- [FAQ](#faq)
+- [License](#license)
+
 ## What is WebAuthn? How it uses fingerprints or else?
 
 In a nutshell, [mayor browsers are compatible with Web Authentication API](https://caniuse.com/#feat=webauthn), pushing authentication to the device (fingerprints, Face ID, patterns, codes, etc) instead of plain-text passwords.
 
-This package validates authentication responses from the devices using a custom [user provider](https://laravel.com/docs/authentication#adding-custom-user-providers).
+This package validates the WebAuthn payload from the devices using a custom [user provider](https://laravel.com/docs/authentication#adding-custom-user-providers).
 
-If you have any doubts about WebAuthn, [check this small FAQ](#faq).
+If you have any doubts about WebAuthn, [check this small FAQ](#faq). For a more deep dive, check [WebAuthn.io](https://webauthn.io/), [WebAuthn.me](https://webauthn.me/) and [Google WebAuthn tutorial](https://codelabs.developers.google.com/codelabs/webauthn-reauth/).
 
 ## Set up
 
-1. Add the `eloquent-webauthn` driver to your authentication configuration in `config/auth.php`.
-2. Migrate the `webauthn_credentials` table.
-3. Implement the `WebAuthnAuthenticatable` contract and `WebAuthnAuthentication` trait to your User(s) classes.
-4. Register WebAuthn routes.
-4. Add the Javascript helper.
+We need to make sure your users can register their devices and authenticate with them.
 
-### 1. Add the `eloquent-webauthn` driver.
+1. [Add the `eloquent-webauthn` driver](#1-add-the-eloquent-webauthn-driver).
+2. [Create the `webauthn_credentials` table.](#2-create-the-webauthn_credentials-table)
+3. [Implement the contract and trait](#3-implement-the-contract-and-trait)
+
+After that, you can quick start WebAuthn with the included controllers and helpers to make your life easier.
+
+4. [Register the routes](#4-register-the-routes-optional)
+5. [Use the Javascript helper](#5-use-the-javascript-helper-optional)
+6. [Set up account recovery](#6-set-up-account-recovery-optional)
+
+### 1. Add the `eloquent-webauthn` driver
 
 This package comes with an Eloquent-compatible [user provider](https://laravel.com/docs/authentication#adding-custom-user-providers) that validates WebAuthn responses from the devices.
 
@@ -61,20 +90,19 @@ return [
 
 ### 2. Create the `webauthn_credentials` table
 
-Create the `webauthn_credentials` table by running the migrations:
+Create the `webauthn_credentials` table by publishing the migration files and migrating the table:
 
+    php artisan vendor:publish --provider="DarkGhostHunter\Larapass\LarapassServiceProvider" --tag="migrations"
     php artisan migrate
 
-> If you need to modify the migration from this package, you can publish it to override whatever you need.
->
->     php artisan vendor:publish --provider="DarkGhostHunter\Larapass\LarapassServiceProvider" --tag="migrations"
-
-### 3. Add the WebAuthn contract and trait
+### 3. Implement the contract and trait
 
 Add the `WebAuthnAuthenticatable` contract and the `WebAuthnAuthentication` trait to the `Authenticatable` user class, or any that uses authentication.
 
 ```php
 <?php
+
+namespace App;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
@@ -88,9 +116,9 @@ class User extends Authenticatable implements WebAuthnAuthenticatable
 }
 ```
 
-> The trait is used to basically tie the User model to the WebAuthn data contained in the database.
+> The trait is used to tie the User model to the WebAuthn data contained in the database.
 
-### 4. Register the routes
+### 4. Register the routes (optional)
 
 Finally, you will need to add the routes for registering and authenticating users. If you want a quick start, just publish the controllers included in Larapass.
 
@@ -112,9 +140,9 @@ Route::post('webauthn/login', 'Auth\WebAuthnLoginController@login')
 
 In your frontend scripts, point the requests to these routes.
 
-> If you want full control, you can opt-out of these helper controllers and use your own logic. Use the [`AttestWebAuthn`](src/Http/AttestsWebAuthn.php) and [`AssertsWebAuthn`](src/Http/AssertsWebAuthn.php) traits if you need to start with something.
+> If you want full control, you can opt-out of these helper controllers and use your own logic. Use the [`AttestWebAuthn`](src/Http/RegistersWebAuthn.php) and [`AssertsWebAuthn`](src/Http/AuthenticatesWebAuthn.php) traits if you need to start with something.
 
-### 5. Frontend integration
+### 5. Use the Javascript helper (optional)
 
 This package includes a convenient script to handle registration and login via WebAuthn. To use it, just publish the `larapass.js` asset into your application public resources.
 
@@ -170,11 +198,11 @@ new Larapass({
 })
 ```
 
-> If the script doesn't suit your needs, you're free to create your own script to handle WebAuthn, or just copy-paste it and import into a transpiler like [Laravel Mix](https://laravel.com/docs/mix#running-mix), [Babel](https://babeljs.io/) or [Webpack](https://webpack.js.org/).
+> You can copy-paste it and import into a transpiler like [Laravel Mix](https://laravel.com/docs/mix#running-mix), [Babel](https://babeljs.io/) or [Webpack](https://webpack.js.org/). If the script doesn't suit your needs, you're free to create your own.
 
-### Remembering Users
+#### Remembering Users
 
-You can enable it by just issuing the `WebAuthn-Remember` header value to `true` when pushing the signed login challenge from your frontend. We can do this easily with the [included Javascript helper](#5-frontend-integration).
+You can enable it by just issuing the `WebAuthn-Remember` header value to `true` when pushing the signed login challenge from your frontend. We can do this easily with the [included Javascript helper](#5-use-the-javascript-helper-optional).
 
 ```javascript
 new Larapass.login({
@@ -186,13 +214,85 @@ new Larapass.login({
 
 Alternatively, you can add the `remember` key to the outgoing JSON Payload if you're using your own scripts. Both ways are accepted.
 
-> You can override this behaviour in the [`AssertsWebAuthn`](src/Http/AssertsWebAuthn.php) trait.
+> You can override this behaviour in the [`AssertsWebAuthn`](src/Http/AuthenticatesWebAuthn.php) trait.
+
+### 6. Set up account recovery (optional)
+
+Probably you will want to offer a way to "recover" an account if the user loses his credentials, which is basically a way to attach a new one. You can use controllers [which are also published](#4-register-the-routes-optional), along with these routes:
+
+```php
+Route::get('webauthn/lost', 'Auth\WebAuthnDeviceLostController@showDeviceLostForm')
+     ->name('webauthn.lost.form');
+Route::post('webauthn/lost', 'Auth\WebAuthnDeviceLostController@sendRecoveryEmail')
+     ->name('webauthn.lost.send');
+
+Route::get('webauthn/recover', 'Auth\WebAuthnRecoveryController@showResetForm')
+     ->name('webauthn.recover.form');
+Route::post('webauthn/recover/options', 'Auth\WebAuthnRecoveryController@options')
+     ->name('webauthn.recover.options');
+Route::post('webauthn/recover/register', 'Auth\WebAuthnRecoveryController@recover')
+     ->name('webauthn.recover');
+```
+
+These come with [new views](resources/views) and [translation lines](resources/lang), so you can override them if you're not happy with what is included. 
+
+You can also override the views in `resources/vendor/larapass` and the notification being sent using the `sendCredentialRecoveryNotification` method of the user.
+
+After that, don't forget to add a new token broker in your `config/auth.php`. We will need it to store the tokens from the recovery procedure.
+
+```php
+return [
+    // ...
+
+    'passwords' => [
+        'users' => [
+            'provider' => 'users',
+            'table' => 'password_resets',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+
+        // New for WebAuthn
+        'webauthn' => [
+            'provider' => 'users', // The user provider using WebAuthn.
+            'table' => 'web_authn_recoveries', // The table to store the recoveries.
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+    ],
+];
+```
+
+## Confirmation middleware
+
+Following the same principle of the [`password.confirm` middleware](https://laravel.com/docs/authentication#password-confirmation), Larapass includes a the `webauthn.confirm` middleware that will ask the user to confirm with his device before entering a given route.
+
+```php
+Route::get('this/is/important', function () {
+    return 'This is very important!';
+})->middleware('webauthn.confirm');
+```
+
+When [publishing the controllers](#4-register-the-routes-optional), the `WebAuthnConfirmController` will be in your controller files ready to accept confirmations. You just need to register the route by just copy-pasting these:
+
+```php
+Route::get('webauthn/confirm', 'Auth\WebAuthnConfirmController@showConfirmForm')
+     ->name('webauthn.confirm.form');
+Route::post('webauthn/confirm/options', 'Auth\WebAuthnConfirmController@options')
+     ->name('webauthn.confirm.options');
+Route::post('webauthn/confirm', 'Auth\WebAuthnConfirmController@confirm')
+     ->name('webauthn.confirm');
+```
+
+As always, you can opt-out with your own logic. For these case take a look into the [`ConfirmsWebAuthn`](src/Http/ConfirmsWebAuthn.php) trait to start.
+
+> You can change how much time to remember the confirmation [in the configuration](#confirmation-timeout).
 
 ## Events
 
-Since all authentication is handled by Laravel itself, the only [event](https://laravel.com/docs/events) included is [`AttestationSuccessful`](src/Events/AttestationSuccessful.php), which fires when the registration is successful. It includes the user and the credentials persisted.
+Since all authentication is handled by Laravel itself, the only [event](https://laravel.com/docs/events) included is [`AttestationSuccessful`](src/Events/AttestationSuccessful.php), which fires when the registration is successful. It includes the user with the credentials persisted.
 
-You can use this event to, for example, notify the user a new device has been registered and with what ID. For that, you can use a [listener](https://laravel.com/docs/events#defining-listeners).
+You can use this event to, for example, notify the user a new device has been registered. For that, you can use a [listener](https://laravel.com/docs/events#defining-listeners).
 
 ```php
 public function handle(AttestationSuccessful $event)
@@ -258,11 +358,10 @@ For assertion, simply create a request using `generateAssertion` and validate it
 use App\User; 
 use DarkGhostHunter\Larapass\Facades\WebAuthn;
 
-$email = request()->input('email');
+// Find the user to assert, if there is any
+$user = User::where('email', request()->input('email'))->first();
 
-$user = User::where('email', $email)->firstOrFail();
-
-// Create an assertion for the given user.
+// Create an assertion for the given user (or a blank one if not found);
 return WebAuthn::generateAssertion($user);
 ```
 
@@ -275,7 +374,7 @@ use App\User;
 use Illuminate\Support\Facades\Auth;
 use DarkGhostHunter\Larapass\Facades\WebAuthn;
 
-// Verify it
+// Verify the incoming assertion.
 $credentials = WebAuthn::validateAssertion(
     request()->json()->all()
 );
@@ -333,7 +432,9 @@ return [
     'conveyance' => 'none',
     'login_verify' => 'preferred',
     'userless' => null,
+    'unique' => false,
     'fallback' => true,
+    'confirm_timeout' => 10800,
 ];
 ```
 
@@ -395,7 +496,7 @@ return [
 ];
 ```
 
-By default, the user decides what to use to register. If you wish to exclusively use a cross-platform authentication (like USB Keys, CA Servers or Certificates) set this to `true`, or `false` if you want to enforce device-only authentication. 
+By default, the user decides what to use for registration. If you wish to exclusively use a cross-platform authentication (like USB Keys, CA Servers or Certificates) set this to `true`, or `false` if you want to enforce device-only authentication. 
 
 ### Attestation conveyance
 
@@ -421,7 +522,7 @@ By default, most authenticators will require the user verification when login in
 
 You can also use `discouraged` to only check for user presence (like a "Continue" button), which may make the login faster but making it slightly less secure.
 
-> When setting [userless](#userless-login-one-touch-typeless) as `preferred` or `required`, this will be overridden to `required` automatically.
+> When setting [userless](#userless-login-one-touch-typeless) as `preferred` or `required` will override this to `required` automatically.
 
 ### Userless login (One touch, Typeless)
 
@@ -431,9 +532,21 @@ return [
 ];
 ```
 
-You can activate _userless_ login, also known as one-touch login or typless login. You should change this to `preferred` in that case, since not all devices support the feature.
+You can activate _userless_ login, also known as one-touch login or typless login, for devices when they're being registered. You should change this to `preferred` in that case, since not all devices support the feature.
 
 If this is activated (not `null` or `discouraged`), login verification will be mandatory.
+
+> This doesn't affect the login procedure, only the attestation (registration).
+
+### Unique
+
+```php
+return [
+    'unique' => false,
+];
+```
+
+If true, the device will limit the creation of only one credential by device. This is done by telling the device the list of credentials ID the user already has. If at least one if already present in the device, the latter will return an error.
 
 ### Password Fallback
 
@@ -445,7 +558,17 @@ return [
 
 By default, this package allows to re-use the same `eloquent-webauthn` driver to log in users with passwords when the credentials are not a WebAuthn JSON payload.
 
-Disabling the fallback will only check for WebAuthn credentials. To handle classic user/password scenarios, you should create a separate guard.
+Disabling the fallback will only validate the WebAuthn credentials. To handle classic user/password scenarios, you may create a separate guard.
+
+### Confirmation timeout
+
+```php
+return [
+    'confirm_timeout' => 10800,
+];
+```
+
+When using the [Confirmation middleware](#confirmation-middleware), the confirmation will be remembered for a set amount of seconds. By default, is 3 hours, which is enough for most scenarios.
 
 ## Attestation and Metadata statements support
 
@@ -468,13 +591,13 @@ $this->app->extend(AttestationStatementSupport::class, function ($manager) {
 
 These are some details about this WebAuthn implementation:
 
-1. Registration (attestation) is remembered by user, domain and IP.
-2. Login (assertion) is remembered by domain and IP.
-3. Cached challenge is always forgotten after resolution, independently of the result.
-4. Cached challenge TTL is the same as the WebAuthn timeout (60 seconds default).
-5. Included controllers include throttling for WebAuthn endpoints.
-6. Users ID (handle) is a random UUID v4.
-7. Credentials can be blacklisted (enabled/disabled).
+* Registration (attestation) is exclusive to the domain, IP and user.
+* Login (assertion) is exclusive to the domain, IP, and the user if specified
+* Cached challenge is always forgotten after resolution, independently of the result.
+* Cached challenge TTL is the same as the WebAuthn timeout (60 seconds default).
+* Included controllers include throttling for WebAuthn endpoints.
+* Users ID (handle) is a random UUID v4.
+* Credentials can be blacklisted (enabled/disabled).
 
 If you discover any security related issues, please email darkghosthunter@gmail.com instead of using the issue tracker.
 
@@ -484,7 +607,7 @@ If you discover any security related issues, please email darkghosthunter@gmail.
 
 * **Does this work with any browser?**
 
-[Yes](https://caniuse.com/#feat=webauthn). In the case of old browsers, you should have a fallback detection script. This can be asked with [the included Javascript helper](#5-frontend-integration) in a breeze:
+[Yes](https://caniuse.com/#feat=webauthn). In the case of old browsers, you should have a fallback detection script. This can be asked with [the included Javascript helper](#5-use-the-javascript-helper-optional) in a breeze:
 
 ```javascript
 if (! Larapass.supportsWebAuthn()) {
@@ -546,9 +669,11 @@ class MyCountChecker implements CounterChecker
 
 * **If a user loses his device, can he register a new device?**
 
-Yes, just send him a signed email to register a new device with secure attestation and assertion routes. That's up to you.
+Yes, just send him a signed email to register a new device with secure attestation and assertion routes. You can [use these recovery helpers](#6-set-up-account-recovery-optional).
 
-> To blacklist a device, use `disableDevice()` in the user instance. That allows the user to re-enable it when he recovers the device.
+* **What's the difference between disabling and deleting a credential?**
+
+Disabling a credential doesn't delete it, so it can be later enabled manually. When the credential is deleted, it goes away forever.
 
 * **How secure is this against passwords or 2FA?**
 
@@ -556,15 +681,19 @@ Extremely secure since it works only on HTTPS, and no password or codes are exch
 
 * **Can I deactivate the password fallback? Can I enforce only WebAuthn authentication?**
 
-Yes. Just be sure to disable the password column in the users table, the Password Broker, and have some logic to recover the account with new devices and invalidate old ones. The [`WebAuthnAuthentication`](src/WebAuthnAuthentication.php) trait helps with this.
+Yes. Just be sure to [use the recovery helpers](#6-set-up-account-recovery-optional) if you want a quick fix.
 
 * **Does this includes a frontend Javascript?**
 
-[Yes.](#5-frontend-integration)
+[Yes.](#5-use-the-javascript-helper-optional)
 
 * **Does this encodes/decode the strings automatically in the frontend?**
 
-Yes, the included [WebAuthn Helper](#5-frontend-integration) does it automatically for you.
+Yes, the included [WebAuthn Helper](#5-use-the-javascript-helper-optional) does it automatically for you.
+
+* **Does this include a credential recovery routes?**
+
+[Yes.](#6-set-up-account-recovery-optional)
 
 ## License
 

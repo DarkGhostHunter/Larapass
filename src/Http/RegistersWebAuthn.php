@@ -7,8 +7,10 @@ use DarkGhostHunter\Larapass\Facades\WebAuthn;
 use DarkGhostHunter\Larapass\Events\AttestationSuccessful;
 use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
 
-trait AttestsWebAuthn
+trait RegistersWebAuthn
 {
+    use WebAuthnRules;
+
     /**
      * Returns a challenge to be verified by the user device.
      *
@@ -45,22 +47,6 @@ trait AttestsWebAuthn
         }
 
         return response()->noContent(422);
-    }
-
-    /**
-     * The attestation rules to validate the incoming JSON payload.
-     *
-     * @return array|string[]
-     */
-    protected function attestationRules()
-    {
-        return [
-            'id'                         => 'required|string',
-            'rawId'                      => 'required|string',
-            'response.attestationObject' => 'required|string',
-            'response.clientDataJSON'    => 'required|string',
-            'type'                       => 'required|string',
-        ];
     }
 
     /**

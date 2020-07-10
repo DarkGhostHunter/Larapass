@@ -3,11 +3,11 @@
 namespace Tests\Stubs;
 
 use Illuminate\Routing\Controller;
-use DarkGhostHunter\Larapass\Http\AttestsWebAuthn;
+use DarkGhostHunter\Larapass\Http\RegistersWebAuthn;
 
 class TestWebAuthnRegisterController extends Controller
 {
-    use AttestsWebAuthn;
+    use RegistersWebAuthn;
 
     /*
     |--------------------------------------------------------------------------

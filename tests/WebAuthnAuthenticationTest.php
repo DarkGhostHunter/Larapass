@@ -111,6 +111,17 @@ class WebAuthnAuthenticationTest extends TestCase
         $this->assertSame($this->user->userEntity()->getId(), $this->user->userEntity()->getId());
     }
 
+    public function test_returns_user_entity_with_handle_used_in_disabled_credential()
+    {
+        $entity = $this->user->userEntity()->getId();
+
+        DB::table('web_authn_credentials')
+            ->where('test_credential_bar')
+            ->update(['disabled_at' => now()]);
+
+        $this->assertSame($entity, $this->user->userEntity()->getId());
+    }
+
     public function test_returns_all_credentials_as_excluded()
     {
         $this->assertCount(2, $this->user->attestationExcludedCredentials());
@@ -184,6 +195,10 @@ class WebAuthnAuthenticationTest extends TestCase
             'disabled_at' => $now->toDateTimeString(),
         ]);
 
+        $this->user->webAuthnCredentials()->update([
+            'disabled_at' => null
+        ]);
+
         $this->user->disableCredential(['test_credential_foo', 'test_credential_bar']);
         $this->assertCount(2, DB::table('web_authn_credentials')->whereNotNull('disabled_at')->get());
 
@@ -193,8 +208,39 @@ class WebAuthnAuthenticationTest extends TestCase
             'disabled_at' => null,
         ]);
 
+        $this->user->disableAllCredentials();
+
         $this->user->enableCredential(['test_credential_foo', 'test_credential_bar']);
         $this->assertCount(2, DB::table('web_authn_credentials')->whereNull('disabled_at')->get());
+    }
+
+    public function test_disables_all_credentials()
+    {
+        $this->user->disableAllCredentials();
+        $this->assertDatabaseHas('web_authn_credentials', [
+            'id'          => 'test_credential_foo',
+        ]);
+        $this->assertDatabaseHas('web_authn_credentials', [
+            'id'          => 'test_credential_bar',
+        ]);
+        $this->assertDatabaseMissing('web_authn_credentials', [
+            'disabled_at' => null,
+        ]);
+    }
+
+    public function test_disables_all_credentials_except_some()
+    {
+        Date::setTestNow($now = Date::create(2020, 04, 01, 16, 30));
+
+        $this->user->disableAllCredentials('test_credential_bar');
+        $this->assertDatabaseHas('web_authn_credentials', [
+            'id'          => 'test_credential_foo',
+            'disabled_at' => $now->toDateTimeString(),
+        ]);
+        $this->assertDatabaseHas('web_authn_credentials', [
+            'id'          => 'test_credential_bar',
+            'disabled_at' => null,
+        ]);
     }
 
     public function test_deletes_credentials()

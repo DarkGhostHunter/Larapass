@@ -3,6 +3,7 @@
 namespace Tests\Stubs;
 
 use Illuminate\Foundation\Auth\User;
+use Illuminate\Notifications\Notifiable;
 use DarkGhostHunter\Larapass\WebAuthnAuthentication;
 use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
 use DarkGhostHunter\Larapass\Eloquent\WebAuthnCredential as WebAuthModel;
@@ -12,7 +13,8 @@ use DarkGhostHunter\Larapass\Eloquent\WebAuthnCredential as WebAuthModel;
  */
 class TestWebAuthnUser extends User implements WebAuthnAuthenticatable
 {
-    use WebAuthnAuthentication;
+    use WebAuthnAuthentication,
+        Notifiable;
 
     protected $table = 'users';
 
