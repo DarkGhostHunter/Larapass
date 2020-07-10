@@ -258,7 +258,7 @@ class Larapass
      *
      * @param data {{string}}
      * @param headers {{string}}
-     * @returns Promise<any>
+     * @returns Promise<JSON|ReadableStream>
      */
     async login(data = {}, headers = {})
     {
@@ -279,7 +279,7 @@ class Larapass
      *
      * @param data {{string}}
      * @param headers {{string}}
-     * @returns Promise<any>
+     * @returns Promise<JSON|ReadableStream>
      */
     async register(data = {}, headers = {})
     {
