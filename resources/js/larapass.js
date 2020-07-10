@@ -229,16 +229,16 @@ class Larapass
     /**
      * Handles the response from the Server.
      *
-     * Throws the response if is not OK (HTTP 2XX).
+     * Throws the entire response if is not OK (HTTP 2XX).
      *
      * @param response {Response}
-     * @returns Response
+     * @returns Promise<any>
      * @throws Response
      */
     static #handleResponse(response)
     {
         if (response.ok) {
-            return response;
+            return response.json();
         }
 
         throw response;
@@ -251,7 +251,7 @@ class Larapass
      *
      * @param data {{string}}
      * @param headers {{string}}
-     * @returns {Promise<Response>}
+     * @returns Promise<any>
      */
     async login(data = {}, headers = {})
     {
@@ -272,7 +272,7 @@ class Larapass
      *
      * @param data {{string}}
      * @param headers {{string}}
-     * @returns {Promise<Response>}
+     * @returns Promise<any>
      */
     async register(data = {}, headers = {})
     {
