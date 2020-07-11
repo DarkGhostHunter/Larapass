@@ -120,7 +120,7 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
     /**
      * Returns the credential ID encoded in BASE64.
      *
-     * @return false
+     * @return string
      */
     public function getPrettyIdAttribute()
     {

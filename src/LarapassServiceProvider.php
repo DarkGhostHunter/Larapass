@@ -135,6 +135,7 @@ class LarapassServiceProvider extends ServiceProvider
                 $app['log']
             );
         });
+if (!$this->app['config']->get('larapass.relaying_party.name')) return;
 
         $this->app->bind(PublicKeyCredentialRpEntity::class, static function ($app) {
             $config = $app['config'];

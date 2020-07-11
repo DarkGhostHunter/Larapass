@@ -80,7 +80,7 @@ class WebAuthnAttestValidator extends WebAuthnAttestCreator
      * @param  \Illuminate\Contracts\Auth\Authenticatable|\DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable  $user
      * @return bool|\Webauthn\PublicKeyCredentialSource
      */
-    public function validate(array $data, WebAuthnAuthenticatable $user)
+    public function validate(array $data, $user)
     {
         if (! $attestation = $this->retrieveAttestation($user)) {
             return false;
