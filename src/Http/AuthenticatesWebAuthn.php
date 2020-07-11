@@ -97,7 +97,7 @@ trait AuthenticatesWebAuthn
     protected function hasRemember(Request $request)
     {
         return filter_var($request->header('WebAuthn-Remember'), FILTER_VALIDATE_BOOLEAN)
-            ?: $request->filled('remember')
+            ?: $request->filled('remember');
     }
 
     /**
