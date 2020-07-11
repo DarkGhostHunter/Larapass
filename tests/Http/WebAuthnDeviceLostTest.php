@@ -125,6 +125,22 @@ class WebAuthnDeviceLostTest extends TestCase
         ]);
     }
 
+    public function test_sends_recovery_email_using_json()
+    {
+        $notification = Notification::fake();
+
+        $this->postJson('webauthn/lost', [
+            'email' => 'john.doe@mail.com'
+        ])
+            ->assertSeeText(trans('larapass::recovery.sent'));
+
+        $notification->assertSentTo(TestWebAuthnUser::first(), AccountRecoveryNotification::class);
+
+        $this->assertDatabaseHas('web_authn_recoveries', [
+            'email' => 'john.doe@mail.com'
+        ]);
+    }
+
     public function test_error_if_email_invalid()
     {
         $notification = Notification::fake();
@@ -136,6 +152,11 @@ class WebAuthnDeviceLostTest extends TestCase
         ])
             ->assertRedirect(route('webauthn.lost.form'))
             ->assertSessionHasErrors(['email']);
+
+        $this->postJson('webauthn/lost', [
+            'email' => 'invalid'
+        ])
+            ->assertSeeText('The given data was invalid');
 
         $notification->assertNothingSent();
 
@@ -155,6 +176,11 @@ class WebAuthnDeviceLostTest extends TestCase
         ])
             ->assertRedirect(route('webauthn.lost.form'))
             ->assertSessionHasErrors(['email']);
+
+        $this->postJson('webauthn/lost', [
+            'email' => 'foo@bar.com'
+        ])
+            ->assertSeeText('The given data was invalid');
 
         $notification->assertNothingSent();
 
@@ -190,6 +216,11 @@ class WebAuthnDeviceLostTest extends TestCase
         ])
             ->assertRedirect(route('webauthn.lost.form'))
             ->assertSessionHasErrors(['email']);
+
+        $this->postJson('webauthn/lost', [
+            'email' => 'john.doe@mail.com'
+        ])
+            ->assertSeeText(trans('larapass::recovery.throttled'));
     }
 
     public function test_error_if_no_broker_is_set()
