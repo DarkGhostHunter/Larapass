@@ -106,6 +106,10 @@ class WebAuthnConfirmTest extends TestCase
             ->assertRedirect('webauthn/confirm');
 
         $this->actingAs($this->user)
+            ->getJson('intended')
+            ->assertSeeText('Authenticator assertion required.');
+
+        $this->actingAs($this->user)
             ->followingRedirects()
             ->get('intended')
             ->assertViewIs('larapass::confirm')

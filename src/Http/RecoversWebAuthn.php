@@ -120,7 +120,7 @@ trait RecoversWebAuthn
     protected function shouldDisableAllCredentials(Request $request)
     {
         return filter_var($request->header('WebAuthn-Unique'), FILTER_VALIDATE_BOOLEAN)
-            ?? $request->filled('unique');
+            ?: $request->filled('unique');
     }
 
     /**
