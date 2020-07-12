@@ -26,7 +26,6 @@
         "nyholm/psr7": "^1.3"
     },
     "require-dev": {
-        "nunomaduro/larastan": "^0.6.1",
         "orchestra/testbench": "^5.0",
         "phpunit/phpunit": "^8.5||^9.0"
     },
