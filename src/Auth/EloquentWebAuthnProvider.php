@@ -87,7 +87,7 @@ class EloquentWebAuthnProvider extends EloquentUserProvider
      * @param  array  $credentials
      * @return bool
      */
-    public function validateCredentials(UserContract $user, array $credentials)
+    public function validateCredentials($user, array $credentials)
     {
         if ($this->isSignedChallenge($credentials)) {
             return (bool)$this->validator->validate($credentials);

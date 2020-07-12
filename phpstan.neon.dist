@@ -1,0 +1,9 @@
+includes:
+    - vendor/nunomaduro/larastan/extension.neon
+parameters:
+    bootstrapFiles:
+        - tests/phpstan/bootstrap.php
+        - tests/phpstan/User.php
+    level: 5
+    paths:
+        - src/
