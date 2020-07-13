@@ -82,7 +82,7 @@ class WebAuthnAssertValidator
     /**
      * If the login should require explicit User verification.
      *
-     * @var bool
+     * @var string
      */
     protected $verifyLogin;
 

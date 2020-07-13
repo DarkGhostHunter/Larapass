@@ -66,7 +66,7 @@ class WebAuthnAttestCreator
     /**
      * If the devices should be further verified.
      *
-     * @var bool
+     * @var string
      */
     protected $conveyance;
 
@@ -122,7 +122,7 @@ class WebAuthnAttestCreator
      * @param  \Illuminate\Contracts\Auth\Authenticatable|\DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable  $user
      * @return \Webauthn\PublicKeyCredentialCreationOptions|null
      */
-    public function retrieveAttestation(WebAuthnAuthenticatable $user)
+    public function retrieveAttestation($user)
     {
         return $this->cache->get($this->cacheKey($user));
     }
@@ -133,7 +133,7 @@ class WebAuthnAttestCreator
      * @param  \Illuminate\Contracts\Auth\Authenticatable|\DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable  $user
      * @return mixed|\Webauthn\PublicKeyCredentialCreationOptions
      */
-    public function generateAttestation(WebAuthnAuthenticatable $user)
+    public function generateAttestation($user)
     {
         $attestation = $this->makeAttestationRequest($user);
 

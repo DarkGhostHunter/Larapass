@@ -31,12 +31,12 @@
     },
     "autoload": {
         "psr-4": {
-            "DarkGhostHunter\\Larapass\\": "src"
+            "DarkGhostHunter\\Larapass\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests"
+            "Tests\\": "tests/"
         }
     },
     "scripts": {

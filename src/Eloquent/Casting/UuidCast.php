@@ -28,12 +28,12 @@ class UuidCast implements CastsAttributes
      * @param  string  $key
      * @param  mixed  $value
      * @param  array  $attributes
-     * @return \Ramsey\Uuid\UuidInterface
+     * @return array|string
      */
     public function set($model, string $key, $value, array $attributes)
     {
-        return mb_strlen($value, '8bit') === 36
+        return (mb_strlen($value, '8bit') === 36
             ? Uuid::fromString($value)
-            : Uuid::fromBytes(base64_decode($value, true));
+            : Uuid::fromBytes(base64_decode($value, true)))->toString();
     }
 }

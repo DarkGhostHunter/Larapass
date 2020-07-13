@@ -77,7 +77,9 @@ trait RecoversWebAuthn
         ], $this->rules())->validate();
 
         $response = WebAuthn::recover($credentials, function ($user) use ($request) {
-            $this->register($request, $user);
+            if (! $this->register($request, $user)) {
+                $this->sendRecoveryFailedResponse($request, 'larapass::recovery.failed');
+            }
         });
 
         return $response === WebAuthn::RECOVERY_ATTACHED
@@ -90,7 +92,7 @@ trait RecoversWebAuthn
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable  $user
-     * @return void
+     * @return bool
      */
     protected function register(Request $request, WebAuthnAuthenticatable $user)
     {
@@ -108,7 +110,11 @@ trait RecoversWebAuthn
             event(new AttestationSuccessful($user, $validCredential));
 
             $this->guard()->login($user);
+
+            return true;
         }
+
+        return false;
     }
 
     /**
@@ -143,6 +149,7 @@ trait RecoversWebAuthn
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  string  $response
+     * @return \Illuminate\Http\JsonResponse|void
      * @throws \Illuminate\Validation\ValidationException
      */
     protected function sendRecoveryFailedResponse(Request $request, $response)

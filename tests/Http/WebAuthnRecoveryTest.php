@@ -404,7 +404,7 @@ class WebAuthnRecoveryTest extends TestCase
         ])->assertStatus(422);
     }
 
-    public function test_attestation_fails_and_recovery_is_deleted_anyway()
+    public function test_attestation_fails_and_recovery_is_not_deleted()
     {
         DB::table('web_authn_recoveries')->insert([
             'email'      => 'john.doe@mail.com',
@@ -428,14 +428,11 @@ class WebAuthnRecoveryTest extends TestCase
         $this->postJson('webauthn/recover/register', $data, [
             'email'           => 'john.doe@mail.com',
             'token'           => 'test_token',
-            'WebAuthn-Unique' => 'on',
+            'WebAuthn-Unique' => 'true',
         ])
-            ->assertOk()
-            ->assertJson([
-                'redirectTo' => '/home',
-            ]);
+            ->assertStatus(422);
 
-        $this->assertDatabaseMissing('web_authn_recoveries', [
+        $this->assertDatabaseHas('web_authn_recoveries', [
             'email' => 'john.doe@mail.com',
         ]);
 
