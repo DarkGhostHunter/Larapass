@@ -54,7 +54,7 @@ class CreateWebAuthnTables extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('web_authn_authentications');
+        Schema::dropIfExists('web_authn_credentials');
         Schema::dropIfExists('web_authn_recoveries');
     }
 }
