@@ -153,14 +153,15 @@ You will receive the `vendor/larapass/js/larapass.js` file which you can include
 ```html
 <script src="{{ asset('vendor/larapass/js/larapass.js') }}"></script>
 
-<!-- Registering users -->
+<!-- Registering credentials -->
 <script>
-    const register = () => {
+    const register = (event) => {
+        event.preventDefault()
         new Larapass({
             register: 'webauthn/register',
             registerOptions: 'webauthn/register/options'
         }).register()
-          .then(response => window.location.href = 'https://myapp.com/devices')
+          .then(response => alert('Registration successful!'))
           .catch(response => alert('Something went wrong, try again!'))
     }
 
@@ -169,13 +170,14 @@ You will receive the `vendor/larapass/js/larapass.js` file which you can include
 
 <!-- Login users -->
 <script>
-    const login = () => {
+    const login = (event) => {
+        event.preventDefault()
         new Larapass({
             login: 'webauthn/register',
             loginOptions: 'webauthn/register/options'
         }).login({
-            email: document.getElementById('email').value,
-        }).then(response => window.location.href = 'https://myapp.com/account')
+            email: document.getElementById('email').value
+        }).then(response => alert('Authentication successful!'))
           .catch(error => alert('Something went wrong, try again!'))
     }
 
@@ -183,7 +185,7 @@ You will receive the `vendor/larapass/js/larapass.js` file which you can include
 </script>
 ```
 
-You can bypass the route list declaration if you're using the defaults. The example above includes them just for show.
+> You can bypass the route list declaration if you're using the defaults. The example above includes them just for show. Be sure to create modify this script for your needs.
 
 Also, the helper allows headers on the action request, on both registration and login.
 
@@ -194,7 +196,7 @@ new Larapass({
 }).login({
     email: document.getElementById('email').value,
 }, {
-    myHeader: 'This is sent with the signed challenge',
+    'My-Custom-Header': 'This is sent with the signed challenge',
 })
 ```
 
