@@ -36,6 +36,14 @@ class Larapass
     };
 
     /**
+     * If set to true, the credentials option will be set to 'include', on all fetch calls,
+     * else it will use the default 'same-origin'. Use this if the backend is not on the same origin as the client or CSFR protection will break
+     *
+     * @type {boolean}
+     */
+    includeCredentials = false
+
+    /**
      * Routes for WebAuthn assertion (login) and attestation (register).
      *
      * @type {{registerOptions: string, loginOptions: string, login: string, register: string}}
@@ -52,8 +60,9 @@ class Larapass
      *
      * @param routes {{registerOptions: string, loginOptions: string, login: string, register: string}}
      * @param headers {{string}}
+     * @param includeCredentials {{boolean}}`
      */
-    constructor(routes = {}, headers = {})
+    constructor(routes = {}, headers = {}, includeCredentials = false)
     {
         this.routes = {...this.routes, ...routes};
 
@@ -61,6 +70,8 @@ class Larapass
             ...this.headers,
             ...headers
         }
+        
+        this.includeCredentials = includeCredentials
 
         // If the developer didn't issue an XSRF token, we will find it ourselves.
         if (headers['X-XSRF-TOKEN'] === undefined) {
@@ -105,7 +116,7 @@ class Larapass
     {
         return fetch(route, {
             method: 'POST',
-            credentials: 'same-origin',
+            credentials: this.includeCredentials ? 'include' : 'same-origin',
             redirect: 'error',
             headers: {...this.headers, ...headers},
             body: JSON.stringify(data)
