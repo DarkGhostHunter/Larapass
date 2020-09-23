@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 use Orchestra\Testbench\TestCase;
 use Illuminate\Support\Facades\DB;
 use Tests\RunsPublishableMigrations;
-use Ramsey\Uuid\Rfc4122\UuidInterface;
+use Ramsey\Uuid\UuidInterface;
 use Webauthn\TrustPath\EmptyTrustPath;
 use Webauthn\PublicKeyCredentialSource;
 use Webauthn\PublicKeyCredentialUserEntity;
@@ -129,12 +129,14 @@ class WebAuthnAuthenticationTest extends TestCase
             'disabled_at'      => null,
         ]);
 
-        $this->assertInstanceOf(PublicKeyCredentialSource::class,
+        $this->assertInstanceOf(
+            PublicKeyCredentialSource::class,
             $source = $model->findOneByCredentialId('test_credential_id')
         );
 
         $this->assertSame(
-            'test_credential_id', $source->getPublicKeyCredentialId()
+            'test_credential_id',
+            $source->getPublicKeyCredentialId()
         );
     }
 
@@ -143,7 +145,9 @@ class WebAuthnAuthenticationTest extends TestCase
         $model = WebAuthnCredential::make();
 
         $entity = new PublicKeyCredentialUserEntity(
-            'test_name', 'test_id', 'test_display_name'
+            'test_name',
+            'test_id',
+            'test_display_name'
         );
 
         $this->assertEmpty($model->findAllForUserEntity($entity));
@@ -166,7 +170,8 @@ class WebAuthnAuthenticationTest extends TestCase
 
         $this->assertCount(1, $model->findAllForUserEntity($entity));
         $this->assertSame(
-            'test_credential_id', $model->findAllForUserEntity($entity)[0]->getPublicKeyCredentialId()
+            'test_credential_id',
+            $model->findAllForUserEntity($entity)[0]->getPublicKeyCredentialId()
         );
     }
 
