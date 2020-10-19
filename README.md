@@ -173,8 +173,8 @@ You will receive the `vendor/larapass/js/larapass.js` file which you can include
     const login = (event) => {
         event.preventDefault()
         new Larapass({
-            login: 'webauthn/register',
-            loginOptions: 'webauthn/register/options'
+            login: 'webauthn/login',
+            loginOptions: 'webauthn/login/options'
         }).login({
             email: document.getElementById('email').value
         }).then(response => alert('Authentication successful!'))
@@ -191,8 +191,8 @@ Also, the helper allows headers on the action request, on both registration and 
 
 ```javascript
 new Larapass({
-    login: 'webauthn/register',
-    loginOptions: 'webauthn/register/options'
+    login: 'webauthn/login',
+    loginOptions: 'webauthn/login/options'
 }).login({
     email: document.getElementById('email').value,
 }, {
