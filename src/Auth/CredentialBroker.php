@@ -48,9 +48,10 @@ class CredentialBroker extends PasswordBroker
      * Send a password reset link to a user.
      *
      * @param  array  $credentials
+     * @param  \Closure|null  $callback
      * @return string
      */
-    public function sendResetLink(array $credentials)
+    public function sendResetLink(array $credentials, Closure $callback = null)
     {
         $user = $this->getUser($credentials);
 
@@ -62,9 +63,13 @@ class CredentialBroker extends PasswordBroker
             return static::RESET_THROTTLED;
         }
 
-        $user->sendCredentialRecoveryNotification(
-            $this->tokens->create($user)
-        );
+        $token = $this->tokens->create($user);
+
+        if ($callback) {
+            $callback($user, $token);
+        } else {
+            $user->sendCredentialRecoveryNotification($token);
+        }
 
         return static::RESET_LINK_SENT;
     }
