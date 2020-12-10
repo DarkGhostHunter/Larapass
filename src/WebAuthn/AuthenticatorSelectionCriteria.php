@@ -13,7 +13,7 @@ class AuthenticatorSelectionCriteria extends WebAuthnAuthenticatorSelectionCrite
      *
      * @param  string  $type
      */
-    public function setResidentKey(string $type)
+    public function setResidentKey(?string $type) : WebAuthnAuthenticatorSelectionCriteria
     {
         if (! in_array($type, [self::USER_VERIFICATION_REQUIREMENT_REQUIRED,
             self::USER_VERIFICATION_REQUIREMENT_PREFERRED,
@@ -22,9 +22,11 @@ class AuthenticatorSelectionCriteria extends WebAuthnAuthenticatorSelectionCrite
         }
 
         $this->residentKey = $type;
+
+        return $this;
     }
 
-    public function getResidentKey()
+    public function getResidentKey() : ?string
     {
         return $this->residentKey;
     }

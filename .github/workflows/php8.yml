@@ -1,4 +1,4 @@
-name: PHP Composer (PHP 7.3 and 7,4 support)
+name: PHP Composer (PHP 8 support)
 
 on:
   push:
@@ -9,11 +9,11 @@ jobs:
 
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
-        php: [7.4, 7.3]
+        php: [8.0]
         laravel: [8.*]
-        dependency-version: [prefer-lowest, prefer-stable]
+        dependency-version: [--prefer-lowest, --prefer-stable]
         include:
           - laravel: 8.*
             testbench: 6.*
@@ -41,7 +41,7 @@ jobs:
     - name: Install dependencies
       run: |
           composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-progress --no-update
-          composer update --${{ matrix.dependency-version }} --prefer-dist --no-progress
+          composer update ${{ matrix.dependency-version }} --prefer-dist --no-progress
 
     - name: Run Tests
       run: composer run-script test
