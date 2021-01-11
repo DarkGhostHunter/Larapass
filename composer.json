@@ -28,7 +28,8 @@
     "require-dev": {
         "phpunit/phpunit": "^8.5||^9.0",
         "laravel/framework": "8.*",
-        "orchestra/testbench": "^6.7.2"
+		"orchestra/testbench": "^6.7.2",
+		"thecodingmachine/safe": "^1.2.0"
     },
     "autoload": {
         "psr-4": {
