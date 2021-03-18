@@ -68,11 +68,9 @@ class WebAuthnLoginTest extends TestCase
     {
         $options = new PublicKeyCredentialRequestOptions(
             $challenge = random_bytes(16),
-            60000,
-            'test_id',
-            [],
-            true
+            60000
         );
+        $options->setRpId('test_id')->allowCredentials([])->setUserVerification($options::USER_VERIFICATION_REQUIREMENT_REQUIRED);
 
         $this->mock(WebAuthnAssertValidator::class)
             ->shouldReceive('generateAssertion')
@@ -82,7 +80,7 @@ class WebAuthnLoginTest extends TestCase
         $this->post('webauthn/login/options')->assertExactJson([
             'challenge'        => Base64Url::encode($challenge),
             'rpId'             => 'test_id',
-            'userVerification' => '1',
+            'userVerification' => 'required',
             'timeout'          => 60000,
         ]);
     }
