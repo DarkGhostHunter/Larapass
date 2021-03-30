@@ -52,14 +52,14 @@ trait ManagesCredentialRepository
     public static function fromCredentialSource(CredentialSource $source)
     {
         return ($model = new static)->fill([
-            $model->getKeyName()    => $source->getPublicKeyCredentialId(),
+            $model->getKeyName()    => Base64Url::encode($source->getPublicKeyCredentialId()),
             'user_handle'           => $source->getUserHandle(),
             'type'                  => $source->getType(),
             'transports'            => $source->getTransports(),
             'attestation_type'      => $source->getAttestationType(),
             'trust_path'            => $source->getTrustPath()->jsonSerialize(),
             'aaguid'                => $source->getAaguid()->toString(),
-            'public_key'            => $source->getCredentialPublicKey(),
+            'public_key'            => Base64Url::encode($source->getCredentialPublicKey()),
             'counter'               => $source->getCounter(),
         ]);
     }
