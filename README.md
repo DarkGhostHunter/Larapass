@@ -127,14 +127,17 @@ Finally, you will need to add the routes for registering and authenticating user
 You can copy-paste these route definitions in your `routes/web.php` file. 
 
 ```php
-Route::post('webauthn/register/options', 'Auth\WebAuthnRegisterController@options')
+use App\Http\Controllers\Auth\WebAuthnRegisterController;
+use App\Http\Controllers\Auth\WebAuthnLoginController;
+
+Route::post('webauthn/register/options', [WebAuthnRegisterController::class, 'options'])
      ->name('webauthn.register.options');
-Route::post('webauthn/register', 'Auth\WebAuthnRegisterController@register')
+Route::post('webauthn/register', [WebAuthnRegisterController::class, 'register'])
      ->name('webauthn.register');
 
-Route::post('webauthn/login/options', 'Auth\WebAuthnLoginController@options')
+Route::post('webauthn/login/options', [WebAuthnLoginController::class, 'options'])
      ->name('webauthn.login.options');
-Route::post('webauthn/login', 'Auth\WebAuthnLoginController@login')
+Route::post('webauthn/login', [WebAuthnLoginController::class, 'login'])
      ->name('webauthn.login');
 ```
 
@@ -223,16 +226,19 @@ Alternatively, you can add the `remember` key to the outgoing JSON Payload if yo
 Probably you will want to offer a way to "recover" an account if the user loses his credentials, which is basically a way to attach a new one. You can use controllers [which are also published](#4-register-the-routes-optional), along with these routes:
 
 ```php
-Route::get('webauthn/lost', 'Auth\WebAuthnDeviceLostController@showDeviceLostForm')
+use App\Http\Controllers\Auth\WebAuthnDeviceLostController;
+use App\Http\Controllers\Auth\WebAuthnRecoveryController;
+
+Route::get('webauthn/lost', [WebAuthnDeviceLostController::class, 'showDeviceLostForm'])
      ->name('webauthn.lost.form');
-Route::post('webauthn/lost', 'Auth\WebAuthnDeviceLostController@sendRecoveryEmail')
+Route::post('webauthn/lost', [WebAuthnDeviceLostController::class, 'sendRecoveryEmail'])
      ->name('webauthn.lost.send');
 
-Route::get('webauthn/recover', 'Auth\WebAuthnRecoveryController@showResetForm')
+Route::get('webauthn/recover', [WebAuthnRecoveryController::class, 'showResetForm'])
      ->name('webauthn.recover.form');
-Route::post('webauthn/recover/options', 'Auth\WebAuthnRecoveryController@options')
+Route::post('webauthn/recover/options', [WebAuthnRecoveryController::class, 'options'])
      ->name('webauthn.recover.options');
-Route::post('webauthn/recover/register', 'Auth\WebAuthnRecoveryController@recover')
+Route::post('webauthn/recover/register', [WebAuthnRecoveryController::class, 'recover'])
      ->name('webauthn.recover');
 ```
 
