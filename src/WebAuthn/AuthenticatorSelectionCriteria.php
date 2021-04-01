@@ -2,29 +2,40 @@
 
 namespace DarkGhostHunter\Larapass\WebAuthn;
 
+use RuntimeException;
 use Webauthn\AuthenticatorSelectionCriteria as WebAuthnAuthenticatorSelectionCriteria;
 
 class AuthenticatorSelectionCriteria extends WebAuthnAuthenticatorSelectionCriteria
 {
-    private $residentKey;
+    private ?string $residentKey = null;
 
     /**
      * Sets the Resident Key variable.
      *
-     * @param  string  $type
+     * @param  string|null  $residentKey
+     *
+     * @return \DarkGhostHunter\Larapass\WebAuthn\AuthenticatorSelectionCriteria
      */
-    public function setResidentKey(string $type)
+    public function setResidentKey(?string $residentKey): AuthenticatorSelectionCriteria
     {
-        if (! in_array($type, [self::USER_VERIFICATION_REQUIREMENT_REQUIRED,
-            self::USER_VERIFICATION_REQUIREMENT_PREFERRED,
-            self::USER_VERIFICATION_REQUIREMENT_DISCOURAGED], false)) {
-            throw new \RuntimeException("The {$type} as Resident Key option is unsupported.");
+        if (!in_array(
+            $residentKey,
+            [
+                self::RESIDENT_KEY_REQUIREMENT_REQUIRED,
+                self::RESIDENT_KEY_REQUIREMENT_PREFERRED,
+                self::RESIDENT_KEY_REQUIREMENT_DISCOURAGED,
+            ],
+            false
+        )) {
+            throw new RuntimeException("The {$residentKey} as Resident Key option is unsupported.");
         }
 
-        $this->residentKey = $type;
+        $this->residentKey = $residentKey;
+
+        return $this;
     }
 
-    public function getResidentKey()
+    public function getResidentKey(): ?string
     {
         return $this->residentKey;
     }
@@ -32,7 +43,7 @@ class AuthenticatorSelectionCriteria extends WebAuthnAuthenticatorSelectionCrite
     /**
      * @return array<string, mixed>
      */
-    public function jsonSerialize() : array
+    public function jsonSerialize(): array
     {
         $serialied = parent::jsonSerialize();
 

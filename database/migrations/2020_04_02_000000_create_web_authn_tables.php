@@ -1,9 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Database\Migrations\Migration;
 use DarkGhostHunter\Larapass\Eloquent\WebAuthnCredential;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateWebAuthnTables extends Migration
 {
@@ -15,7 +15,8 @@ class CreateWebAuthnTables extends Migration
     public function up()
     {
         Schema::create('web_authn_credentials', function (Blueprint $table) {
-            $table->binary('id');
+
+            $table->string('id', 255);
 
             // Change accordingly for your users table if you need to.
             $table->unsignedBigInteger('user_id');
@@ -54,7 +55,7 @@ class CreateWebAuthnTables extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('web_authn_authentications');
+        Schema::dropIfExists('web_authn_credentials');
         Schema::dropIfExists('web_authn_recoveries');
     }
 }

@@ -2,34 +2,34 @@
 
 namespace Tests\WebAuthn;
 
-use Mockery;
+use Base64Url\Base64Url;
+use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAssertValidator;
 use Exception;
+use Illuminate\Cache\Repository;
+use Illuminate\Contracts\Cache\Factory as CacheFactoryContract;
+use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
+use InvalidArgumentException;
+use Mockery;
+use Orchestra\Testbench\TestCase;
+use Psr\Http\Message\ServerRequestInterface;
 use Ramsey\Uuid\Uuid;
 use Tests\RegistersPackage;
-use Illuminate\Support\Str;
-use Illuminate\Support\Arr;
-use Illuminate\Http\Request;
-use InvalidArgumentException;
-use Illuminate\Cache\Repository;
-use Orchestra\Testbench\TestCase;
-use Tests\Stubs\TestWebAuthnUser;
-use Webauthn\PublicKeyCredential;
-use Illuminate\Support\Facades\DB;
-use Webauthn\AuthenticatorResponse;
 use Tests\RunsPublishableMigrations;
+use Tests\Stubs\TestWebAuthnUser;
 use Webauthn\AttestedCredentialData;
-use Illuminate\Support\Facades\Route;
-use Webauthn\TrustPath\EmptyTrustPath;
-use Webauthn\PublicKeyCredentialLoader;
-use Webauthn\PublicKeyCredentialSource;
 use Webauthn\AuthenticatorAssertionResponse;
-use Psr\Http\Message\ServerRequestInterface;
-use Webauthn\PublicKeyCredentialRequestOptions;
-use Webauthn\PublicKeyCredentialSourceRepository;
 use Webauthn\AuthenticatorAssertionResponseValidator;
-use DarkGhostHunter\Larapass\Exceptions\WebAuthnException;
-use Illuminate\Contracts\Cache\Factory as CacheFactoryContract;
-use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAssertValidator;
+use Webauthn\AuthenticatorResponse;
+use Webauthn\PublicKeyCredential;
+use Webauthn\PublicKeyCredentialLoader;
+use Webauthn\PublicKeyCredentialRequestOptions;
+use Webauthn\PublicKeyCredentialSource;
+use Webauthn\PublicKeyCredentialSourceRepository;
+use Webauthn\TrustPath\EmptyTrustPath;
 
 class WebAuthnAssertionTest extends TestCase
 {
@@ -84,8 +84,9 @@ class WebAuthnAssertionTest extends TestCase
         $this->assertInstanceOf(PublicKeyCredentialRequestOptions::class, $result);
 
         $firstCredential = Arr::first($result->getAllowCredentials());
+
         $this->assertSame('public_key', $firstCredential->getType());
-        $this->assertSame('test_credential_foo', $firstCredential->getId());
+        $this->assertSame('test_credential_foo', Base64Url::encode($firstCredential->getId()));
         $this->assertCount(0, $result->getExtensions());
         $this->assertSame(60000, $result->getTimeout());
         $this->assertSame('preferred', $result->getUserVerification());
@@ -148,21 +149,18 @@ class WebAuthnAssertionTest extends TestCase
         $cache = $this->mock(Repository::class);
 
         $cache->shouldReceive('forget');
-        $cache->shouldReceive('get')->andReturn(
-            $options = new PublicKeyCredentialRequestOptions(
-                random_bytes(16),
-                60000,
-                'test_id',
-                [],
-                true
-            )
-        );
+        $options = new PublicKeyCredentialRequestOptions(
+            random_bytes(16),
+            60000);
+        $options->setRpId('test_id')->allowCredentials([])->setUserVerification($options::USER_VERIFICATION_REQUIREMENT_REQUIRED);
+        $cache->shouldReceive('get')->andReturn($options);
 
         $this->mock(CacheFactoryContract::class)
             ->shouldReceive('store')
             ->with(null)
             ->andReturn($cache);
 
+        /** @var AuthenticatorAssertionResponse */
         $response = Mockery::mock(AuthenticatorAssertionResponse::class);
 
         $credential = new PublicKeyCredential(
@@ -214,21 +212,18 @@ class WebAuthnAssertionTest extends TestCase
         $cache = $this->mock(Repository::class);
 
         $cache->shouldReceive('forget');
-        $cache->shouldReceive('get')->andReturn(
-            $options = new PublicKeyCredentialRequestOptions(
-                random_bytes(16),
-                60000,
-                'test_id',
-                [],
-                true
-            )
-        );
+        $options = new PublicKeyCredentialRequestOptions(
+            random_bytes(16),
+            60000);
+        $options->setRpId('test_id')->allowCredentials([])->setUserVerification($options::USER_VERIFICATION_REQUIREMENT_REQUIRED);
+        $cache->shouldReceive('get')->andReturn($options);
 
         $this->mock(CacheFactoryContract::class)
             ->shouldReceive('store')
             ->with(null)
             ->andReturn($cache);
 
+        /** @var AuthenticatorAssertionResponse */
         $response = Mockery::mock(AuthenticatorAssertionResponse::class);
 
         $credential = new PublicKeyCredential(
@@ -313,21 +308,18 @@ class WebAuthnAssertionTest extends TestCase
         $cache = $this->mock(Repository::class);
 
         $cache->shouldReceive('forget');
-        $cache->shouldReceive('get')->andReturn(
-            $options = new PublicKeyCredentialRequestOptions(
-                random_bytes(16),
-                60000,
-                'test_id',
-                [],
-                true
-            )
-        );
+        $options = new PublicKeyCredentialRequestOptions(
+            random_bytes(16),
+            60000);
+        $options->setRpId('test_id')->allowCredentials([])->setUserVerification($options::USER_VERIFICATION_REQUIREMENT_REQUIRED);
+        $cache->shouldReceive('get')->andReturn($options);
 
         $this->mock(CacheFactoryContract::class)
             ->shouldReceive('store')
             ->with(null)
             ->andReturn($cache);
 
+        /** @var PublicKeyCredential */
         $credential = Mockery::mock(PublicKeyCredential::class);
         $credential->shouldReceive('getResponse')
             ->andReturn(new class extends AuthenticatorResponse {
@@ -364,21 +356,18 @@ class WebAuthnAssertionTest extends TestCase
         $cache = $this->mock(Repository::class);
 
         $cache->shouldReceive('forget');
-        $cache->shouldReceive('get')->andReturn(
-            $options = new PublicKeyCredentialRequestOptions(
-                random_bytes(16),
-                60000,
-                'test_id',
-                [],
-                true
-            )
-        );
+        $options = new PublicKeyCredentialRequestOptions(
+            random_bytes(16),
+            60000);
+        $options->setRpId('test_id')->allowCredentials([])->setUserVerification($options::USER_VERIFICATION_REQUIREMENT_REQUIRED);
+        $cache->shouldReceive('get')->andReturn($options);
 
         $this->mock(CacheFactoryContract::class)
             ->shouldReceive('store')
             ->with(null)
             ->andReturn($cache);
 
+        /** @var AuthenticatorAssertionResponse */
         $response = Mockery::mock(AuthenticatorAssertionResponse::class);
 
         $credential = new PublicKeyCredential(
@@ -432,15 +421,11 @@ class WebAuthnAssertionTest extends TestCase
         $cache = $this->mock(Repository::class);
 
         $cache->shouldReceive('forget');
-        $cache->shouldReceive('get')->andReturn(
-            $options = new PublicKeyCredentialRequestOptions(
-                random_bytes(16),
-                60000,
-                'test_id',
-                [],
-                true
-            )
-        );
+        $options = new PublicKeyCredentialRequestOptions(
+            random_bytes(16),
+            60000);
+        $options->setRpId('test_id')->allowCredentials([])->setUserVerification($options::USER_VERIFICATION_REQUIREMENT_REQUIRED);
+        $cache->shouldReceive('get')->andReturn($options);
 
         $this->mock(CacheFactoryContract::class)
             ->shouldReceive('store')
@@ -449,6 +434,7 @@ class WebAuthnAssertionTest extends TestCase
 
         $response = Mockery::mock(AuthenticatorAssertionResponse::class);
 
+        /** @var AuthenticatorAssertionResponse */
         $credential = new PublicKeyCredential(
             'test_credential_id',
             'public-key',
@@ -492,14 +478,11 @@ class WebAuthnAssertionTest extends TestCase
         $cache = $this->mock(Repository::class);
 
         $cache->shouldReceive('forget');
-        $cache->shouldReceive('get')->andReturn(
-            new PublicKeyCredentialRequestOptions(
-                base64_decode('w+BeaUTZZnYMzvUB5GWUpiT1WYOnr9iCGUt5irUiUko='),
-                60000,
-                'webauthn.spomky-labs.com',
-                []
-            )
-        );
+        $options = new PublicKeyCredentialRequestOptions(
+            base64_decode('w+BeaUTZZnYMzvUB5GWUpiT1WYOnr9iCGUt5irUiUko='),
+            60000);
+        $options->setRpId('webauthn.spomky-labs.com')->allowCredentials([]);
+        $cache->shouldReceive('get')->andReturn($options);
 
         $this->mock(CacheFactoryContract::class)
             ->shouldReceive('store')

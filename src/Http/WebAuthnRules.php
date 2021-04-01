@@ -9,14 +9,14 @@ trait WebAuthnRules
      *
      * @return array|string[]
      */
-    protected function attestationRules()
+    protected function attestationRules(): array
     {
         return [
-            'id'                         => 'required|string',
-            'rawId'                      => 'required|string',
+            'id' => 'required|string',
+            'rawId' => 'required|string',
             'response.attestationObject' => 'required|string',
-            'response.clientDataJSON'    => 'required|string',
-            'type'                       => 'required|string',
+            'response.clientDataJSON' => 'required|string',
+            'type' => 'required|string',
         ];
     }
 
@@ -25,16 +25,16 @@ trait WebAuthnRules
      *
      * @return array|string[]
      */
-    protected function assertionRules()
+    protected function assertionRules(): array
     {
         return [
-            'id'                         => 'required|string',
-            'rawId'                      => 'required|string',
+            'id' => 'required|string',
+            'rawId' => 'required|string',
             'response.authenticatorData' => 'required|string',
-            'response.clientDataJSON'    => 'required|string',
-            'response.signature'         => 'required|string',
-            'response.userHandle'        => 'required|string',
-            'type'                       => 'required|string',
+            'response.clientDataJSON' => 'required|string',
+            'response.signature' => 'required|string',
+            'response.userHandle' => 'sometimes|nullable',
+            'type' => 'required|string',
         ];
     }
 }

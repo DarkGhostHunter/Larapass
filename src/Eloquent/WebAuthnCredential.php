@@ -2,8 +2,8 @@
 
 namespace DarkGhostHunter\Larapass\Eloquent;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webauthn\PublicKeyCredentialSourceRepository;
 
@@ -73,10 +73,10 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
      * @var array
      */
     protected $casts = [
-        'transports'  => 'collection',
-        'counter'     => 'integer',
-        'trust_path'  => Casting\TrustPathCast::class,
-        'aaguid'      => Casting\UuidCast::class,
+        'transports' => 'collection',
+        'counter' => 'integer',
+        'trust_path' => Casting\TrustPathCast::class,
+        'aaguid' => Casting\UuidCast::class,
     ];
 
     /**
@@ -102,9 +102,9 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
      *
      * @return bool
      */
-    public function isEnabled()
+    public function isEnabled(): bool
     {
-        return ! $this->disabled_at;
+        return !$this->disabled_at;
     }
 
     /**
@@ -112,29 +112,30 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
      *
      * @return bool
      */
-    public function isDisabled()
+    public function isDisabled(): bool
     {
-        return ! $this->isEnabled();
-    }
-
-    /**
-     * Returns the credential ID encoded in BASE64.
-     *
-     * @return string
-     */
-    public function getPrettyIdAttribute()
-    {
-        return base64_decode($this->attributes['id']);
+        return !$this->isEnabled();
     }
 
     /**
      * Filter the credentials for those explicitly enabled.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $builder
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeEnabled(Builder $builder)
+    public function scopeEnabled(Builder $builder): Builder
     {
         return $builder->withoutTrashed();
+    }
+
+    /**
+     * Convert the object into something JSON serializable.
+     *
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        return array_merge($this->toArray(), [$this->getKeyName() => $this->getRawOriginal($this->getKeyName())]);
     }
 }

@@ -2,11 +2,10 @@
 
 namespace DarkGhostHunter\Larapass\Auth;
 
-use Illuminate\Auth\EloquentUserProvider;
-use Illuminate\Contracts\Hashing\Hasher as HasherContract;
-use Illuminate\Contracts\Config\Repository as ConfigContract;
-use Illuminate\Contracts\Auth\Authenticatable as UserContract;
 use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAssertValidator;
+use Illuminate\Auth\EloquentUserProvider;
+use Illuminate\Contracts\Config\Repository as ConfigContract;
+use Illuminate\Contracts\Hashing\Hasher as HasherContract;
 
 class EloquentWebAuthnProvider extends EloquentUserProvider
 {
@@ -22,7 +21,7 @@ class EloquentWebAuthnProvider extends EloquentUserProvider
      *
      * @var \DarkGhostHunter\Larapass\WebAuthn\WebAuthnAssertValidator
      */
-    protected $validator;
+    protected WebAuthnAssertValidator $validator;
 
     /**
      * Create a new database user provider.
@@ -32,11 +31,12 @@ class EloquentWebAuthnProvider extends EloquentUserProvider
      * @param  \Illuminate\Contracts\Hashing\Hasher  $hasher
      * @param  string  $model
      */
-    public function __construct(ConfigContract $config,
-                                WebAuthnAssertValidator $validator,
-                                HasherContract $hasher,
-                                $model)
-    {
+    public function __construct(
+        ConfigContract $config,
+        WebAuthnAssertValidator $validator,
+        HasherContract $hasher,
+        string $model
+    ) {
         $this->fallback = $config->get('larapass.fallback');
         $this->validator = $validator;
 
@@ -47,35 +47,26 @@ class EloquentWebAuthnProvider extends EloquentUserProvider
      * Retrieve a user by the given credentials.
      *
      * @param  array  $credentials
+     *
      * @return \Illuminate\Contracts\Auth\Authenticatable|\DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable|null|void
      */
     public function retrieveByCredentials(array $credentials)
     {
-        if ($this->isSignedChallenge($credentials) && $id = $this->binaryID($credentials['rawId'])) {
-            return $this->model::getFromCredentialId($id);
+        if ($this->isSignedChallenge($credentials)) {
+            return $this->model::getFromCredentialId($credentials['id']);
         }
 
         return parent::retrieveByCredentials($credentials);
     }
 
     /**
-     * Transforms the raw ID string into a binary string.
-     *
-     * @param  string  $rawId
-     * @return null|string
-     */
-    protected function binaryID(string $rawId)
-    {
-        return base64_decode(strtr($rawId, '-_', '+/'), true);
-    }
-
-    /**
      * Check if the credentials are for a public key signed challenge
      *
      * @param  array  $credentials
+     *
      * @return bool
      */
-    protected function isSignedChallenge(array $credentials)
+    protected function isSignedChallenge(array $credentials): bool
     {
         return isset($credentials['id'], $credentials['rawId'], $credentials['type'], $credentials['response']);
     }
@@ -85,9 +76,10 @@ class EloquentWebAuthnProvider extends EloquentUserProvider
      *
      * @param  \Illuminate\Contracts\Auth\Authenticatable|\DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable  $user
      * @param  array  $credentials
+     *
      * @return bool
      */
-    public function validateCredentials($user, array $credentials)
+    public function validateCredentials($user, array $credentials): bool
     {
         if ($this->isSignedChallenge($credentials)) {
             return (bool)$this->validator->validate($credentials);

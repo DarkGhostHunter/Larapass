@@ -2,26 +2,26 @@
 
 namespace Tests\Http;
 
-use Ramsey\Uuid\Uuid;
 use Base64Url\Base64Url;
-use Tests\RegistersPackage;
-use Illuminate\Support\Str;
-use Orchestra\Testbench\TestCase;
-use Tests\Stubs\TestWebAuthnUser;
-use Tests\RunsPublishableMigrations;
-use Illuminate\Support\Facades\File;
-use Illuminate\Foundation\Auth\User;
-use Illuminate\Support\Facades\Date;
-use Illuminate\Support\Facades\Event;
-use Webauthn\TrustPath\EmptyTrustPath;
-use Webauthn\PublicKeyCredentialSource;
-use Webauthn\PublicKeyCredentialRpEntity;
-use Webauthn\PublicKeyCredentialUserEntity;
-use Webauthn\PublicKeyCredentialParameters;
-use Webauthn\PublicKeyCredentialCreationOptions;
 use DarkGhostHunter\Larapass\Events\AttestationSuccessful;
 use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAttestCreator;
 use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAttestValidator;
+use Illuminate\Foundation\Auth\User;
+use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
+use Orchestra\Testbench\TestCase;
+use Ramsey\Uuid\Uuid;
+use Tests\RegistersPackage;
+use Tests\RunsPublishableMigrations;
+use Tests\Stubs\TestWebAuthnUser;
+use Webauthn\PublicKeyCredentialCreationOptions;
+use Webauthn\PublicKeyCredentialParameters;
+use Webauthn\PublicKeyCredentialRpEntity;
+use Webauthn\PublicKeyCredentialSource;
+use Webauthn\PublicKeyCredentialUserEntity;
+use Webauthn\TrustPath\EmptyTrustPath;
 
 class WebAuthnRegistrationTest extends TestCase
 {
@@ -158,8 +158,8 @@ class WebAuthnRegistrationTest extends TestCase
         $this->mock(WebAuthnAttestValidator::class)
             ->shouldReceive('validate')
             ->with($data = [
-                'id'       => 'test_id',
-                'rawId'    => Base64Url::encode('test_id'),
+                'id'       => 'dGVzdF9jcmVkZW50aWFsX2lk',
+                'rawId'    => 'ZEdWemRGOWpjbVZrWlc1MGFXRnNYMmxr',
                 'response' => [
                     'attestationObject' => 'test',
                     'clientDataJSON'    => 'test',
@@ -168,7 +168,7 @@ class WebAuthnRegistrationTest extends TestCase
             ], $user)
             ->andReturnUsing(function (array $data) {
                 return new PublicKeyCredentialSource(
-                    $data['rawId'],
+                    'dGVzdF9jcmVkZW50aWFsX2lk',
                     'test_type',
                     [],
                     'test_attestation',
@@ -185,7 +185,7 @@ class WebAuthnRegistrationTest extends TestCase
         $this->postJson('webauthn/register', $data)->assertNoContent();
 
         $this->assertDatabaseHas('web_authn_credentials', [
-            'id'               => $data['rawId'],
+            'id'               => 'ZEdWemRGOWpjbVZrWlc1MGFXRnNYMmxr',
             'user_id'          => 1,
             'type'             => 'test_type',
             'transports'       => json_encode([]),
@@ -200,9 +200,9 @@ class WebAuthnRegistrationTest extends TestCase
             'public_key'       => 'test_public_key',
         ]);
 
-        $event->assertDispatched(AttestationSuccessful::class, function ($event) use ($user, $data) {
+        $event->assertDispatched(AttestationSuccessful::class, function ($event) use ($user) {
             return $user->is($event->user)
-                && $data['rawId'] === $event->credential->getPublicKeyCredentialId();
+                && 'dGVzdF9jcmVkZW50aWFsX2lk' === $event->credential->getPublicKeyCredentialId();
         });
     }
 

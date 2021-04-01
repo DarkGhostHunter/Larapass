@@ -3,8 +3,8 @@
 namespace DarkGhostHunter\Larapass\Auth;
 
 use Closure;
-use Illuminate\Auth\Passwords\PasswordBroker;
 use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
+use Illuminate\Auth\Passwords\PasswordBroker;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 
 class CredentialBroker extends PasswordBroker
@@ -48,13 +48,15 @@ class CredentialBroker extends PasswordBroker
      * Send a password reset link to a user.
      *
      * @param  array  $credentials
+     * @param  \Closure|null  $callback
+     *
      * @return string
      */
-    public function sendResetLink(array $credentials)
+    public function sendResetLink(array $credentials, Closure $callback = null): string
     {
         $user = $this->getUser($credentials);
 
-        if (! $user instanceof WebAuthnAuthenticatable) {
+        if (!$user instanceof WebAuthnAuthenticatable) {
             return static::INVALID_USER;
         }
 
@@ -62,9 +64,13 @@ class CredentialBroker extends PasswordBroker
             return static::RESET_THROTTLED;
         }
 
-        $user->sendCredentialRecoveryNotification(
-            $this->tokens->create($user)
-        );
+        $token = $this->tokens->create($user);
+
+        if ($callback) {
+            $callback($user, $token);
+        } else {
+            $user->sendCredentialRecoveryNotification($token);
+        }
 
         return static::RESET_LINK_SENT;
     }
@@ -74,13 +80,14 @@ class CredentialBroker extends PasswordBroker
      *
      * @param  array  $credentials
      * @param  \Closure  $callback
-     * @return mixed
+     *
+     * @return \Illuminate\Contracts\Auth\CanResetPassword|string
      */
     public function reset(array $credentials, Closure $callback)
     {
         $user = $this->validateReset($credentials);
 
-        if (! $user instanceof CanResetPasswordContract || ! $user instanceof WebAuthnAuthenticatable) {
+        if (!$user instanceof CanResetPasswordContract || !$user instanceof WebAuthnAuthenticatable) {
             return $user;
         }
 

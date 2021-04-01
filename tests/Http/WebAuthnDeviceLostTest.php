@@ -2,16 +2,16 @@
 
 namespace Tests\Http;
 
-use Tests\RegistersPackage;
-use Orchestra\Testbench\TestCase;
-use Tests\Stubs\TestWebAuthnUser;
-use Illuminate\Support\Facades\DB;
-use Tests\RunsPublishableMigrations;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Date;
-use Webauthn\TrustPath\EmptyTrustPath;
-use Illuminate\Support\Facades\Notification;
 use DarkGhostHunter\Larapass\Notifications\AccountRecoveryNotification;
+use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Notification;
+use Orchestra\Testbench\TestCase;
+use Tests\RegistersPackage;
+use Tests\RunsPublishableMigrations;
+use Tests\Stubs\TestWebAuthnUser;
+use Webauthn\TrustPath\EmptyTrustPath;
 
 class WebAuthnDeviceLostTest extends TestCase
 {

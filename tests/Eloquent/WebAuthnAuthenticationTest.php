@@ -2,17 +2,18 @@
 
 namespace Tests\Eloquent;
 
-use Ramsey\Uuid\Uuid;
-use Tests\RegistersPackage;
+use Base64Url\Base64Url;
+use DarkGhostHunter\Larapass\Eloquent\WebAuthnCredential;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Orchestra\Testbench\TestCase;
-use Illuminate\Support\Facades\DB;
+use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
+use Tests\RegistersPackage;
 use Tests\RunsPublishableMigrations;
-use Ramsey\Uuid\Rfc4122\UuidInterface;
-use Webauthn\TrustPath\EmptyTrustPath;
 use Webauthn\PublicKeyCredentialSource;
 use Webauthn\PublicKeyCredentialUserEntity;
-use DarkGhostHunter\Larapass\Eloquent\WebAuthnCredential;
+use Webauthn\TrustPath\EmptyTrustPath;
 
 class WebAuthnAuthenticationTest extends TestCase
 {
@@ -54,20 +55,11 @@ class WebAuthnAuthenticationTest extends TestCase
         ]);
 
         $this->assertSame([
-            'id'         => 'test_credential_id',
+            'id'         => Base64Url::decode('test_credential_id'),
             'name'       => 'foo',
             'type'       => 'public_key',
             'transports' => [],
         ], WebAuthnCredential::first()->toArray());
-    }
-
-    public function test_returns_pretty_id()
-    {
-        $model = WebAuthnCredential::make([
-            'id' => base64_encode('test_credential_id'),
-        ]);
-
-        $this->assertSame('test_credential_id', $model->prettyId);
     }
 
     public function test_can_fill_name()
@@ -110,11 +102,11 @@ class WebAuthnAuthenticationTest extends TestCase
         $model = WebAuthnCredential::make();
 
         $this->assertNull(
-            $model->findOneByCredentialId('test_credential_id')
+            $model->findOneByCredentialId(Base64Url::decode('dGVzdF9jcmVkZW50aWFsX2lk'))
         );
 
         DB::table('web_authn_credentials')->insert([
-            'id'               => 'test_credential_id',
+            'id'               => 'dGVzdF9jcmVkZW50aWFsX2lk',
             'user_id'          => 1,
             'type'             => 'public_key',
             'transports'       => json_encode([]),
@@ -129,12 +121,14 @@ class WebAuthnAuthenticationTest extends TestCase
             'disabled_at'      => null,
         ]);
 
-        $this->assertInstanceOf(PublicKeyCredentialSource::class,
-            $source = $model->findOneByCredentialId('test_credential_id')
+        $this->assertInstanceOf(
+            PublicKeyCredentialSource::class,
+            $source = $model->findOneByCredentialId(Base64Url::decode('dGVzdF9jcmVkZW50aWFsX2lk'))
         );
 
         $this->assertSame(
-            'test_credential_id', $source->getPublicKeyCredentialId()
+            'test_credential_id',
+            $source->getPublicKeyCredentialId()
         );
     }
 
@@ -143,7 +137,9 @@ class WebAuthnAuthenticationTest extends TestCase
         $model = WebAuthnCredential::make();
 
         $entity = new PublicKeyCredentialUserEntity(
-            'test_name', 'test_id', 'test_display_name'
+            'test_name',
+            'test_id',
+            'test_display_name'
         );
 
         $this->assertEmpty($model->findAllForUserEntity($entity));
@@ -166,14 +162,15 @@ class WebAuthnAuthenticationTest extends TestCase
 
         $this->assertCount(1, $model->findAllForUserEntity($entity));
         $this->assertSame(
-            'test_credential_id', $model->findAllForUserEntity($entity)[0]->getPublicKeyCredentialId()
+            Base64Url::decode('test_credential_id'),
+            $model->findAllForUserEntity($entity)[0]->getPublicKeyCredentialId()
         );
     }
 
     public function test_only_updates_counter_from_credential_source()
     {
         DB::table('web_authn_credentials')->insert([
-            'id'               => 'test_credential_id',
+            'id'               => 'dGVzdF9jcmVkZW50aWFsX2lk',
             'user_id'          => 1,
             'type'             => 'public_key',
             'transports'       => json_encode([]),
@@ -191,7 +188,7 @@ class WebAuthnAuthenticationTest extends TestCase
         $model = WebAuthnCredential::make();
 
         $model->saveCredentialSource(new PublicKeyCredentialSource(
-            'test_credential_id',
+            Base64Url::decode('dGVzdF9jcmVkZW50aWFsX2lk'),
             'anything',
             ['foo', 'bar'],
             'any',
@@ -215,7 +212,7 @@ class WebAuthnAuthenticationTest extends TestCase
         ));
 
         $this->assertDatabaseHas('web_authn_credentials', [
-            'id'      => 'test_credential_id',
+            'id'      => 'dGVzdF9jcmVkZW50aWFsX2lk',
             'counter' => 10,
         ]);
     }
@@ -223,7 +220,7 @@ class WebAuthnAuthenticationTest extends TestCase
     public function test_checks_if_credential_is_enabled_or_disabled()
     {
         DB::table('web_authn_credentials')->insert([
-            'id'               => 'test_credential_id',
+            'id'               => 'dGVzdF9jcmVkZW50aWFsX2lk',
             'user_id'          => 1,
             'type'             => 'public_key',
             'transports'       => json_encode([]),
@@ -238,11 +235,11 @@ class WebAuthnAuthenticationTest extends TestCase
             'disabled_at'      => now()->toDateTimeString(),
         ]);
 
-        $credential = WebAuthnCredential::find('test_credential_id');
+        $credential = WebAuthnCredential::find('dGVzdF9jcmVkZW50aWFsX2lk');
 
         $this->assertNull($credential);
 
-        $credential = WebAuthnCredential::withTrashed()->find('test_credential_id');
+        $credential = WebAuthnCredential::withTrashed()->find('dGVzdF9jcmVkZW50aWFsX2lk');
 
         $this->assertTrue($credential->isDisabled());
         $this->assertFalse($credential->isEnabled());

@@ -2,19 +2,19 @@
 
 namespace Tests;
 
-use Ramsey\Uuid\Uuid;
+use DarkGhostHunter\Larapass\WebAuthnAuthentication;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Orchestra\Testbench\TestCase;
+use Ramsey\Uuid\Uuid;
 use Tests\Stubs\TestWebAuthnUser;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Date;
-use Webauthn\TrustPath\EmptyTrustPath;
-use Webauthn\PublicKeyCredentialSource;
-use Illuminate\Database\Eloquent\Model;
-use Webauthn\PublicKeyCredentialUserEntity;
 use Webauthn\PublicKeyCredentialDescriptor;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use DarkGhostHunter\Larapass\WebAuthnAuthentication;
+use Webauthn\PublicKeyCredentialSource;
+use Webauthn\PublicKeyCredentialUserEntity;
+use Webauthn\TrustPath\EmptyTrustPath;
 
 class WebAuthnAuthenticationTest extends TestCase
 {
@@ -157,7 +157,7 @@ class WebAuthnAuthenticationTest extends TestCase
         Date::setTestNow($now = Date::create(2020, 01, 04, 16, 30));
 
         $this->user->addCredential(new PublicKeyCredentialSource(
-            'test_credential_id',
+            'dGVzdF9jcmVkZW50aWFsX2lk',
             'public_key',
             [],
             'none',
@@ -169,7 +169,7 @@ class WebAuthnAuthenticationTest extends TestCase
         ));
 
         $this->assertDatabaseHas('web_authn_credentials', [
-            'id'               => 'test_credential_id',
+            'id'               => 'ZEdWemRGOWpjbVZrWlc1MGFXRnNYMmxr',
             'user_id'          => 1,
             'type'             => 'public_key',
             'transports'       => json_encode([]),

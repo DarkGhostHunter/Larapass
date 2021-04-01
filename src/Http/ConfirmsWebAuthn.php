@@ -2,9 +2,10 @@
 
 namespace DarkGhostHunter\Larapass\Http;
 
-use Illuminate\Http\Request;
-use DarkGhostHunter\Larapass\Facades\WebAuthn;
 use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
+use DarkGhostHunter\Larapass\Facades\WebAuthn;
+use Illuminate\Http\Request;
+use Webauthn\PublicKeyCredentialRequestOptions;
 
 trait ConfirmsWebAuthn
 {
@@ -13,7 +14,7 @@ trait ConfirmsWebAuthn
     /**
      * Display the password confirmation view.
      *
-     * @return \Illuminate\View\View
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\View\View
      */
     public function showConfirmForm()
     {
@@ -24,9 +25,10 @@ trait ConfirmsWebAuthn
      * Return a request to assert the device.
      *
      * @param  \DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable  $user
+     *
      * @return \Webauthn\PublicKeyCredentialRequestOptions
      */
-    public function options(WebAuthnAuthenticatable $user)
+    public function options(WebAuthnAuthenticatable $user): PublicKeyCredentialRequestOptions
     {
         return WebAuthn::generateAssertion($user);
     }
@@ -35,6 +37,7 @@ trait ConfirmsWebAuthn
      * Confirm the device assertion.
      *
      * @param  \Illuminate\Http\Request  $request
+     *
      * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse|\Illuminate\Http\Response
      */
     public function confirm(Request $request)
@@ -44,9 +47,7 @@ trait ConfirmsWebAuthn
         if (WebAuthn::validateAssertion($credential)) {
             $this->resetAuthenticatorConfirmationTimeout($request);
 
-            return response()->json([
-                'redirectTo' => redirect()->intended($this->redirectPath())->getTargetUrl()
-            ]);
+            return response()->json(['redirectTo' => redirect()->intended($this->redirectPath())->getTargetUrl()]);
         }
 
         return response()->noContent(422);
@@ -56,9 +57,10 @@ trait ConfirmsWebAuthn
      * Reset the password confirmation timeout.
      *
      * @param  \Illuminate\Http\Request  $request
+     *
      * @return void
      */
-    protected function resetAuthenticatorConfirmationTimeout(Request $request)
+    protected function resetAuthenticatorConfirmationTimeout(Request $request): void
     {
         $request->session()->put('auth.webauthn.confirm', now()->timestamp);
     }
@@ -68,7 +70,7 @@ trait ConfirmsWebAuthn
      *
      * @return string
      */
-    public function redirectPath()
+    public function redirectPath(): string
     {
         if (method_exists($this, 'redirectTo')) {
             return $this->redirectTo();

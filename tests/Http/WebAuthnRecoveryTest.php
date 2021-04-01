@@ -2,19 +2,19 @@
 
 namespace Tests\Http;
 
-use Mockery;
-use Ramsey\Uuid\Uuid;
 use Base64Url\Base64Url;
-use Tests\RegistersPackage;
-use Orchestra\Testbench\TestCase;
-use Tests\Stubs\TestWebAuthnUser;
-use Illuminate\Support\Facades\DB;
-use Tests\RunsPublishableMigrations;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Date;
-use Webauthn\TrustPath\EmptyTrustPath;
-use Webauthn\PublicKeyCredentialSource;
 use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAttestValidator;
+use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Mockery;
+use Orchestra\Testbench\TestCase;
+use Ramsey\Uuid\Uuid;
+use Tests\RegistersPackage;
+use Tests\RunsPublishableMigrations;
+use Tests\Stubs\TestWebAuthnUser;
+use Webauthn\PublicKeyCredentialSource;
+use Webauthn\TrustPath\EmptyTrustPath;
 
 class WebAuthnRecoveryTest extends TestCase
 {
@@ -224,8 +224,8 @@ class WebAuthnRecoveryTest extends TestCase
         $this->mock(WebAuthnAttestValidator::class)
             ->shouldReceive('validate')
             ->with($data = [
-                'id'       => 'test_id',
-                'rawId'    => Base64Url::encode('test_user_handle'),
+                'id'       => 'dGVzdF9jcmVkZW50aWFsX2lk',
+                'rawId'    => 'ZEdWemRGOWpjbVZrWlc1MGFXRnNYMmxr',
                 'response' => [
                     'attestationObject' => 'test_attestationObject',
                     'clientDataJSON'    => 'test_clientDataJSON',
@@ -233,7 +233,7 @@ class WebAuthnRecoveryTest extends TestCase
                 'type'     => 'test_type',
             ], Mockery::type(TestWebAuthnUser::class))
             ->andReturn(new PublicKeyCredentialSource(
-                'test_id',
+                'dGVzdF9jcmVkZW50aWFsX2lk',
                 'test_type',
                 [],
                 'none',
@@ -258,7 +258,7 @@ class WebAuthnRecoveryTest extends TestCase
         ]);
 
         $this->assertDatabaseHas('web_authn_credentials', [
-            'id' => 'test_id',
+            'id' => 'ZEdWemRGOWpjbVZrWlc1MGFXRnNYMmxr',
         ]);
     }
 
@@ -315,7 +315,7 @@ class WebAuthnRecoveryTest extends TestCase
         ]);
 
         $this->assertDatabaseHas('web_authn_credentials', [
-            'id' => 'test_id',
+            'id' => 'dGVzdF9pZA',
         ]);
     }
 

@@ -2,10 +2,10 @@
 
 namespace DarkGhostHunter\Larapass\Eloquent\Casting;
 
+use Base64Url\Base64Url;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
-use Webauthn\TrustPath\TrustPathLoader;
 
-class TrustPathCast implements CastsAttributes
+class Base64UrlCast implements CastsAttributes
 {
     /**
      * Transform the attribute from the underlying model values.
@@ -15,11 +15,11 @@ class TrustPathCast implements CastsAttributes
      * @param  mixed  $value
      * @param  array  $attributes
      *
-     * @return \Webauthn\TrustPath\TrustPath
+     * @return string
      */
-    public function get($model, string $key, $value, array $attributes): \Webauthn\TrustPath\TrustPath
+    public function get($model, string $key, $value, array $attributes): string
     {
-        return TrustPathLoader::loadTrustPath(json_decode($value, true));
+        return Base64Url::decode($value);
     }
 
     /**
@@ -27,13 +27,13 @@ class TrustPathCast implements CastsAttributes
      *
      * @param  \Illuminate\Database\Eloquent\Model  $model
      * @param  string  $key
-     * @param  \Webauthn\TrustPath\TrustPath|array  $value
+     * @param  mixed  $value
      * @param  array  $attributes
      *
      * @return string
      */
     public function set($model, string $key, $value, array $attributes): string
     {
-        return json_encode($value);
+        return Base64Url::encode($value);
     }
 }

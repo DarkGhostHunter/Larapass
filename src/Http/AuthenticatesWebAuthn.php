@@ -2,9 +2,12 @@
 
 namespace DarkGhostHunter\Larapass\Http;
 
+use DarkGhostHunter\Larapass\Facades\WebAuthn;
+use Illuminate\Contracts\Auth\StatefulGuard;
+use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use DarkGhostHunter\Larapass\Facades\WebAuthn;
+use Webauthn\PublicKeyCredentialRequestOptions;
 
 trait AuthenticatesWebAuthn
 {
@@ -14,9 +17,10 @@ trait AuthenticatesWebAuthn
      * Returns an WebAuthn Assertion challenge for the user (or userless).
      *
      * @param  \Illuminate\Http\Request  $request
+     *
      * @return \Webauthn\PublicKeyCredentialRequestOptions
      */
-    public function options(Request $request)
+    public function options(Request $request): PublicKeyCredentialRequestOptions
     {
         $credentials = $request->validate($this->optionRules());
 
@@ -30,7 +34,7 @@ trait AuthenticatesWebAuthn
      *
      * @return array
      */
-    protected function optionRules()
+    protected function optionRules(): array
     {
         return [
             $this->username() => 'sometimes|email',
@@ -42,7 +46,7 @@ trait AuthenticatesWebAuthn
      *
      * @return string
      */
-    protected function username()
+    protected function username(): string
     {
         return 'email';
     }
@@ -51,6 +55,7 @@ trait AuthenticatesWebAuthn
      * Return the user that should authenticate via WebAuthn.
      *
      * @param  array  $credentials
+     *
      * @return \Illuminate\Contracts\Auth\Authenticatable|\DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable|null
      */
     protected function getUserFromCredentials(array $credentials)
@@ -66,7 +71,7 @@ trait AuthenticatesWebAuthn
      *
      * @return \Illuminate\Contracts\Auth\UserProvider
      */
-    protected function userProvider()
+    protected function userProvider(): UserProvider
     {
         return Auth::createUserProvider('users');
     }
@@ -75,6 +80,7 @@ trait AuthenticatesWebAuthn
      * Log the user in.
      *
      * @param  \Illuminate\Http\Request  $request
+     *
      * @return \Illuminate\Http\Response|\Illuminate\Http\JsonResponse
      */
     public function login(Request $request)
@@ -92,9 +98,10 @@ trait AuthenticatesWebAuthn
      * Check if the Request has a "Remember" value present.
      *
      * @param  \Illuminate\Http\Request  $request
+     *
      * @return bool
      */
-    protected function hasRemember(Request $request)
+    protected function hasRemember(Request $request): bool
     {
         return filter_var($request->header('WebAuthn-Remember'), FILTER_VALIDATE_BOOLEAN)
             ?: $request->filled('remember');
@@ -105,9 +112,10 @@ trait AuthenticatesWebAuthn
      *
      * @param  array  $challenge
      * @param  bool  $remember
+     *
      * @return bool
      */
-    protected function attemptLogin(array $challenge, bool $remember = false)
+    protected function attemptLogin(array $challenge, bool $remember = false): bool
     {
         return $this->guard()->attempt($challenge, $remember);
     }
@@ -117,6 +125,7 @@ trait AuthenticatesWebAuthn
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  mixed  $user
+     *
      * @return void|\Illuminate\Http\JsonResponse
      */
     protected function authenticated(Request $request, $user)
@@ -129,7 +138,7 @@ trait AuthenticatesWebAuthn
      *
      * @return \Illuminate\Contracts\Auth\StatefulGuard
      */
-    protected function guard()
+    protected function guard(): StatefulGuard
     {
         return Auth::guard();
     }

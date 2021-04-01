@@ -8,18 +8,20 @@
 
 Authenticate users with just their device, fingerprint or biometric data. Goodbye passwords!
 
-This enables WebAuthn authentication inside Laravel authentication driver, and comes with everything but the kitchen sink. 
+This enables WebAuthn authentication inside Laravel authentication driver, and comes with _everything but the kitchen sink_. 
 
 ## Requisites
 
-* PHP 7.2.15+
-* Laravel 7.18 (July 2020)
+* PHP 7.4 or PHP 8.0
+* Laravel 7.18 (July 2020) or Laravel 8.x
 
 ## Installation 
 
 Just hit the console and require it with Composer.
 
     composer require darkghosthunter/larapass
+
+Unfortunately, using WebAuthn is not a "walk in the park", this package allows you to enable WebAuthn in the most **easiest way possible**.
 
 # Table of contents
 
@@ -60,7 +62,7 @@ We need to make sure your users can register their devices and authenticate with
 2. [Create the `webauthn_credentials` table.](#2-create-the-webauthn_credentials-table)
 3. [Implement the contract and trait](#3-implement-the-contract-and-trait)
 
-After that, you can quick start WebAuthn with the included controllers and helpers to make your life easier.
+After that, you can quickly start WebAuthn with the included controllers and helpers to make your life easier.
 
 4. [Register the routes](#4-register-the-routes-optional)
 5. [Use the Javascript helper](#5-use-the-javascript-helper-optional)
@@ -127,14 +129,17 @@ Finally, you will need to add the routes for registering and authenticating user
 You can copy-paste these route definitions in your `routes/web.php` file. 
 
 ```php
-Route::post('webauthn/register/options', 'Auth\WebAuthnRegisterController@options')
+use App\Http\Controllers\Auth\WebAuthnRegisterController;
+use App\Http\Controllers\Auth\WebAuthnLoginController;
+
+Route::post('webauthn/register/options', [WebAuthnRegisterController::class, 'options'])
      ->name('webauthn.register.options');
-Route::post('webauthn/register', 'Auth\WebAuthnRegisterController@register')
+Route::post('webauthn/register', [WebAuthnRegisterController::class, 'register'])
      ->name('webauthn.register');
 
-Route::post('webauthn/login/options', 'Auth\WebAuthnLoginController@options')
+Route::post('webauthn/login/options', [WebAuthnLoginController::class, 'options'])
      ->name('webauthn.login.options');
-Route::post('webauthn/login', 'Auth\WebAuthnLoginController@login')
+Route::post('webauthn/login', [WebAuthnLoginController::class, 'login'])
      ->name('webauthn.login');
 ```
 
@@ -153,14 +158,15 @@ You will receive the `vendor/larapass/js/larapass.js` file which you can include
 ```html
 <script src="{{ asset('vendor/larapass/js/larapass.js') }}"></script>
 
-<!-- Registering users -->
+<!-- Registering credentials -->
 <script>
-    const register = () => {
+    const register = (event) => {
+        event.preventDefault()
         new Larapass({
             register: 'webauthn/register',
             registerOptions: 'webauthn/register/options'
         }).register()
-          .then(response => window.location.href = 'https://myapp.com/devices')
+          .then(response => alert('Registration successful!'))
           .catch(response => alert('Something went wrong, try again!'))
     }
 
@@ -169,13 +175,14 @@ You will receive the `vendor/larapass/js/larapass.js` file which you can include
 
 <!-- Login users -->
 <script>
-    const login = () => {
+    const login = (event) => {
+        event.preventDefault()
         new Larapass({
-            login: 'webauthn/register',
-            loginOptions: 'webauthn/register/options'
+            login: 'webauthn/login',
+            loginOptions: 'webauthn/login/options'
         }).login({
-            email: document.getElementById('email').value,
-        }).then(response => window.location.href = 'https://myapp.com/account')
+            email: document.getElementById('email').value
+        }).then(response => alert('Authentication successful!'))
           .catch(error => alert('Something went wrong, try again!'))
     }
 
@@ -183,18 +190,18 @@ You will receive the `vendor/larapass/js/larapass.js` file which you can include
 </script>
 ```
 
-You can bypass the route list declaration if you're using the defaults. The example above includes them just for show.
+> You can bypass the route list declaration if you're using the defaults. The example above includes them just for show. Be sure to create modify this script for your needs.
 
 Also, the helper allows headers on the action request, on both registration and login.
 
 ```javascript
 new Larapass({
-    login: 'webauthn/register',
-    loginOptions: 'webauthn/register/options'
+    login: 'webauthn/login',
+    loginOptions: 'webauthn/login/options'
 }).login({
     email: document.getElementById('email').value,
 }, {
-    myHeader: 'This is sent with the signed challenge',
+    'My-Custom-Header': 'This is sent with the signed challenge',
 })
 ```
 
@@ -221,16 +228,19 @@ Alternatively, you can add the `remember` key to the outgoing JSON Payload if yo
 Probably you will want to offer a way to "recover" an account if the user loses his credentials, which is basically a way to attach a new one. You can use controllers [which are also published](#4-register-the-routes-optional), along with these routes:
 
 ```php
-Route::get('webauthn/lost', 'Auth\WebAuthnDeviceLostController@showDeviceLostForm')
+use App\Http\Controllers\Auth\WebAuthnDeviceLostController;
+use App\Http\Controllers\Auth\WebAuthnRecoveryController;
+
+Route::get('webauthn/lost', [WebAuthnDeviceLostController::class, 'showDeviceLostForm'])
      ->name('webauthn.lost.form');
-Route::post('webauthn/lost', 'Auth\WebAuthnDeviceLostController@sendRecoveryEmail')
+Route::post('webauthn/lost', [WebAuthnDeviceLostController::class, 'sendRecoveryEmail'])
      ->name('webauthn.lost.send');
 
-Route::get('webauthn/recover', 'Auth\WebAuthnRecoveryController@showResetForm')
+Route::get('webauthn/recover', [WebAuthnRecoveryController::class, 'showResetForm'])
      ->name('webauthn.recover.form');
-Route::post('webauthn/recover/options', 'Auth\WebAuthnRecoveryController@options')
+Route::post('webauthn/recover/options', [WebAuthnRecoveryController::class, 'options'])
      ->name('webauthn.recover.options');
-Route::post('webauthn/recover/register', 'Auth\WebAuthnRecoveryController@recover')
+Route::post('webauthn/recover/register', [WebAuthnRecoveryController::class, 'recover'])
      ->name('webauthn.recover');
 ```
 

@@ -3,17 +3,17 @@
 namespace Tests\Http;
 
 use Base64Url\Base64Url;
-use Illuminate\Support\Str;
-use Tests\RegistersPackage;
-use Orchestra\Testbench\TestCase;
-use Tests\Stubs\TestWebAuthnUser;
-use Illuminate\Support\Facades\DB;
-use Tests\RunsPublishableMigrations;
-use Illuminate\Support\Facades\File;
-use Webauthn\TrustPath\EmptyTrustPath;
-use Webauthn\PublicKeyCredentialRequestOptions;
 use DarkGhostHunter\Larapass\Eloquent\WebAuthnCredential;
 use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAssertValidator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
+use Orchestra\Testbench\TestCase;
+use Tests\RegistersPackage;
+use Tests\RunsPublishableMigrations;
+use Tests\Stubs\TestWebAuthnUser;
+use Webauthn\PublicKeyCredentialRequestOptions;
+use Webauthn\TrustPath\EmptyTrustPath;
 
 class WebAuthnLoginTest extends TestCase
 {
@@ -68,11 +68,9 @@ class WebAuthnLoginTest extends TestCase
     {
         $options = new PublicKeyCredentialRequestOptions(
             $challenge = random_bytes(16),
-            60000,
-            'test_id',
-            [],
-            true
+            60000
         );
+        $options->setRpId('test_id')->allowCredentials([])->setUserVerification($options::USER_VERIFICATION_REQUIREMENT_REQUIRED);
 
         $this->mock(WebAuthnAssertValidator::class)
             ->shouldReceive('generateAssertion')
@@ -82,7 +80,7 @@ class WebAuthnLoginTest extends TestCase
         $this->post('webauthn/login/options')->assertExactJson([
             'challenge'        => Base64Url::encode($challenge),
             'rpId'             => 'test_id',
-            'userVerification' => '1',
+            'userVerification' => 'required',
             'timeout'          => 60000,
         ]);
     }
@@ -98,7 +96,7 @@ class WebAuthnLoginTest extends TestCase
         ])->save();
 
         DB::table('web_authn_credentials')->insert([
-            'id'               => 'test_credential_id',
+            'id'               => 'dGVzdF9jcmVkZW50aWFsX2lk',
             'user_id'          => 1,
             'type'             => 'public_key',
             'transports'       => json_encode([]),
@@ -195,7 +193,7 @@ class WebAuthnLoginTest extends TestCase
         $user->save();
 
         DB::table('web_authn_credentials')->insert([
-            'id'               => 'test_credential_id',
+            'id'               => 'dGVzdF9jcmVkZW50aWFsX2lk',
             'user_id'          => 1,
             'type'             => 'public_key',
             'transports'       => json_encode([]),
@@ -209,19 +207,21 @@ class WebAuthnLoginTest extends TestCase
             'updated_at'       => now()->toDateTimeString(),
         ]);
 
+        $data = [
+            'id'       => 'dGVzdF9jcmVkZW50aWFsX2lk',
+            'rawId'    => 'ZEdWemRGOWpjbVZrWlc1MGFXRnNYMmxr',
+            'type'     => 'test_type',
+            'response' => [
+                'authenticatorData' => 'test',
+                'clientDataJSON' => 'test',
+                'signature' => 'test',
+                'userHandle' => 'test',
+            ],
+        ];
+
         $this->mock(WebAuthnAssertValidator::class)
             ->shouldReceive('validate')
-            ->with($data = [
-                'id'       => 'test_credential_id',
-                'type'     => 'test_type',
-                'response' => [
-                    'authenticatorData' => 'test',
-                    'clientDataJSON' => 'test',
-                    'signature' => 'test',
-                    'userHandle' => 'test',
-                ],
-                'rawId'    => Base64Url::encode('test_credential_id'),
-            ])
+            ->with($data)
             ->andReturnUsing(function ($data) {
                 $credentials = WebAuthnCredential::find($data['id']);
 
@@ -235,7 +235,7 @@ class WebAuthnLoginTest extends TestCase
         $this->assertAuthenticatedAs($user);
 
         $this->assertDatabaseHas('web_authn_credentials', [
-            'id'      => 'test_credential_id',
+            'id'      => 'dGVzdF9jcmVkZW50aWFsX2lk',
             'counter' => 1,
         ]);
     }

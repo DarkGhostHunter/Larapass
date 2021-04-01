@@ -2,15 +2,14 @@
 
 namespace Tests\Facades;
 
+use DarkGhostHunter\Larapass\Facades\WebAuthn;
+use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAssertValidator;
+use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAttestValidator;
+use Orchestra\Testbench\TestCase;
 use RuntimeException;
 use Tests\RegistersPackage;
-use Orchestra\Testbench\TestCase;
-use Tests\Stubs\TestWebAuthnUser;
 use Tests\RunsPublishableMigrations;
-use DarkGhostHunter\Larapass\Facades\WebAuthn;
-use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAttestCreator;
-use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAttestValidator;
-use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAssertValidator;
+use Tests\Stubs\TestWebAuthnUser;
 
 class WebAuthnTest extends TestCase
 {
@@ -22,20 +21,6 @@ class WebAuthnTest extends TestCase
         $this->expectException(RuntimeException::class);
 
         WebAuthn::anyMethod();
-    }
-
-    public function test_returns_attestation()
-    {
-        $user = TestWebAuthnUser::make();
-
-        $this->mock(WebAuthnAttestCreator::class)
-            ->shouldReceive('generateAttestation')
-            ->with($user)
-            ->andReturnTrue();
-
-        $result = WebAuthn::generateAttestation($user);
-
-        $this->assertTrue($result);
     }
 
     public function test_validates_attestation()
@@ -50,32 +35,6 @@ class WebAuthnTest extends TestCase
             ->andReturnTrue();
 
         $result = WebAuthn::validateAttestation($array, $user);
-
-        $this->assertTrue($result);
-    }
-
-    public function test_creates_assert()
-    {
-        $user = TestWebAuthnUser::make();
-
-        $this->mock(WebAuthnAssertValidator::class)
-            ->shouldReceive('generateAssertion')
-            ->with($user)
-            ->andReturnTrue();
-
-        $result = WebAuthn::generateAssertion($user);
-
-        $this->assertTrue($result);
-    }
-
-    public function test_creates_blank_assert()
-    {
-        $this->mock(WebAuthnAssertValidator::class)
-            ->shouldReceive('generateAssertion')
-            ->withNoArgs()
-            ->andReturnTrue();
-
-        $result = WebAuthn::generateBlankAssertion();
 
         $this->assertTrue($result);
     }

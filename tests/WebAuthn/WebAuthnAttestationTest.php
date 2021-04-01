@@ -2,36 +2,37 @@
 
 namespace Tests\WebAuthn;
 
-use Mockery;
+use Base64Url\Base64Url;
+use DarkGhostHunter\Larapass\WebAuthn\AuthenticatorSelectionCriteria;
+use DarkGhostHunter\Larapass\WebAuthn\PublicKeyCredentialParametersCollection;
+use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAttestCreator;
+use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAttestValidator;
 use Exception;
+use Illuminate\Cache\Repository;
+use Illuminate\Contracts\Cache\Factory as CacheFactoryContract;
+use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
+use InvalidArgumentException;
+use Mockery;
+use Orchestra\Testbench\TestCase;
+use Psr\Http\Message\ServerRequestInterface;
 use Ramsey\Uuid\Uuid;
 use Tests\RegistersPackage;
-use Illuminate\Support\Str;
-use Illuminate\Support\Arr;
-use Illuminate\Http\Request;
-use InvalidArgumentException;
-use Illuminate\Cache\Repository;
-use Orchestra\Testbench\TestCase;
-use Tests\Stubs\TestWebAuthnUser;
-use Webauthn\PublicKeyCredential;
-use Illuminate\Support\Facades\DB;
-use Webauthn\AuthenticatorResponse;
 use Tests\RunsPublishableMigrations;
-use Illuminate\Support\Facades\Route;
-use Webauthn\TrustPath\EmptyTrustPath;
-use Webauthn\PublicKeyCredentialLoader;
-use Webauthn\PublicKeyCredentialSource;
-use Webauthn\PublicKeyCredentialRpEntity;
-use Psr\Http\Message\ServerRequestInterface;
-use Webauthn\AuthenticatorAttestationResponse;
-use Webauthn\PublicKeyCredentialCreationOptions;
-use Webauthn\AuthenticatorAttestationResponseValidator;
-use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAttestCreator;
-use Illuminate\Contracts\Cache\Factory as CacheFactoryContract;
-use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAttestValidator;
-use DarkGhostHunter\Larapass\WebAuthn\AuthenticatorSelectionCriteria;
+use Tests\Stubs\TestWebAuthnUser;
 use Webauthn\AuthenticationExtensions\AuthenticationExtensionsClientInputs;
-use DarkGhostHunter\Larapass\WebAuthn\PublicKeyCredentialParametersCollection;
+use Webauthn\AuthenticatorAttestationResponse;
+use Webauthn\AuthenticatorAttestationResponseValidator;
+use Webauthn\AuthenticatorResponse;
+use Webauthn\PublicKeyCredential;
+use Webauthn\PublicKeyCredentialCreationOptions;
+use Webauthn\PublicKeyCredentialLoader;
+use Webauthn\PublicKeyCredentialRpEntity;
+use Webauthn\PublicKeyCredentialSource;
+use Webauthn\TrustPath\EmptyTrustPath;
 
 class WebAuthnAttestationTest extends TestCase
 {
@@ -230,7 +231,7 @@ class WebAuthnAttestationTest extends TestCase
 
         $this->assertCount(1, $attestation->getExcludeCredentials());
         $this->assertSame(
-            'test_credential_foo', Arr::first($attestation->getExcludeCredentials())->getId()
+            'test_credential_foo', Base64Url::encode(Arr::first($attestation->getExcludeCredentials())->getId())
         );
     }
 
