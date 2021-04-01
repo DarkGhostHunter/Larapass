@@ -2,30 +2,43 @@
 
 namespace DarkGhostHunter\Larapass\Eloquent;
 
-use Webauthn\PublicKeyCredentialUserEntity as UserEntity;
-use Webauthn\PublicKeyCredentialSource as CredentialSource;
+use Base64Url\Base64Url;
 use Webauthn\PublicKeyCredentialDescriptor as CredentialDescriptor;
+use Webauthn\PublicKeyCredentialSource as CredentialSource;
+use Webauthn\PublicKeyCredentialUserEntity as UserEntity;
 
 trait ManagesCredentialRepository
 {
     /**
+     * Initializes the trait.
+     *
+     * @returns void
+     */
+    protected function initializeManagesCredentialRepository()
+    {
+        $this->mergeCasts([$this->getKeyName() => Casting\Base64UrlCast::class]);
+    }
+
+    /**
      * Finds a source of the credentials.
      *
-     * @param  string  $id
+     * @param  string  $binaryId
+     *
      * @return null|\Webauthn\PublicKeyCredentialSource
      */
-    public function findOneByCredentialId(string $id) : ?CredentialSource
+    public function findOneByCredentialId(string $binaryId): ?CredentialSource
     {
-        return optional($this->find($id))->toCredentialSource();
+        return optional($this->find(Base64Url::encode($binaryId)))->toCredentialSource();
     }
 
     /**
      * Return an array of all credentials for a given user.
      *
      * @param  \Webauthn\PublicKeyCredentialUserEntity  $entity
+     *
      * @return array|\Webauthn\PublicKeyCredentialSource[]
      */
-    public function findAllForUserEntity(UserEntity $entity) : array
+    public function findAllForUserEntity(UserEntity $entity): array
     {
         return static::where('user_handle', $entity->getId())->get()->map->toCredentialSource()->all();
     }
@@ -35,33 +48,37 @@ trait ManagesCredentialRepository
      *
      * @param  \Webauthn\PublicKeyCredentialSource  $source
      */
-    public function saveCredentialSource(CredentialSource $source) : void
+    public function saveCredentialSource(CredentialSource $source): void
     {
-        // We will only update the credential counter, and only if it exists
-        if ($model = static::find($source->getPublicKeyCredentialId())) {
-            $model->setAttribute('counter', $source->getCounter())->save();
-        }
+        // We will only update the credential counter only if it exists.
+        static::update(
+            [$this->getKeyName() => Base64Url::encode($source->getPublicKeyCredentialId())],
+            ['counter' => $source->getCounter()]
+        );
     }
 
     /**
      * Creates a new Eloquent Model from a Credential Source.
      *
      * @param  \Webauthn\PublicKeyCredentialSource  $source
+     *
      * @return self
      */
     public static function fromCredentialSource(CredentialSource $source)
     {
-        return ($model = new static)->fill([
-            $model->getKeyName()    => $source->getPublicKeyCredentialId(),
-            'user_handle'           => $source->getUserHandle(),
-            'type'                  => $source->getType(),
-            'transports'            => $source->getTransports(),
-            'attestation_type'      => $source->getAttestationType(),
-            'trust_path'            => $source->getTrustPath()->jsonSerialize(),
-            'aaguid'                => $source->getAaguid()->toString(),
-            'public_key'            => $source->getCredentialPublicKey(),
-            'counter'               => $source->getCounter(),
-        ]);
+        return ($model = new static())->fill(
+            [
+                $model->getKeyName() => $source->getPublicKeyCredentialId(),
+                'user_handle' => $source->getUserHandle(),
+                'type' => $source->getType(),
+                'transports' => $source->getTransports(),
+                'attestation_type' => $source->getAttestationType(),
+                'trust_path' => $source->getTrustPath()->jsonSerialize(),
+                'aaguid' => $source->getAaguid()->toString(),
+                'public_key' => $source->getCredentialPublicKey(),
+                'counter' => $source->getCounter(),
+            ]
+        );
     }
 
     /**
@@ -69,10 +86,10 @@ trait ManagesCredentialRepository
      *
      * @return \Webauthn\PublicKeyCredentialSource
      */
-    public function toCredentialSource() : CredentialSource
+    public function toCredentialSource(): CredentialSource
     {
         return new CredentialSource(
-            $this->id,
+            $this->getKey(),
             $this->type,
             $this->transports->all(),
             $this->attestation_type,
@@ -89,7 +106,7 @@ trait ManagesCredentialRepository
      *
      * @return \Webauthn\PublicKeyCredentialDescriptor
      */
-    public function toCredentialDescriptor() : CredentialDescriptor
+    public function toCredentialDescriptor(): CredentialDescriptor
     {
         return $this->toCredentialSource()->getPublicKeyCredentialDescriptor();
     }
