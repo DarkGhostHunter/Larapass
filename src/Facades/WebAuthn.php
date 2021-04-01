@@ -75,7 +75,7 @@ class WebAuthn extends Facade
     }
 
     /**
-     * Creates a new assertion request for a given user.
+     * Creates a new assertion request for a given user, or blank if there is no user given.
      *
      * @param  \DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable  $user
      *
@@ -84,16 +84,6 @@ class WebAuthn extends Facade
     public static function generateAssertion(?WebAuthnAuthenticatable $user = null)
     {
         return static::$app[WebAuthnAssertValidator::class]->generateAssertion($user);
-    }
-
-    /**
-     * Returns a blank assertion request for user-less authentication.
-     *
-     * @return \Webauthn\PublicKeyCredentialRequestOptions
-     */
-    public static function generateBlankAssertion()
-    {
-        return static::$app[WebAuthnAssertValidator::class]->generateAssertion();
     }
 
     /**

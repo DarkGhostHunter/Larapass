@@ -12,14 +12,14 @@ class AttestationSuccessful
      *
      * @var \DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable
      */
-    public $user;
+    public WebAuthnAuthenticatable $user;
 
     /**
      * The credentials registered.
      *
      * @var \Webauthn\PublicKeyCredentialSource
      */
-    public $credential;
+    public PublicKeyCredentialSource $credential;
 
     /**
      * Create a new Event instance.
