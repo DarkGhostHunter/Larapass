@@ -15,9 +15,9 @@ class Base64UrlCast implements CastsAttributes
      * @param  mixed  $value
      * @param  array  $attributes
      *
-     * @return \Ramsey\Uuid\UuidInterface
+     * @return string
      */
-    public function get($model, string $key, $value, array $attributes)
+    public function get($model, string $key, $value, array $attributes): string
     {
         return Base64Url::decode($value);
     }
@@ -30,9 +30,9 @@ class Base64UrlCast implements CastsAttributes
      * @param  mixed  $value
      * @param  array  $attributes
      *
-     * @return array|string
+     * @return string
      */
-    public function set($model, string $key, $value, array $attributes)
+    public function set($model, string $key, $value, array $attributes): string
     {
         return Base64Url::encode($value);
     }

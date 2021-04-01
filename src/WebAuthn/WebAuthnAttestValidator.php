@@ -22,21 +22,21 @@ class WebAuthnAttestValidator extends WebAuthnAttestCreator
      *
      * @var \Webauthn\AuthenticatorAttestationResponseValidator
      */
-    protected $validator;
+    protected AttestationValidator $validator;
 
     /**
      * Loader for the raw credentials.
      *
      * @var \Webauthn\PublicKeyCredentialLoader
      */
-    protected $loader;
+    protected PublicKeyCredentialLoader $loader;
 
     /**
      * Server Request
      *
      * @var \Psr\Http\Message\ServerRequestInterface
      */
-    protected $request;
+    protected ServerRequestInterface $request;
 
     /**
      * WebAuthnAttestation constructor.
@@ -120,7 +120,7 @@ class WebAuthnAttestValidator extends WebAuthnAttestCreator
      *
      * @return string
      */
-    protected function getCurrentRpId(CreationOptions $attestation)
+    protected function getCurrentRpId(CreationOptions $attestation): string
     {
         return $attestation->getRp()->getId() ?? $this->laravelRequest->getHost();
     }

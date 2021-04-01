@@ -3,6 +3,7 @@
 namespace DarkGhostHunter\Larapass\WebAuthn;
 
 use Illuminate\Contracts\Cache\Factory as CacheFactoryContract;
+use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Contracts\Config\Repository as ConfigContract;
 use Illuminate\Http\Request;
 use InvalidArgumentException;
@@ -21,49 +22,49 @@ class WebAuthnAssertValidator
      *
      * @var \Illuminate\Contracts\Cache\Repository
      */
-    protected $cache;
+    protected Repository $cache;
 
     /**
      * Application as the Relying Party.
      *
      * @var \Webauthn\PublicKeyCredentialRpEntity
      */
-    protected $relyingParty;
+    protected RelyingParty $relyingParty;
 
     /**
      * Custom extensions the user can accept from the client itself.
      *
      * @var \Webauthn\AuthenticationExtensions\AuthenticationExtensionsClientInputs
      */
-    protected $extensions;
+    protected AuthenticationExtensionsClientInputs $extensions;
 
     /**
      * Validator for the Attestation response.
      *
      * @var \Webauthn\AuthenticatorAssertionResponseValidator
      */
-    protected $validator;
+    protected AuthenticatorAssertionResponseValidator $validator;
 
     /**
      * Loader for the raw credentials.
      *
      * @var \Webauthn\PublicKeyCredentialLoader
      */
-    protected $loader;
+    protected PublicKeyCredentialLoader $loader;
 
     /**
      * Server Request
      *
      * @var \Psr\Http\Message\ServerRequestInterface
      */
-    protected $request;
+    protected ServerRequestInterface $request;
 
     /**
      * HTTP Request fingerprint for the device.
      *
      * @var \Illuminate\Http\Request
      */
-    protected $laravelRequest;
+    protected Request $laravelRequest;
 
     /**
      * Challenge time-to-live, in milliseconds.
@@ -84,7 +85,7 @@ class WebAuthnAssertValidator
      *
      * @var string
      */
-    protected $verifyLogin;
+    protected string $verifyLogin;
 
     /**
      * WebAuthnAttestation constructor.
@@ -129,7 +130,7 @@ class WebAuthnAssertValidator
      *
      * @return string
      */
-    protected function shouldVerifyLogin(ConfigContract $config)
+    protected function shouldVerifyLogin(ConfigContract $config): string
     {
         if (in_array($config->get('larapass.userless'), ['required', 'preferred'])) {
             return 'required';
@@ -143,7 +144,7 @@ class WebAuthnAssertValidator
      *
      * @return \Webauthn\PublicKeyCredentialRequestOptions|null
      */
-    public function retrieveAssertion()
+    public function retrieveAssertion(): ?RequestOptions
     {
         return $this->cache->get($this->cacheKey());
     }
@@ -155,7 +156,7 @@ class WebAuthnAssertValidator
      *
      * @return \Webauthn\PublicKeyCredentialRequestOptions
      */
-    public function generateAssertion($user = null)
+    public function generateAssertion($user = null): RequestOptions
     {
         $assertion = $this->makeAssertionRequest($user);
 
@@ -171,7 +172,7 @@ class WebAuthnAssertValidator
      *
      * @return \Webauthn\PublicKeyCredentialRequestOptions
      */
-    protected function makeAssertionRequest($user = null)
+    protected function makeAssertionRequest($user = null): RequestOptions
     {
         return new RequestOptions(
             random_bytes($this->bytes),
@@ -188,10 +189,9 @@ class WebAuthnAssertValidator
      *
      * @return string
      */
-    protected function cacheKey()
+    protected function cacheKey(): string
     {
-        return 'larapass.assertation|' .
-            sha1($this->laravelRequest->getHttpHost() . '|' . $this->laravelRequest->ip());
+        return 'larapass.assertation|' . sha1($this->laravelRequest->getHttpHost() . '|' . $this->laravelRequest->ip());
     }
 
     /**
@@ -237,7 +237,7 @@ class WebAuthnAssertValidator
      *
      * @return string
      */
-    protected function getCurrentRpId(RequestOptions $assertion)
+    protected function getCurrentRpId(RequestOptions $assertion): string
     {
         return $assertion->getRpId() ?? $this->laravelRequest->getHost();
     }

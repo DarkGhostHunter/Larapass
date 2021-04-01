@@ -2,32 +2,35 @@
 
 namespace DarkGhostHunter\Larapass\WebAuthn;
 
+use RuntimeException;
 use Webauthn\AuthenticatorSelectionCriteria as WebAuthnAuthenticatorSelectionCriteria;
 
 class AuthenticatorSelectionCriteria extends WebAuthnAuthenticatorSelectionCriteria
 {
-    private $residentKey;
+    private ?string $residentKey;
 
     /**
      * Sets the Resident Key variable.
      *
-     * @param  string  $type
+     * @param  string|null  $residentKey
+     *
+     * @return \DarkGhostHunter\Larapass\WebAuthn\AuthenticatorSelectionCriteria
      */
-    public function setResidentKey(?string $type): AuthenticatorSelectionCriteria
+    public function setResidentKey(?string $residentKey): AuthenticatorSelectionCriteria
     {
         if (!in_array(
-            $type,
+            $residentKey,
             [
-                self::USER_VERIFICATION_REQUIREMENT_REQUIRED,
-                self::USER_VERIFICATION_REQUIREMENT_PREFERRED,
-                self::USER_VERIFICATION_REQUIREMENT_DISCOURAGED,
+                self::RESIDENT_KEY_REQUIREMENT_REQUIRED,
+                self::RESIDENT_KEY_REQUIREMENT_PREFERRED,
+                self::RESIDENT_KEY_REQUIREMENT_DISCOURAGED,
             ],
             false
         )) {
-            throw new \RuntimeException("The {$type} as Resident Key option is unsupported.");
+            throw new RuntimeException("The {$residentKey} as Resident Key option is unsupported.");
         }
 
-        $this->residentKey = $type;
+        $this->residentKey = $residentKey;
 
         return $this;
     }

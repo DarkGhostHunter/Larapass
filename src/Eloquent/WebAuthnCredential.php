@@ -102,7 +102,7 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
      *
      * @return bool
      */
-    public function isEnabled()
+    public function isEnabled(): bool
     {
         return !$this->disabled_at;
     }
@@ -112,7 +112,7 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
      *
      * @return bool
      */
-    public function isDisabled()
+    public function isDisabled(): bool
     {
         return !$this->isEnabled();
     }
@@ -124,7 +124,7 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeEnabled(Builder $builder)
+    public function scopeEnabled(Builder $builder): Builder
     {
         return $builder->withoutTrashed();
     }

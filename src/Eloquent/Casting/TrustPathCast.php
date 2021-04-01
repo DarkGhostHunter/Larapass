@@ -17,7 +17,7 @@ class TrustPathCast implements CastsAttributes
      *
      * @return \Webauthn\TrustPath\TrustPath
      */
-    public function get($model, string $key, $value, array $attributes)
+    public function get($model, string $key, $value, array $attributes): \Webauthn\TrustPath\TrustPath
     {
         return TrustPathLoader::loadTrustPath(json_decode($value, true));
     }
@@ -32,7 +32,7 @@ class TrustPathCast implements CastsAttributes
      *
      * @return string
      */
-    public function set($model, string $key, $value, array $attributes)
+    public function set($model, string $key, $value, array $attributes): string
     {
         return json_encode($value);
     }

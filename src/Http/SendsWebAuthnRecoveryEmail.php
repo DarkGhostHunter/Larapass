@@ -12,7 +12,7 @@ trait SendsWebAuthnRecoveryEmail
     /**
      * Show the Account Recovery form.
      *
-     * @return \Illuminate\View\View|mixed
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\View\View
      */
     public function showDeviceLostForm()
     {
@@ -43,7 +43,7 @@ trait SendsWebAuthnRecoveryEmail
      *
      * @return array|string[]
      */
-    protected function recoveryRules()
+    protected function recoveryRules(): array
     {
         return [
             'email' => 'required|email',
@@ -58,7 +58,7 @@ trait SendsWebAuthnRecoveryEmail
      *
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
      */
-    protected function sendRecoveryLinkResponse(Request $request, $response)
+    protected function sendRecoveryLinkResponse(Request $request, string $response)
     {
         return $request->wantsJson()
             ? new JsonResponse(['message' => trans($response)], 200)
@@ -74,14 +74,10 @@ trait SendsWebAuthnRecoveryEmail
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
      * @throws \Illuminate\Validation\ValidationException
      */
-    protected function sendRecoveryLinkFailedResponse(Request $request, $response)
+    protected function sendRecoveryLinkFailedResponse(Request $request, string $response)
     {
         if ($request->wantsJson()) {
-            throw ValidationException::withMessages(
-                [
-                    'email' => [trans($response)],
-                ]
-            );
+            throw ValidationException::withMessages(['email' => [trans($response)]]);
         }
 
         return back()

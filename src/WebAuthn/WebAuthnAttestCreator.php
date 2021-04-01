@@ -5,6 +5,7 @@ namespace DarkGhostHunter\Larapass\WebAuthn;
 use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Cache\Factory as CacheFactoryContract;
+use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Contracts\Config\Repository as ConfigContract;
 use Illuminate\Http\Request;
 use Webauthn\AuthenticationExtensions\AuthenticationExtensionsClientInputs;
@@ -19,42 +20,42 @@ class WebAuthnAttestCreator
      *
      * @var \Illuminate\Contracts\Cache\Repository
      */
-    protected $cache;
+    protected Repository $cache;
 
     /**
      * Application as the Relying Party.
      *
      * @var \Webauthn\PublicKeyCredentialRpEntity
      */
-    protected $relyingParty;
+    protected RelyingParty $relyingParty;
 
     /**
      * Authenticator filters.
      *
      * @var \Webauthn\AuthenticatorSelectionCriteria
      */
-    protected $criteria;
+    protected AuthenticatorSelectionCriteria $criteria;
 
     /**
      * Parameters for the credentials creation.
      *
      * @var \DarkGhostHunter\Larapass\WebAuthn\PublicKeyCredentialParametersCollection
      */
-    protected $parameters;
+    protected PublicKeyCredentialParametersCollection $parameters;
 
     /**
      * Custom extensions the user can accept from the client itself.
      *
      * @var \Webauthn\AuthenticationExtensions\AuthenticationExtensionsClientInputs
      */
-    protected $extensions;
+    protected AuthenticationExtensionsClientInputs $extensions;
 
     /**
      * Challenge time-to-live, in milliseconds.
      *
      * @var int
      */
-    protected $timeout;
+    protected int $timeout;
 
     /**
      * Number of bytes to create for a random challenge.
@@ -68,21 +69,21 @@ class WebAuthnAttestCreator
      *
      * @var string
      */
-    protected $conveyance;
+    protected string $conveyance;
 
     /**
      * If only one credential is allowed for the user in the device.
      *
      * @var bool
      */
-    protected $unique;
+    protected bool $unique;
 
     /**
      * Laravel HTTP Request.
      *
      * @var \Illuminate\Http\Request
      */
-    protected $laravelRequest;
+    protected Request $laravelRequest;
 
     /**
      * WebAuthnAttestation constructor.
@@ -124,7 +125,7 @@ class WebAuthnAttestCreator
      *
      * @return \Webauthn\PublicKeyCredentialCreationOptions|null
      */
-    public function retrieveAttestation($user)
+    public function retrieveAttestation($user): ?PublicKeyCredentialCreationOptions
     {
         return $this->cache->get($this->cacheKey($user));
     }
@@ -136,7 +137,7 @@ class WebAuthnAttestCreator
      *
      * @return mixed|\Webauthn\PublicKeyCredentialCreationOptions
      */
-    public function generateAttestation($user)
+    public function generateAttestation($user): PublicKeyCredentialCreationOptions
     {
         $attestation = $this->makeAttestationRequest($user);
 
@@ -152,7 +153,7 @@ class WebAuthnAttestCreator
      *
      * @return mixed
      */
-    protected function makeAttestationRequest($user)
+    protected function makeAttestationRequest($user): PublicKeyCredentialCreationOptions
     {
         return new PublicKeyCredentialCreationOptions(
             $this->relyingParty,
@@ -174,7 +175,7 @@ class WebAuthnAttestCreator
      *
      * @return string
      */
-    protected function cacheKey(Authenticatable $user)
+    protected function cacheKey(Authenticatable $user): string
     {
         return implode(
             '|',
@@ -193,7 +194,7 @@ class WebAuthnAttestCreator
      *
      * @return array
      */
-    protected function getExcludedCredentials(WebAuthnAuthenticatable $user)
+    protected function getExcludedCredentials(WebAuthnAuthenticatable $user): array
     {
         return $this->unique ? $user->attestationExcludedCredentials() : [];
     }

@@ -15,26 +15,26 @@ class RequireWebAuthn
      *
      * @var \Illuminate\Contracts\Routing\ResponseFactory
      */
-    protected $responseFactory;
+    protected ResponseFactory $responseFactory;
 
     /**
      * The URL generator instance.
      *
      * @var \Illuminate\Contracts\Routing\UrlGenerator
      */
-    protected $urlGenerator;
+    protected UrlGenerator $urlGenerator;
 
     /**
      * The password timeout.
      *
      * @var int
      */
-    protected $remember;
+    protected int $remember;
 
     /**
      * @var \Illuminate\Contracts\Session\Session
      */
-    protected $session;
+    protected Session $session;
 
     /**
      * Create a new middleware instance.
@@ -69,12 +69,7 @@ class RequireWebAuthn
     {
         if ($this->shouldConfirmAuthenticator()) {
             if ($request->expectsJson()) {
-                return $this->responseFactory->json(
-                    [
-                        'message' => 'Authenticator assertion required.',
-                    ],
-                    423
-                );
+                return $this->responseFactory->json(['message' => 'Authenticator assertion required.'], 423);
             }
 
             return $this->responseFactory->redirectGuest(
@@ -90,7 +85,7 @@ class RequireWebAuthn
      *
      * @return bool
      */
-    protected function shouldConfirmAuthenticator()
+    protected function shouldConfirmAuthenticator(): bool
     {
         $confirmedAt = now()->timestamp - $this->session->get('auth.webauthn.confirm', 0);
 

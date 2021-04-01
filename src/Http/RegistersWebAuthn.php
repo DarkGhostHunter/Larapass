@@ -5,7 +5,10 @@ namespace DarkGhostHunter\Larapass\Http;
 use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
 use DarkGhostHunter\Larapass\Events\AttestationSuccessful;
 use DarkGhostHunter\Larapass\Facades\WebAuthn;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Webauthn\PublicKeyCredentialSource;
 
 trait RegistersWebAuthn
 {
@@ -18,7 +21,7 @@ trait RegistersWebAuthn
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function options(WebAuthnAuthenticatable $user)
+    public function options(WebAuthnAuthenticatable $user): JsonResponse
     {
         return response()->json(WebAuthn::generateAttestation($user));
     }
@@ -31,7 +34,7 @@ trait RegistersWebAuthn
      *
      * @return \Illuminate\Http\Response
      */
-    public function register(Request $request, WebAuthnAuthenticatable $user)
+    public function register(Request $request, WebAuthnAuthenticatable $user): Response
     {
         $input = $request->validate($this->attestationRules());
 
@@ -59,7 +62,7 @@ trait RegistersWebAuthn
      *
      * @return void|mixed
      */
-    protected function credentialRegistered($user, $credentials)
+    protected function credentialRegistered(WebAuthnAuthenticatable $user, PublicKeyCredentialSource $credentials)
     {
         // ...
     }

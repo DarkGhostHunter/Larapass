@@ -21,7 +21,7 @@ class EloquentWebAuthnProvider extends EloquentUserProvider
      *
      * @var \DarkGhostHunter\Larapass\WebAuthn\WebAuthnAssertValidator
      */
-    protected $validator;
+    protected WebAuthnAssertValidator $validator;
 
     /**
      * Create a new database user provider.
@@ -35,7 +35,7 @@ class EloquentWebAuthnProvider extends EloquentUserProvider
         ConfigContract $config,
         WebAuthnAssertValidator $validator,
         HasherContract $hasher,
-        $model
+        string $model
     ) {
         $this->fallback = $config->get('larapass.fallback');
         $this->validator = $validator;
@@ -66,7 +66,7 @@ class EloquentWebAuthnProvider extends EloquentUserProvider
      *
      * @return bool
      */
-    protected function isSignedChallenge(array $credentials)
+    protected function isSignedChallenge(array $credentials): bool
     {
         return isset($credentials['id'], $credentials['rawId'], $credentials['type'], $credentials['response']);
     }
@@ -79,7 +79,7 @@ class EloquentWebAuthnProvider extends EloquentUserProvider
      *
      * @return bool
      */
-    public function validateCredentials($user, array $credentials)
+    public function validateCredentials($user, array $credentials): bool
     {
         if ($this->isSignedChallenge($credentials)) {
             return (bool)$this->validator->validate($credentials);

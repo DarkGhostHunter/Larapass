@@ -5,6 +5,7 @@ namespace DarkGhostHunter\Larapass\Http;
 use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
 use DarkGhostHunter\Larapass\Events\AttestationSuccessful;
 use DarkGhostHunter\Larapass\Facades\WebAuthn;
+use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -37,9 +38,9 @@ trait RecoversWebAuthn
      *
      * @param  \Illuminate\Http\Request  $request
      *
-     * @return \Illuminate\Http\JsonResponse|void
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function options(Request $request)
+    public function options(Request $request): JsonResponse
     {
         $user = WebAuthn::getUser($request->validate($this->rules()));
 
@@ -56,7 +57,7 @@ trait RecoversWebAuthn
      *
      * @return array
      */
-    protected function rules()
+    protected function rules(): array
     {
         return [
             'token' => 'required',
@@ -104,7 +105,7 @@ trait RecoversWebAuthn
      *
      * @return bool
      */
-    protected function register(Request $request, WebAuthnAuthenticatable $user)
+    protected function register(Request $request, WebAuthnAuthenticatable $user): bool
     {
         $validCredential = WebAuthn::validateAttestation(
             $request->validate($this->attestationRules()),
@@ -135,7 +136,7 @@ trait RecoversWebAuthn
      *
      * @return bool|mixed
      */
-    protected function shouldDisableAllCredentials(Request $request)
+    protected function shouldDisableAllCredentials(Request $request): bool
     {
         return filter_var($request->header('WebAuthn-Unique'), FILTER_VALIDATE_BOOLEAN)
             ?: $request->filled('unique');
@@ -149,7 +150,7 @@ trait RecoversWebAuthn
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function sendRecoveryResponse(Request $request, $response)
+    protected function sendRecoveryResponse(Request $request, string $response): JsonResponse
     {
         return new JsonResponse(
             [
@@ -168,7 +169,7 @@ trait RecoversWebAuthn
      * @return \Illuminate\Http\JsonResponse|void
      * @throws \Illuminate\Validation\ValidationException
      */
-    protected function sendRecoveryFailedResponse(Request $request, $response)
+    protected function sendRecoveryFailedResponse(Request $request, string $response): JsonResponse
     {
         throw ValidationException::withMessages(
             [
@@ -182,7 +183,7 @@ trait RecoversWebAuthn
      *
      * @return \Illuminate\Contracts\Auth\StatefulGuard
      */
-    protected function guard()
+    protected function guard(): StatefulGuard
     {
         return Auth::guard();
     }
@@ -192,7 +193,7 @@ trait RecoversWebAuthn
      *
      * @return string
      */
-    public function redirectPath()
+    public function redirectPath(): string
     {
         if (method_exists($this, 'redirectTo')) {
             return $this->redirectTo();

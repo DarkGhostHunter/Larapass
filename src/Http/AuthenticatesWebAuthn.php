@@ -3,9 +3,11 @@
 namespace DarkGhostHunter\Larapass\Http;
 
 use DarkGhostHunter\Larapass\Facades\WebAuthn;
+use Illuminate\Contracts\Auth\StatefulGuard;
+use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
+use Webauthn\PublicKeyCredentialRequestOptions;
 
 trait AuthenticatesWebAuthn
 {
@@ -18,7 +20,7 @@ trait AuthenticatesWebAuthn
      *
      * @return \Webauthn\PublicKeyCredentialRequestOptions
      */
-    public function options(Request $request)
+    public function options(Request $request): PublicKeyCredentialRequestOptions
     {
         $credentials = $request->validate($this->optionRules());
 
@@ -32,7 +34,7 @@ trait AuthenticatesWebAuthn
      *
      * @return array
      */
-    protected function optionRules()
+    protected function optionRules(): array
     {
         return [
             $this->username() => 'sometimes|email',
@@ -44,7 +46,7 @@ trait AuthenticatesWebAuthn
      *
      * @return string
      */
-    protected function username()
+    protected function username(): string
     {
         return 'email';
     }
@@ -69,7 +71,7 @@ trait AuthenticatesWebAuthn
      *
      * @return \Illuminate\Contracts\Auth\UserProvider
      */
-    protected function userProvider()
+    protected function userProvider(): UserProvider
     {
         return Auth::createUserProvider('users');
     }
@@ -87,8 +89,6 @@ trait AuthenticatesWebAuthn
 
         $credential['response']['userHandle'] = null;
 
-        Log::debug($credential);
-
         if ($authenticated = $this->attemptLogin($credential, $this->hasRemember($request))) {
             return $this->authenticated($request, $this->guard()->user()) ?? response()->noContent();
         }
@@ -103,7 +103,7 @@ trait AuthenticatesWebAuthn
      *
      * @return bool
      */
-    protected function hasRemember(Request $request)
+    protected function hasRemember(Request $request): bool
     {
         return filter_var($request->header('WebAuthn-Remember'), FILTER_VALIDATE_BOOLEAN)
             ?: $request->filled('remember');
@@ -117,7 +117,7 @@ trait AuthenticatesWebAuthn
      *
      * @return bool
      */
-    protected function attemptLogin(array $challenge, bool $remember = false)
+    protected function attemptLogin(array $challenge, bool $remember = false): bool
     {
         return $this->guard()->attempt($challenge, $remember);
     }
@@ -140,7 +140,7 @@ trait AuthenticatesWebAuthn
      *
      * @return \Illuminate\Contracts\Auth\StatefulGuard
      */
-    protected function guard()
+    protected function guard(): StatefulGuard
     {
         return Auth::guard();
     }

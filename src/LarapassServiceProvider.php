@@ -39,11 +39,18 @@ use Webauthn\TokenBinding\TokenBindingHandler;
 class LarapassServiceProvider extends ServiceProvider
 {
     /**
+     * Path to the migration file.
+     *
+     * @var string
+     */
+    protected const MIGRATION_FILE = __DIR__ . '/../database/migrations/2020_04_02_000000_create_web_authn_tables.php';
+
+    /**
      * Register the application services.
      *
      * @return void
      */
-    public function register()
+    public function register(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/larapass.php', 'larapass');
 
@@ -61,7 +68,7 @@ class LarapassServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    protected function bindWebAuthnBasePackage()
+    protected function bindWebAuthnBasePackage(): void
     {
         // And from here the shit hits the fan. But it's needed to make the package modular,
         // testable and catchable by the developer when he needs to override anything.
@@ -251,7 +258,7 @@ class LarapassServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'larapass');
         $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'larapass');
@@ -280,46 +287,23 @@ class LarapassServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    protected function publishFiles()
+    protected function publishFiles() : void
     {
-        $this->publishes(
-            [
-                __DIR__ . '/../config/larapass.php' => config_path('larapass.php'),
-            ],
-            'config'
-        );
+        $this->publishes([__DIR__ . '/../config/larapass.php' => config_path('larapass.php')], 'config');
+        $this->publishes([__DIR__ . '/../stubs' => app_path('Http/Controllers/Auth')], 'controllers');
+        $this->publishes([__DIR__ . '/../resources/js' => public_path('vendor/larapass/js')], 'public');
+        $this->publishes([__DIR__ . '/../resources/views' => resource_path('views/vendor/larapass')], 'views');
 
-        $this->publishes(
-            [
-                __DIR__ . '/../stubs' => app_path('Http/Controllers/Auth'),
-            ],
-            'controllers'
-        );
+        $this->publishes([static::MIGRATION_FILE => static::generateDatabasePublishPath()], 'migrations');
+    }
 
-        $this->publishes(
-            [
-                __DIR__ . '/../resources/js' => public_path('vendor/larapass/js'),
-            ],
-            'public'
-        );
-
-        $this->publishes(
-            [
-                __DIR__ . '/../resources/views' => resource_path('views/vendor/larapass'),
-            ],
-            'views'
-        );
-
-        $this->publishes(
-            [
-                __DIR__ .
-                '/../database/migrations/2020_04_02_000000_create_web_authn_tables.php' => database_path(
-                    'migrations/' .
-                    now()->format('Y_m_d_His') .
-                    '_create_web_authn_tables.php'
-                ),
-            ],
-            'migrations'
-        );
+    /**
+     * Creates a final database path for the migration.
+     *
+     * @return string
+     */
+    protected static function generateDatabasePublishPath(): string
+    {
+        return database_path('migrations/' . now()->format('Y_m_d_His') . '_create_web_authn_tables.php');
     }
 }

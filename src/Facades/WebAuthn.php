@@ -9,6 +9,8 @@ use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAssertValidator;
 use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAttestCreator;
 use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAttestValidator;
 use Illuminate\Support\Facades\Facade;
+use Webauthn\PublicKeyCredentialCreationOptions;
+use Webauthn\PublicKeyCredentialRequestOptions;
 
 class WebAuthn extends Facade
 {
@@ -54,7 +56,7 @@ class WebAuthn extends Facade
      *
      * @return \Webauthn\PublicKeyCredentialCreationOptions
      */
-    public static function generateAttestation(WebAuthnAuthenticatable $user)
+    public static function generateAttestation(WebAuthnAuthenticatable $user): PublicKeyCredentialCreationOptions
     {
         return static::$app[WebAuthnAttestCreator::class]->generateAttestation($user);
     }
@@ -77,11 +79,11 @@ class WebAuthn extends Facade
     /**
      * Creates a new assertion request for a given user, or blank if there is no user given.
      *
-     * @param  \DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable  $user
+     * @param  \DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable|null  $user
      *
      * @return \Webauthn\PublicKeyCredentialRequestOptions
      */
-    public static function generateAssertion(?WebAuthnAuthenticatable $user = null)
+    public static function generateAssertion(?WebAuthnAuthenticatable $user = null): PublicKeyCredentialRequestOptions
     {
         return static::$app[WebAuthnAssertValidator::class]->generateAssertion($user);
     }
@@ -95,7 +97,7 @@ class WebAuthn extends Facade
      *
      * @return bool
      */
-    public static function validateAssertion(array $data)
+    public static function validateAssertion(array $data): bool
     {
         return (bool)static::$app[WebAuthnAssertValidator::class]->validate($data);
     }
@@ -107,7 +109,7 @@ class WebAuthn extends Facade
      *
      * @return string
      */
-    public static function sendRecoveryLink(array $credentials)
+    public static function sendRecoveryLink(array $credentials): string
     {
         return static::$app[CredentialBroker::class]->sendResetLink($credentials);
     }
@@ -145,7 +147,7 @@ class WebAuthn extends Facade
      *
      * @return bool
      */
-    public static function tokenExists($user, string $token)
+    public static function tokenExists($user, string $token): bool
     {
         return $user ? static::$app[CredentialBroker::class]->tokenExists($user, $token) : false;
     }

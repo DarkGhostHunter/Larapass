@@ -17,7 +17,7 @@ class UuidCast implements CastsAttributes
      *
      * @return \Ramsey\Uuid\UuidInterface
      */
-    public function get($model, string $key, $value, array $attributes)
+    public function get($model, string $key, $value, array $attributes): \Ramsey\Uuid\UuidInterface
     {
         return Uuid::fromString($value);
     }

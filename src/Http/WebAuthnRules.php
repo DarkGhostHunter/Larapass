@@ -9,7 +9,7 @@ trait WebAuthnRules
      *
      * @return array|string[]
      */
-    protected function attestationRules()
+    protected function attestationRules(): array
     {
         return [
             'id' => 'required|string',
@@ -25,7 +25,7 @@ trait WebAuthnRules
      *
      * @return array|string[]
      */
-    protected function assertionRules()
+    protected function assertionRules(): array
     {
         return [
             'id' => 'required|string',
