@@ -643,11 +643,11 @@ Yes, as long you are hashing them as you should, and you have secured your appli
 
 * **Can a user register two or more _devices_?**
 
-Yes, but you need to manually attest (register) these. It's recommended to email him to register a new device.
+Yes.
 
 * **What happens if a credential is cloned?**
 
-The user won't be authenticated since the server counter will be greater than the reported by the credential. To intercede in the procedure, modify the Assertion Validator in the Service Container and add your own `CounterChecker`:
+The user won't be authenticated since the "logins" counter will be greater than the reported by the original device. To intercede in the procedure, modify the Assertion Validator in the Service Container and add your own `CounterChecker`:
 
 ```php
 $this->app->bind(CounterChecker::class, function () {
@@ -685,17 +685,21 @@ Yes, [use these recovery helpers](#6-set-up-account-recovery-optional).
 
 Disabling a credential doesn't delete it, so it can be later enabled manually in the case the user recovers it. When the credential is deleted, it goes away forever.
 
+* **Can a user delete its credentials from its device?**
+
+Yes. If it does, the other part of the credentials in your server gets virtually orphaned. You may want to show the user a list of registered credentials to delete them.
+
 * **How secure is this against passwords or 2FA?**
 
-Extremely secure since it works only on HTTPS, and no password or codes are exchanged.
+Extremely secure since it works only on HTTPS (or `localhost`), and no password are exchanged, or codes are visible in the screen.
 
 * **Can I deactivate the password fallback? Can I enforce only WebAuthn authentication?**
 
-Yes. Just be sure to [use the recovery helpers](#6-set-up-account-recovery-optional) to avoid users locked out.
+Yes. Just be sure to [use the recovery helpers](#6-set-up-account-recovery-optional) to avoid locking out your users..
 
 * **Does this includes a frontend Javascript?**
 
-[Yes.](#5-use-the-javascript-helper-optional)
+[Yes](#5-use-the-javascript-helper-optional), but it's very _basic_. 
 
 * **Does this encodes/decode the strings automatically in the frontend?**
 
@@ -707,7 +711,15 @@ Yes, the included [WebAuthn Helper](#5-use-the-javascript-helper-optional) does 
 
 * **Can I use my smartphone as authenticator through a PC desktop/laptop/terminal?**
 
-Depends on the OS and hardware. Some will require previously pairing the device to an "account". Others won't and will only work with USB keys. This is up to hardware and software vendor themselves.
+Depends on the OS and hardware. Some will require previously pairing the device to an "account". Others  will only work with USB keys. This is up to hardware and software vendor themselves.
+
+* **Why my device doesn't show Windows Hello/TouchId/FaceId/fingerprint authentication?**
+
+By default, this WebAuthn implementation accepts almost everything. Some combinations of devices, OS and web browsers may differ on what to make available for WebAuthn authentication. In other words, it's not my fault.
+
+* **I'm trying to test this in my development server but it doesn't work**
+
+Use `localhost` exclusively, or use [ngrok](https://ngrok.com/) (or similar) to tunnel your site through HTTPS. WebAuthn only works on `localhost` or `HTTPS` only.
 
 ## License
 
