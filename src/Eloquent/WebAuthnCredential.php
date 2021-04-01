@@ -118,16 +118,6 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
     }
 
     /**
-     * Returns the credential ID encoded in BASE64.
-     *
-     * @return string
-     */
-    public function getPrettyIdAttribute()
-    {
-        return base64_decode($this->attributes['id']);
-    }
-
-    /**
      * Filter the credentials for those explicitly enabled.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $builder
