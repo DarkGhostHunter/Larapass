@@ -16,11 +16,7 @@ class CreateWebAuthnTables extends Migration
     {
         Schema::create('web_authn_credentials', function (Blueprint $table) {
 
-            if ($table->engine === 'mysql') {
-                $table->addColumn('tinyblob', 'id');
-            } else {
-                $table->binary('id');
-            }
+            $table->string('id', 255);
 
             // Change accordingly for your users table if you need to.
             $table->unsignedBigInteger('user_id');
