@@ -15,9 +15,15 @@ class AuthenticatorSelectionCriteria extends WebAuthnAuthenticatorSelectionCrite
      */
     public function setResidentKey(?string $type): AuthenticatorSelectionCriteria
     {
-        if (! in_array($type, [self::USER_VERIFICATION_REQUIREMENT_REQUIRED,
-            self::USER_VERIFICATION_REQUIREMENT_PREFERRED,
-            self::USER_VERIFICATION_REQUIREMENT_DISCOURAGED], false)) {
+        if (!in_array(
+            $type,
+            [
+                self::USER_VERIFICATION_REQUIREMENT_REQUIRED,
+                self::USER_VERIFICATION_REQUIREMENT_PREFERRED,
+                self::USER_VERIFICATION_REQUIREMENT_DISCOURAGED,
+            ],
+            false
+        )) {
             throw new \RuntimeException("The {$type} as Resident Key option is unsupported.");
         }
 
@@ -34,7 +40,7 @@ class AuthenticatorSelectionCriteria extends WebAuthnAuthenticatorSelectionCrite
     /**
      * @return array<string, mixed>
      */
-    public function jsonSerialize() : array
+    public function jsonSerialize(): array
     {
         $serialied = parent::jsonSerialize();
 

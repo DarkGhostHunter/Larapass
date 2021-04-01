@@ -2,10 +2,10 @@
 
 namespace DarkGhostHunter\Larapass\Http;
 
-use Illuminate\Http\Request;
-use DarkGhostHunter\Larapass\Facades\WebAuthn;
-use DarkGhostHunter\Larapass\Events\AttestationSuccessful;
 use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
+use DarkGhostHunter\Larapass\Events\AttestationSuccessful;
+use DarkGhostHunter\Larapass\Facades\WebAuthn;
+use Illuminate\Http\Request;
 
 trait RegistersWebAuthn
 {
@@ -15,6 +15,7 @@ trait RegistersWebAuthn
      * Returns a challenge to be verified by the user device.
      *
      * @param  \DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable  $user
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function options(WebAuthnAuthenticatable $user)
@@ -27,16 +28,17 @@ trait RegistersWebAuthn
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable  $user
+     *
      * @return \Illuminate\Http\Response
      */
     public function register(Request $request, WebAuthnAuthenticatable $user)
     {
+        $input = $request->validate($this->attestationRules());
+
         // We'll validate the challenge coming from the authenticator and instantly
         // save it into the credentials store. If the data is invalid we will bail
         // out and return a non-authorized response since we can't save the data.
-        $validCredential = WebAuthn::validateAttestation(
-            $request->validate($this->attestationRules()), $user
-        );
+        $validCredential = WebAuthn::validateAttestation($input, $user);
 
         if ($validCredential) {
             $user->addCredential($validCredential);
@@ -54,6 +56,7 @@ trait RegistersWebAuthn
      *
      * @param  \DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable  $user
      * @param  \Webauthn\PublicKeyCredentialSource  $credentials
+     *
      * @return void|mixed
      */
     protected function credentialRegistered($user, $credentials)

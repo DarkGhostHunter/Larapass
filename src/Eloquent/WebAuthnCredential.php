@@ -2,8 +2,8 @@
 
 namespace DarkGhostHunter\Larapass\Eloquent;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webauthn\PublicKeyCredentialSourceRepository;
 
@@ -73,10 +73,10 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
      * @var array
      */
     protected $casts = [
-        'transports'  => 'collection',
-        'counter'     => 'integer',
-        'trust_path'  => Casting\TrustPathCast::class,
-        'aaguid'      => Casting\UuidCast::class,
+        'transports' => 'collection',
+        'counter' => 'integer',
+        'trust_path' => Casting\TrustPathCast::class,
+        'aaguid' => Casting\UuidCast::class,
     ];
 
     /**
@@ -104,7 +104,7 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
      */
     public function isEnabled()
     {
-        return ! $this->disabled_at;
+        return !$this->disabled_at;
     }
 
     /**
@@ -114,7 +114,7 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
      */
     public function isDisabled()
     {
-        return ! $this->isEnabled();
+        return !$this->isEnabled();
     }
 
     /**
@@ -131,6 +131,7 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
      * Filter the credentials for those explicitly enabled.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $builder
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeEnabled(Builder $builder)

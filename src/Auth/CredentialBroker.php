@@ -3,8 +3,8 @@
 namespace DarkGhostHunter\Larapass\Auth;
 
 use Closure;
-use Illuminate\Auth\Passwords\PasswordBroker;
 use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
+use Illuminate\Auth\Passwords\PasswordBroker;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 
 class CredentialBroker extends PasswordBroker
@@ -49,13 +49,14 @@ class CredentialBroker extends PasswordBroker
      *
      * @param  array  $credentials
      * @param  \Closure|null  $callback
+     *
      * @return string
      */
-    public function sendResetLink(array $credentials, Closure $callback = null)
+    public function sendResetLink(array $credentials, Closure $callback = null) : string
     {
         $user = $this->getUser($credentials);
 
-        if (! $user instanceof WebAuthnAuthenticatable) {
+        if (!$user instanceof WebAuthnAuthenticatable) {
             return static::INVALID_USER;
         }
 
@@ -79,13 +80,14 @@ class CredentialBroker extends PasswordBroker
      *
      * @param  array  $credentials
      * @param  \Closure  $callback
+     *
      * @return mixed
      */
-    public function reset(array $credentials, Closure $callback)
+    public function reset(array $credentials, Closure $callback) : mixed
     {
         $user = $this->validateReset($credentials);
 
-        if (! $user instanceof CanResetPasswordContract || ! $user instanceof WebAuthnAuthenticatable) {
+        if (!$user instanceof CanResetPasswordContract || !$user instanceof WebAuthnAuthenticatable) {
             return $user;
         }
 

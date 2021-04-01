@@ -2,9 +2,9 @@
 
 namespace DarkGhostHunter\Larapass\Notifications;
 
-use Illuminate\Support\Facades\Lang;
-use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Lang;
 
 class AccountRecoveryNotification extends Notification
 {
@@ -43,6 +43,7 @@ class AccountRecoveryNotification extends Notification
      * Get the notification's channels.
      *
      * @param  mixed  $notifiable
+     *
      * @return array|string
      */
     public function via($notifiable)
@@ -54,6 +55,7 @@ class AccountRecoveryNotification extends Notification
      * Build the mail representation of the notification.
      *
      * @param  mixed  $notifiable
+     *
      * @return \Illuminate\Notifications\Messages\MailMessage
      */
     public function toMail($notifiable)
@@ -65,19 +67,34 @@ class AccountRecoveryNotification extends Notification
         if (static::$createUrlCallback) {
             $url = call_user_func(static::$createUrlCallback, $notifiable, $this->token);
         } else {
-            $url = url(route('webauthn.recover.form', [
-                'token' => $this->token,
-                'email' => $notifiable->getEmailForPasswordReset(),
-            ], false));
+            $url = url(
+                route(
+                    'webauthn.recover.form',
+                    [
+                        'token' => $this->token,
+                        'email' => $notifiable->getEmailForPasswordReset(),
+                    ],
+                    false
+                )
+            );
         }
 
-        return (new MailMessage)
+        return (new MailMessage())
             ->subject(Lang::get('Account Recovery Notification'))
-            ->line(Lang::get('You are receiving this email because we received an account recovery request for your account.'))
+            ->line(
+                Lang::get(
+                    'You are receiving this email because we received an account recovery request for your account.'
+                )
+            )
             ->action(Lang::get('Recover Account'), $url)
-            ->line(Lang::get('This recovery link will expire in :count minutes.', [
-                'count' => config('auth.passwords.webauthn.expire')
-            ]))
+            ->line(
+                Lang::get(
+                    'This recovery link will expire in :count minutes.',
+                    [
+                        'count' => config('auth.passwords.webauthn.expire'),
+                    ]
+                )
+            )
             ->line(Lang::get('If you did not request an account recovery, no further action is required.'));
     }
 
@@ -85,6 +102,7 @@ class AccountRecoveryNotification extends Notification
      * Set a callback that should be used when creating the reset password button URL.
      *
      * @param  callable  $callback
+     *
      * @return void
      */
     public static function createUrlUsing($callback)
@@ -96,6 +114,7 @@ class AccountRecoveryNotification extends Notification
      * Set a callback that should be used when building the notification mail message.
      *
      * @param  callable  $callback
+     *
      * @return void
      */
     public static function toMailUsing($callback)

@@ -2,9 +2,10 @@
 
 namespace DarkGhostHunter\Larapass\Http;
 
+use DarkGhostHunter\Larapass\Facades\WebAuthn;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use DarkGhostHunter\Larapass\Facades\WebAuthn;
+use Illuminate\Support\Facades\Log;
 
 trait AuthenticatesWebAuthn
 {
@@ -14,6 +15,7 @@ trait AuthenticatesWebAuthn
      * Returns an WebAuthn Assertion challenge for the user (or userless).
      *
      * @param  \Illuminate\Http\Request  $request
+     *
      * @return \Webauthn\PublicKeyCredentialRequestOptions
      */
     public function options(Request $request)
@@ -51,6 +53,7 @@ trait AuthenticatesWebAuthn
      * Return the user that should authenticate via WebAuthn.
      *
      * @param  array  $credentials
+     *
      * @return \Illuminate\Contracts\Auth\Authenticatable|\DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable|null
      */
     protected function getUserFromCredentials(array $credentials)
@@ -75,11 +78,16 @@ trait AuthenticatesWebAuthn
      * Log the user in.
      *
      * @param  \Illuminate\Http\Request  $request
+     *
      * @return \Illuminate\Http\Response|\Illuminate\Http\JsonResponse
      */
     public function login(Request $request)
     {
         $credential = $request->validate($this->assertionRules());
+
+        $credential['response']['userHandle'] = null;
+
+        Log::debug($credential);
 
         if ($authenticated = $this->attemptLogin($credential, $this->hasRemember($request))) {
             return $this->authenticated($request, $this->guard()->user()) ?? response()->noContent();
@@ -92,6 +100,7 @@ trait AuthenticatesWebAuthn
      * Check if the Request has a "Remember" value present.
      *
      * @param  \Illuminate\Http\Request  $request
+     *
      * @return bool
      */
     protected function hasRemember(Request $request)
@@ -105,6 +114,7 @@ trait AuthenticatesWebAuthn
      *
      * @param  array  $challenge
      * @param  bool  $remember
+     *
      * @return bool
      */
     protected function attemptLogin(array $challenge, bool $remember = false)
@@ -117,6 +127,7 @@ trait AuthenticatesWebAuthn
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  mixed  $user
+     *
      * @return void|\Illuminate\Http\JsonResponse
      */
     protected function authenticated(Request $request, $user)

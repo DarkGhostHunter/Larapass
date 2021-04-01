@@ -2,8 +2,8 @@
 
 namespace DarkGhostHunter\Larapass\Events;
 
-use Webauthn\PublicKeyCredentialSource;
 use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
+use Webauthn\PublicKeyCredentialSource;
 
 class AttestationSuccessful
 {
@@ -26,6 +26,7 @@ class AttestationSuccessful
      *
      * @param  \DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable  $user
      * @param  \Webauthn\PublicKeyCredentialSource  $credential
+     *
      * @return void
      */
     public function __construct(WebAuthnAuthenticatable $user, PublicKeyCredentialSource $credential)

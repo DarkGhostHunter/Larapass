@@ -2,15 +2,15 @@
 
 namespace DarkGhostHunter\Larapass\WebAuthn;
 
-use Illuminate\Http\Request;
-use Webauthn\AuthenticatorSelectionCriteria;
+use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\Cache\Factory as CacheFactoryContract;
+use Illuminate\Contracts\Config\Repository as ConfigContract;
+use Illuminate\Http\Request;
+use Webauthn\AuthenticationExtensions\AuthenticationExtensionsClientInputs;
+use Webauthn\AuthenticatorSelectionCriteria;
 use Webauthn\PublicKeyCredentialCreationOptions;
 use Webauthn\PublicKeyCredentialRpEntity as RelyingParty;
-use Illuminate\Contracts\Config\Repository as ConfigContract;
-use Illuminate\Contracts\Cache\Factory as CacheFactoryContract;
-use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
-use Webauthn\AuthenticationExtensions\AuthenticationExtensionsClientInputs;
 
 class WebAuthnAttestCreator
 {
@@ -95,14 +95,15 @@ class WebAuthnAttestCreator
      * @param  \Webauthn\AuthenticationExtensions\AuthenticationExtensionsClientInputs  $extensions
      * @param  \Illuminate\Http\Request  $request
      */
-    public function __construct(ConfigContract $config,
-                                CacheFactoryContract $cache,
-                                RelyingParty $relyingParty,
-                                AuthenticatorSelectionCriteria $criteria,
-                                PublicKeyCredentialParametersCollection $parameters,
-                                AuthenticationExtensionsClientInputs $extensions,
-                                Request $request)
-    {
+    public function __construct(
+        ConfigContract $config,
+        CacheFactoryContract $cache,
+        RelyingParty $relyingParty,
+        AuthenticatorSelectionCriteria $criteria,
+        PublicKeyCredentialParametersCollection $parameters,
+        AuthenticationExtensionsClientInputs $extensions,
+        Request $request
+    ) {
         $this->cache = $cache->store($config->get('larapass.cache'));
         $this->relyingParty = $relyingParty;
         $this->criteria = $criteria;
@@ -120,6 +121,7 @@ class WebAuthnAttestCreator
      * Retrieves an Attestation if it exists.
      *
      * @param  \Illuminate\Contracts\Auth\Authenticatable|\DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable  $user
+     *
      * @return \Webauthn\PublicKeyCredentialCreationOptions|null
      */
     public function retrieveAttestation($user)
@@ -131,6 +133,7 @@ class WebAuthnAttestCreator
      * Generates a new Attestation for a given user.
      *
      * @param  \Illuminate\Contracts\Auth\Authenticatable|\DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable  $user
+     *
      * @return mixed|\Webauthn\PublicKeyCredentialCreationOptions
      */
     public function generateAttestation($user)
@@ -146,6 +149,7 @@ class WebAuthnAttestCreator
      * Returns the challenge that is remembered specifically for the user.
      *
      * @param  \DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable|\Illuminate\Contracts\Auth\Authenticatable  $user
+     *
      * @return mixed
      */
     protected function makeAttestationRequest($user)
@@ -167,21 +171,26 @@ class WebAuthnAttestCreator
      * Returns the cache key to remember the challenge for the user.
      *
      * @param  \Illuminate\Contracts\Auth\Authenticatable  $user
+     *
      * @return string
      */
     protected function cacheKey(Authenticatable $user)
     {
-        return implode('|', [
-            'larapass.attestation',
-            get_class($user) . ':' . $user->getAuthIdentifier(),
-            sha1($this->laravelRequest->getHttpHost() . '|' . $this->laravelRequest->ip()),
-        ]);
+        return implode(
+            '|',
+            [
+                'larapass.attestation',
+                get_class($user) . ':' . $user->getAuthIdentifier(),
+                sha1($this->laravelRequest->getHttpHost() . '|' . $this->laravelRequest->ip()),
+            ]
+        );
     }
 
     /**
      * Return the excluded credentials if the configuration demands it.
      *
      * @param  \DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable  $user
+     *
      * @return array
      */
     protected function getExcludedCredentials(WebAuthnAuthenticatable $user)

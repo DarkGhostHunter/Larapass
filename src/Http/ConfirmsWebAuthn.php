@@ -2,9 +2,9 @@
 
 namespace DarkGhostHunter\Larapass\Http;
 
-use Illuminate\Http\Request;
-use DarkGhostHunter\Larapass\Facades\WebAuthn;
 use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
+use DarkGhostHunter\Larapass\Facades\WebAuthn;
+use Illuminate\Http\Request;
 
 trait ConfirmsWebAuthn
 {
@@ -24,6 +24,7 @@ trait ConfirmsWebAuthn
      * Return a request to assert the device.
      *
      * @param  \DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable  $user
+     *
      * @return \Webauthn\PublicKeyCredentialRequestOptions
      */
     public function options(WebAuthnAuthenticatable $user)
@@ -35,6 +36,7 @@ trait ConfirmsWebAuthn
      * Confirm the device assertion.
      *
      * @param  \Illuminate\Http\Request  $request
+     *
      * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse|\Illuminate\Http\Response
      */
     public function confirm(Request $request)
@@ -44,9 +46,11 @@ trait ConfirmsWebAuthn
         if (WebAuthn::validateAssertion($credential)) {
             $this->resetAuthenticatorConfirmationTimeout($request);
 
-            return response()->json([
-                'redirectTo' => redirect()->intended($this->redirectPath())->getTargetUrl()
-            ]);
+            return response()->json(
+                [
+                    'redirectTo' => redirect()->intended($this->redirectPath())->getTargetUrl(),
+                ]
+            );
         }
 
         return response()->noContent(422);
@@ -56,6 +60,7 @@ trait ConfirmsWebAuthn
      * Reset the password confirmation timeout.
      *
      * @param  \Illuminate\Http\Request  $request
+     *
      * @return void
      */
     protected function resetAuthenticatorConfirmationTimeout(Request $request)

@@ -3,12 +3,12 @@
 namespace DarkGhostHunter\Larapass\Facades;
 
 use Closure;
-use Illuminate\Support\Facades\Facade;
 use DarkGhostHunter\Larapass\Auth\CredentialBroker;
+use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
+use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAssertValidator;
 use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAttestCreator;
 use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAttestValidator;
-use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAssertValidator;
-use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
+use Illuminate\Support\Facades\Facade;
 
 class WebAuthn extends Facade
 {
@@ -51,6 +51,7 @@ class WebAuthn extends Facade
      * Creates a new attestation (registration) request.
      *
      * @param  \DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable  $user
+     *
      * @return \Webauthn\PublicKeyCredentialCreationOptions
      */
     public static function generateAttestation(WebAuthnAuthenticatable $user)
@@ -65,6 +66,7 @@ class WebAuthn extends Facade
      *
      * @param  array  $data
      * @param  \DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable  $user
+     *
      * @return bool|\Webauthn\PublicKeyCredentialSource
      */
     public static function validateAttestation(array $data, WebAuthnAuthenticatable $user)
@@ -76,6 +78,7 @@ class WebAuthn extends Facade
      * Creates a new assertion request for a given user.
      *
      * @param  \DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable  $user
+     *
      * @return \Webauthn\PublicKeyCredentialRequestOptions
      */
     public static function generateAssertion(?WebAuthnAuthenticatable $user = null)
@@ -99,17 +102,19 @@ class WebAuthn extends Facade
      * It returns `false` when the validation fails.
      *
      * @param  array  $data
+     *
      * @return bool
      */
     public static function validateAssertion(array $data)
     {
-        return (bool) static::$app[WebAuthnAssertValidator::class]->validate($data);
+        return (bool)static::$app[WebAuthnAssertValidator::class]->validate($data);
     }
 
     /**
      * Sends an account recovery email to an user by the credentials.
      *
      * @param  array  $credentials
+     *
      * @return string
      */
     public static function sendRecoveryLink(array $credentials)
@@ -122,6 +127,7 @@ class WebAuthn extends Facade
      *
      * @param  array  $credentials
      * @param  \Closure  $callback
+     *
      * @return \Illuminate\Contracts\Auth\CanResetPassword|mixed|string
      */
     public static function recover(array $credentials, Closure $callback)
@@ -133,6 +139,7 @@ class WebAuthn extends Facade
      * Get the user for the given credentials.
      *
      * @param  array  $credentials
+     *
      * @return null|\DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable|\Illuminate\Contracts\Auth\CanResetPassword
      */
     public static function getUser(array $credentials)
@@ -145,6 +152,7 @@ class WebAuthn extends Facade
      *
      * @param  \DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable|\Illuminate\Contracts\Auth\CanResetPassword|null  $user
      * @param  string  $token
+     *
      * @return bool
      */
     public static function tokenExists($user, string $token)

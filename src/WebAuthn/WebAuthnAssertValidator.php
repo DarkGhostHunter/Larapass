@@ -2,17 +2,17 @@
 
 namespace DarkGhostHunter\Larapass\WebAuthn;
 
+use Illuminate\Contracts\Cache\Factory as CacheFactoryContract;
+use Illuminate\Contracts\Config\Repository as ConfigContract;
 use Illuminate\Http\Request;
 use InvalidArgumentException;
-use Webauthn\PublicKeyCredentialLoader;
 use Psr\Http\Message\ServerRequestInterface;
+use Webauthn\AuthenticationExtensions\AuthenticationExtensionsClientInputs;
 use Webauthn\AuthenticatorAssertionResponse;
 use Webauthn\AuthenticatorAssertionResponseValidator;
-use Webauthn\PublicKeyCredentialRpEntity as RelyingParty;
-use Illuminate\Contracts\Config\Repository as ConfigContract;
-use Illuminate\Contracts\Cache\Factory as CacheFactoryContract;
+use Webauthn\PublicKeyCredentialLoader;
 use Webauthn\PublicKeyCredentialRequestOptions as RequestOptions;
-use Webauthn\AuthenticationExtensions\AuthenticationExtensionsClientInputs;
+use Webauthn\PublicKeyCredentialRpEntity as RelyingParty;
 
 class WebAuthnAssertValidator
 {
@@ -98,15 +98,16 @@ class WebAuthnAssertValidator
      * @param  \Psr\Http\Message\ServerRequestInterface  $request
      * @param  \Illuminate\Http\Request  $laravelRequest
      */
-    public function __construct(ConfigContract $config,
-                                CacheFactoryContract $cache,
-                                RelyingParty $relyingParty,
-                                AuthenticationExtensionsClientInputs $extensions,
-                                AuthenticatorAssertionResponseValidator $validator,
-                                PublicKeyCredentialLoader $loader,
-                                ServerRequestInterface $request,
-                                Request $laravelRequest)
-    {
+    public function __construct(
+        ConfigContract $config,
+        CacheFactoryContract $cache,
+        RelyingParty $relyingParty,
+        AuthenticationExtensionsClientInputs $extensions,
+        AuthenticatorAssertionResponseValidator $validator,
+        PublicKeyCredentialLoader $loader,
+        ServerRequestInterface $request,
+        Request $laravelRequest
+    ) {
         $this->cache = $cache->store($config->get('larapass.cache'));
         $this->relyingParty = $relyingParty;
         $this->extensions = $extensions;
@@ -125,6 +126,7 @@ class WebAuthnAssertValidator
      * Check if the login verification should be mandatory.
      *
      * @param  \Illuminate\Contracts\Config\Repository  $config
+     *
      * @return string
      */
     protected function shouldVerifyLogin(ConfigContract $config)
@@ -150,6 +152,7 @@ class WebAuthnAssertValidator
      * Returns a challenge for the given request fingerprint.
      *
      * @param  \DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable|null  $user
+     *
      * @return \Webauthn\PublicKeyCredentialRequestOptions
      */
     public function generateAssertion($user = null)
@@ -165,6 +168,7 @@ class WebAuthnAssertValidator
      * Creates a new Assertion Request for the request, and user if issued.
      *
      * @param  \Illuminate\Contracts\Auth\Authenticatable|\DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable|null  $user
+     *
      * @return \Webauthn\PublicKeyCredentialRequestOptions
      */
     protected function makeAssertionRequest($user = null)
@@ -194,11 +198,12 @@ class WebAuthnAssertValidator
      * Verifies if the assertion is correct.
      *
      * @param  array  $data
+     *
      * @return bool|\Webauthn\PublicKeyCredentialSource
      */
     public function validate(array $data)
     {
-        if (! $assertion = $this->retrieveAssertion()) {
+        if (!$assertion = $this->retrieveAssertion()) {
             return false;
         }
 
@@ -206,7 +211,7 @@ class WebAuthnAssertValidator
             $credentials = $this->loader->loadArray($data);
             $response = $credentials->getResponse();
 
-            if (! $response instanceof AuthenticatorAssertionResponse) {
+            if (!$response instanceof AuthenticatorAssertionResponse) {
                 return false;
             }
 
@@ -218,11 +223,9 @@ class WebAuthnAssertValidator
                 $response->getUserHandle(),
                 [$this->getCurrentRpId($assertion)]
             );
-        }
-        catch (InvalidArgumentException $exception) {
+        } catch (InvalidArgumentException $exception) {
             return false;
-        }
-        finally {
+        } finally {
             $this->cache->forget($this->cacheKey());
         }
     }
@@ -231,6 +234,7 @@ class WebAuthnAssertValidator
      * Returns the current Relaying Party ID to validate the response.
      *
      * @param  \Webauthn\PublicKeyCredentialRequestOptions  $assertion
+     *
      * @return string
      */
     protected function getCurrentRpId(RequestOptions $assertion)

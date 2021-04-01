@@ -2,8 +2,8 @@
 
 namespace DarkGhostHunter\Larapass\Eloquent\Casting;
 
-use Ramsey\Uuid\Uuid;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
+use Ramsey\Uuid\Uuid;
 
 class UuidCast implements CastsAttributes
 {
@@ -14,6 +14,7 @@ class UuidCast implements CastsAttributes
      * @param  string  $key
      * @param  mixed  $value
      * @param  array  $attributes
+     *
      * @return \Ramsey\Uuid\UuidInterface
      */
     public function get($model, string $key, $value, array $attributes)
@@ -28,6 +29,7 @@ class UuidCast implements CastsAttributes
      * @param  string  $key
      * @param  mixed  $value
      * @param  array  $attributes
+     *
      * @return array|string
      */
     public function set($model, string $key, $value, array $attributes)

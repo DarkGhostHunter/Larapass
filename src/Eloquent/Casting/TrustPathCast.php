@@ -2,8 +2,8 @@
 
 namespace DarkGhostHunter\Larapass\Eloquent\Casting;
 
-use Webauthn\TrustPath\TrustPathLoader;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
+use Webauthn\TrustPath\TrustPathLoader;
 
 class TrustPathCast implements CastsAttributes
 {
@@ -14,6 +14,7 @@ class TrustPathCast implements CastsAttributes
      * @param  string  $key
      * @param  mixed  $value
      * @param  array  $attributes
+     *
      * @return \Webauthn\TrustPath\TrustPath
      */
     public function get($model, string $key, $value, array $attributes)
@@ -28,6 +29,7 @@ class TrustPathCast implements CastsAttributes
      * @param  string  $key
      * @param  \Webauthn\TrustPath\TrustPath|array  $value
      * @param  array  $attributes
+     *
      * @return string
      */
     public function set($model, string $key, $value, array $attributes)

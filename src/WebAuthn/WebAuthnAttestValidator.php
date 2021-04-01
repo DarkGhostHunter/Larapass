@@ -2,19 +2,18 @@
 
 namespace DarkGhostHunter\Larapass\WebAuthn;
 
+use Illuminate\Contracts\Cache\Factory as CacheFactoryContract;
+use Illuminate\Contracts\Config\Repository as ConfigContract;
 use Illuminate\Http\Request;
 use InvalidArgumentException;
-use Webauthn\PublicKeyCredentialLoader;
-use Webauthn\AuthenticatorSelectionCriteria;
 use Psr\Http\Message\ServerRequestInterface;
-use Webauthn\AuthenticatorAttestationResponse;
-use Webauthn\PublicKeyCredentialRpEntity as RelyingParty;
-use Illuminate\Contracts\Config\Repository as ConfigContract;
-use Illuminate\Contracts\Cache\Factory as CacheFactoryContract;
-use DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable;
-use Webauthn\PublicKeyCredentialCreationOptions as CreationOptions;
 use Webauthn\AuthenticationExtensions\AuthenticationExtensionsClientInputs;
+use Webauthn\AuthenticatorAttestationResponse;
 use Webauthn\AuthenticatorAttestationResponseValidator as AttestationValidator;
+use Webauthn\AuthenticatorSelectionCriteria;
+use Webauthn\PublicKeyCredentialCreationOptions as CreationOptions;
+use Webauthn\PublicKeyCredentialLoader;
+use Webauthn\PublicKeyCredentialRpEntity as RelyingParty;
 
 class WebAuthnAttestValidator extends WebAuthnAttestCreator
 {
@@ -53,23 +52,30 @@ class WebAuthnAttestValidator extends WebAuthnAttestCreator
      * @param  \Webauthn\PublicKeyCredentialLoader  $loader
      * @param  \Psr\Http\Message\ServerRequestInterface  $request
      */
-    public function __construct(ConfigContract $config,
-                                CacheFactoryContract $cache,
-                                RelyingParty $relyingParty,
-                                AuthenticatorSelectionCriteria $criteria,
-                                PublicKeyCredentialParametersCollection $parameters,
-                                AuthenticationExtensionsClientInputs $extensions,
-                                AttestationValidator $validator,
-                                Request $laravelRequest,
-                                PublicKeyCredentialLoader $loader,
-                                ServerRequestInterface $request)
-    {
+    public function __construct(
+        ConfigContract $config,
+        CacheFactoryContract $cache,
+        RelyingParty $relyingParty,
+        AuthenticatorSelectionCriteria $criteria,
+        PublicKeyCredentialParametersCollection $parameters,
+        AuthenticationExtensionsClientInputs $extensions,
+        AttestationValidator $validator,
+        Request $laravelRequest,
+        PublicKeyCredentialLoader $loader,
+        ServerRequestInterface $request
+    ) {
         $this->validator = $validator;
         $this->loader = $loader;
         $this->request = $request;
 
         parent::__construct(
-            $config, $cache, $relyingParty, $criteria, $parameters, $extensions, $laravelRequest
+            $config,
+            $cache,
+            $relyingParty,
+            $criteria,
+            $parameters,
+            $extensions,
+            $laravelRequest
         );
     }
 
@@ -78,18 +84,19 @@ class WebAuthnAttestValidator extends WebAuthnAttestCreator
      *
      * @param  array  $data
      * @param  \Illuminate\Contracts\Auth\Authenticatable|\DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable  $user
+     *
      * @return bool|\Webauthn\PublicKeyCredentialSource
      */
     public function validate(array $data, $user)
     {
-        if (! $attestation = $this->retrieveAttestation($user)) {
+        if (!$attestation = $this->retrieveAttestation($user)) {
             return false;
         }
 
         try {
             $credentials = $this->loader->loadArray($data)->getResponse();
 
-            if (! $credentials instanceof AuthenticatorAttestationResponse) {
+            if (!$credentials instanceof AuthenticatorAttestationResponse) {
                 return false;
             }
 
@@ -99,11 +106,9 @@ class WebAuthnAttestValidator extends WebAuthnAttestCreator
                 $this->request,
                 [$this->getCurrentRpId($attestation)]
             );
-        }
-        catch (InvalidArgumentException $exception) {
+        } catch (InvalidArgumentException $exception) {
             return false;
-        }
-        finally {
+        } finally {
             $this->cache->forget($this->cacheKey($user));
         }
     }
@@ -112,6 +117,7 @@ class WebAuthnAttestValidator extends WebAuthnAttestCreator
      * Returns the current Relaying Party ID to validate the response.
      *
      * @param  \Webauthn\PublicKeyCredentialCreationOptions  $attestation
+     *
      * @return string
      */
     protected function getCurrentRpId(CreationOptions $attestation)

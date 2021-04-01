@@ -2,10 +2,10 @@
 
 namespace DarkGhostHunter\Larapass\Http;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Validation\ValidationException;
 use DarkGhostHunter\Larapass\Facades\WebAuthn;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 trait SendsWebAuthnRecoveryEmail
 {
@@ -23,6 +23,7 @@ trait SendsWebAuthnRecoveryEmail
      * Send a recovery email to the user.
      *
      * @param  \Illuminate\Http\Request  $request
+     *
      * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
      * @throws \Illuminate\Validation\ValidationException
      */
@@ -54,6 +55,7 @@ trait SendsWebAuthnRecoveryEmail
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  string  $response
+     *
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
      */
     protected function sendRecoveryLinkResponse(Request $request, $response)
@@ -68,15 +70,18 @@ trait SendsWebAuthnRecoveryEmail
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  string  $response
+     *
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
      * @throws \Illuminate\Validation\ValidationException
      */
     protected function sendRecoveryLinkFailedResponse(Request $request, $response)
     {
         if ($request->wantsJson()) {
-            throw ValidationException::withMessages([
-                'email' => [trans($response)],
-            ]);
+            throw ValidationException::withMessages(
+                [
+                    'email' => [trans($response)],
+                ]
+            );
         }
 
         return back()
