@@ -105,15 +105,15 @@ return [
     | Userless (One touch, Typeless) login
     |--------------------------------------------------------------------------
     |
-    | By default the user must input its username to receive which credentials
-    | can use to login. If this is activated, and the device supports it, the
-    | public key and ID can be stored inside the device for one-touch login.
+    | By default, users must input their email to receive a list of credentials
+    | ID to use for authentication, but they can also login without specifying
+    | one if the device can remember them, allowing for true one-touch login.
     |
     | Supported: "null", "required", "preferred", "discouraged".
     |
     */
 
-    'userless' => null,
+    'userless' => 'preferred',
 
     /*
     |--------------------------------------------------------------------------
