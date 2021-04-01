@@ -8,7 +8,7 @@
 
 Authenticate users with just their device, fingerprint or biometric data. Goodbye passwords!
 
-This enables WebAuthn authentication inside Laravel authentication driver, and comes with everything but the kitchen sink. 
+This enables WebAuthn authentication inside Laravel authentication driver, and comes with _everything but the kitchen sink_. 
 
 ## Requisites
 
@@ -20,6 +20,8 @@ This enables WebAuthn authentication inside Laravel authentication driver, and c
 Just hit the console and require it with Composer.
 
     composer require darkghosthunter/larapass
+
+Unfortunately, using WebAuthn is not a "walk in the park", this package allows you to enable WebAuthn in the most **easiest way possible**.
 
 # Table of contents
 
@@ -60,7 +62,7 @@ We need to make sure your users can register their devices and authenticate with
 2. [Create the `webauthn_credentials` table.](#2-create-the-webauthn_credentials-table)
 3. [Implement the contract and trait](#3-implement-the-contract-and-trait)
 
-After that, you can quick start WebAuthn with the included controllers and helpers to make your life easier.
+After that, you can quickly start WebAuthn with the included controllers and helpers to make your life easier.
 
 4. [Register the routes](#4-register-the-routes-optional)
 5. [Use the Javascript helper](#5-use-the-javascript-helper-optional)
