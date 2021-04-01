@@ -7,7 +7,7 @@ use Webauthn\AuthenticatorSelectionCriteria as WebAuthnAuthenticatorSelectionCri
 
 class AuthenticatorSelectionCriteria extends WebAuthnAuthenticatorSelectionCriteria
 {
-    private ?string $residentKey;
+    private ?string $residentKey = null;
 
     /**
      * Sets the Resident Key variable.

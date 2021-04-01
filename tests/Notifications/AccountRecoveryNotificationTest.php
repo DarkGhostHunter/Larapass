@@ -2,9 +2,9 @@
 
 namespace Tests\Notifications;
 
+use DarkGhostHunter\Larapass\Notifications\AccountRecoveryNotification;
 use Orchestra\Testbench\TestCase;
 use Tests\Stubs\TestWebAuthnUser;
-use DarkGhostHunter\Larapass\Notifications\AccountRecoveryNotification;
 
 class AccountRecoveryNotificationTest extends TestCase
 {

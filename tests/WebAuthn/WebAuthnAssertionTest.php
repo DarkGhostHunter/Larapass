@@ -2,33 +2,34 @@
 
 namespace Tests\WebAuthn;
 
-use Mockery;
+use Base64Url\Base64Url;
+use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAssertValidator;
 use Exception;
+use Illuminate\Cache\Repository;
+use Illuminate\Contracts\Cache\Factory as CacheFactoryContract;
+use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
+use InvalidArgumentException;
+use Mockery;
+use Orchestra\Testbench\TestCase;
+use Psr\Http\Message\ServerRequestInterface;
 use Ramsey\Uuid\Uuid;
 use Tests\RegistersPackage;
-use Illuminate\Support\Str;
-use Illuminate\Support\Arr;
-use Illuminate\Http\Request;
-use InvalidArgumentException;
-use Illuminate\Cache\Repository;
-use Orchestra\Testbench\TestCase;
-use Tests\Stubs\TestWebAuthnUser;
-use Webauthn\PublicKeyCredential;
-use Illuminate\Support\Facades\DB;
-use Webauthn\AuthenticatorResponse;
 use Tests\RunsPublishableMigrations;
+use Tests\Stubs\TestWebAuthnUser;
 use Webauthn\AttestedCredentialData;
-use Illuminate\Support\Facades\Route;
-use Webauthn\TrustPath\EmptyTrustPath;
-use Webauthn\PublicKeyCredentialLoader;
-use Webauthn\PublicKeyCredentialSource;
 use Webauthn\AuthenticatorAssertionResponse;
-use Psr\Http\Message\ServerRequestInterface;
-use Webauthn\PublicKeyCredentialRequestOptions;
-use Webauthn\PublicKeyCredentialSourceRepository;
 use Webauthn\AuthenticatorAssertionResponseValidator;
-use Illuminate\Contracts\Cache\Factory as CacheFactoryContract;
-use DarkGhostHunter\Larapass\WebAuthn\WebAuthnAssertValidator;
+use Webauthn\AuthenticatorResponse;
+use Webauthn\PublicKeyCredential;
+use Webauthn\PublicKeyCredentialLoader;
+use Webauthn\PublicKeyCredentialRequestOptions;
+use Webauthn\PublicKeyCredentialSource;
+use Webauthn\PublicKeyCredentialSourceRepository;
+use Webauthn\TrustPath\EmptyTrustPath;
 
 class WebAuthnAssertionTest extends TestCase
 {
@@ -83,8 +84,9 @@ class WebAuthnAssertionTest extends TestCase
         $this->assertInstanceOf(PublicKeyCredentialRequestOptions::class, $result);
 
         $firstCredential = Arr::first($result->getAllowCredentials());
+
         $this->assertSame('public_key', $firstCredential->getType());
-        $this->assertSame('test_credential_foo', $firstCredential->getId());
+        $this->assertSame('test_credential_foo', Base64Url::encode($firstCredential->getId()));
         $this->assertCount(0, $result->getExtensions());
         $this->assertSame(60000, $result->getTimeout());
         $this->assertSame('preferred', $result->getUserVerification());

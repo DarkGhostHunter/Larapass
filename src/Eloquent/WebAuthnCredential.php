@@ -128,4 +128,14 @@ class WebAuthnCredential extends Model implements PublicKeyCredentialSourceRepos
     {
         return $builder->withoutTrashed();
     }
+
+    /**
+     * Convert the object into something JSON serializable.
+     *
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        return array_merge($this->toArray(), [$this->getKeyName() => $this->getRawOriginal($this->getKeyName())]);
+    }
 }

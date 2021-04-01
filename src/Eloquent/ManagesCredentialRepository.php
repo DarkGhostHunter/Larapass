@@ -51,10 +51,8 @@ trait ManagesCredentialRepository
     public function saveCredentialSource(CredentialSource $source): void
     {
         // We will only update the credential counter only if it exists.
-        static::update(
-            [$this->getKeyName() => Base64Url::encode($source->getPublicKeyCredentialId())],
-            ['counter' => $source->getCounter()]
-        );
+        static::where([$this->getKeyName() => Base64Url::encode($source->getPublicKeyCredentialId())])
+            ->update(['counter' => $source->getCounter()]);
     }
 
     /**

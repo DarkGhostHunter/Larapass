@@ -135,7 +135,7 @@ class WebAuthnAttestCreator
      *
      * @param  \Illuminate\Contracts\Auth\Authenticatable|\DarkGhostHunter\Larapass\Contracts\WebAuthnAuthenticatable  $user
      *
-     * @return mixed|\Webauthn\PublicKeyCredentialCreationOptions
+     * @return \Webauthn\PublicKeyCredentialCreationOptions
      */
     public function generateAttestation($user): PublicKeyCredentialCreationOptions
     {

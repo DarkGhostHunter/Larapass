@@ -87,8 +87,6 @@ trait AuthenticatesWebAuthn
     {
         $credential = $request->validate($this->assertionRules());
 
-        $credential['response']['userHandle'] = null;
-
         if ($authenticated = $this->attemptLogin($credential, $this->hasRemember($request))) {
             return $this->authenticated($request, $this->guard()->user()) ?? response()->noContent();
         }
