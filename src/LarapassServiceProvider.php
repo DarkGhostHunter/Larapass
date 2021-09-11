@@ -195,7 +195,7 @@ class LarapassServiceProvider extends ServiceProvider
                 $config = $app['config'];
 
                 $selection = new WebAuthn\AuthenticatorSelectionCriteria(
-                    $config->get('larapass.cross-plataform')
+                    $config->get('larapass.attachment')
                 );
 
                 if ($userless = $config->get('larapass.userless')) {
