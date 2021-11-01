@@ -24,7 +24,7 @@ class CreateWebAuthnTables extends Migration
             $table->string('name')->nullable();
             $table->string('type', 16);
             $table->json('transports');
-            $table->json('attestation_type');
+            $table->string('attestation_type');
             $table->json('trust_path');
             $table->uuid('aaguid');
             $table->binary('public_key');
