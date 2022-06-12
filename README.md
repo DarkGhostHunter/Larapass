@@ -1,3 +1,7 @@
+# This package has been superseded by [Laragear WebAuthn](https://github.com/Laragear/WebAuthn).
+
+--- 
+
 ![Lukenn Sabellano - Unsplash (UL) #RDufjtg6JpQ](https://images.unsplash.com/photo-1567826722186-9ecdf689f122?ixlib=rb-1.2.1&auto=format&fit=crop&w=1280&h=400&q=80)
 
 [![Latest Stable Version](https://poser.pugx.org/darkghosthunter/larapass/v/stable)](https://packagist.org/packages/darkghosthunter/larapass) [![License](https://poser.pugx.org/darkghosthunter/larapass/license)](https://packagist.org/packages/darkghosthunter/larapass) ![](https://img.shields.io/packagist/php-v/darkghosthunter/larapass.svg) ![](https://github.com/DarkGhostHunter/Larapass/workflows/PHP%20Composer/badge.svg) [![Coverage Status](https://coveralls.io/repos/github/DarkGhostHunter/Larapass/badge.svg?branch=master)](https://coveralls.io/github/DarkGhostHunter/Larapass?branch=master) [![Laravel Octane Compatible](https://img.shields.io/badge/Laravel%20Octane-Compatible-success?style=flat&logo=laravel)](https://github.com/laravel/octane)
@@ -12,6 +16,8 @@ This enables WebAuthn authentication inside Laravel authentication driver, and c
 
 * PHP 7.4 or PHP 8.0
 * Laravel 7.18 (July 2020) or Laravel 8.x
+
+> For Laravel 9.x supports and onwards, use [Laragear WebAuthn](https://github.com/Laragear/WebAuthn).
 
 ## Installation 
 
